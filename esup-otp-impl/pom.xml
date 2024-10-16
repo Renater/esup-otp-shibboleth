@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>fr.renater.shibboleth.esup.otp</groupId>
+        <artifactId>idp-plugin-esup-otp-parent</artifactId>
+        <version>0.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <name>Shibboleth IdP :: Plugins :: Esup otp Login Flow Impl</name>
+    <description>Esup otp plugin implementation.</description>
+    <artifactId>esup-otp-impl</artifactId>
+    <packaging>jar</packaging>
+    
+    <properties>
+        <checkstyle.configLocation>${project.basedir}/../resources/checkstyle/checkstyle.xml</checkstyle.configLocation>
+        <automatic.module.name>fr.renater.shibboleth.esup.otp.impl</automatic.module.name>
+    </properties>
+
+    <dependencies>
+        <!-- Compile Dependencies -->
+
+        <!-- Provided dependencies -->
+        <dependency>
+            <groupId>${idp.groupId}</groupId>
+            <artifactId>idp-admin-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Needed to allow module/plugin derivation. -->
+        <dependency>
+            <groupId>${idp.groupId}</groupId>
+            <artifactId>idp-admin-impl</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${idp.groupId}</groupId>
+            <artifactId>idp-authn-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${idp.groupId}</groupId>
+            <artifactId>idp-cli</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${idp.groupId}</groupId>
+            <artifactId>idp-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Runtime Dependencies -->
+
+        <!-- Test Dependencies -->
+
+        <!-- Managed Dependencies -->
+    </dependencies>
+    
+</project>
