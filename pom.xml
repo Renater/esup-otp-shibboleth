@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.shibboleth</groupId>
+        <artifactId>parent</artifactId>
+        <version>17.0.2</version>
+    </parent>
+
+    <name>Shibboleth IdP :: Plugins :: Esup otp Login Flow</name>
+    <description>An IdP plugin providing Esup otp login support.</description>
+    <groupId>fr.renater.shibboleth.esup.otp</groupId>
+    <artifactId>idp-plugin-esup-otp-parent</artifactId>
+    <version>0.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    
+    <properties>
+        <shibboleth.projectName>java-idp-plugin-esup-otp</shibboleth.projectName>
+        <idp.groupId>net.shibboleth.idp</idp.groupId>
+        <idp.version>5.0.0</idp.version>
+        <opensaml.groupId>org.opensaml</opensaml.groupId>
+        <opensaml.version>5.0.0</opensaml.version>
+        <shib-profile.groupId>net.shibboleth</shib-profile.groupId>
+        <shib-profile.version>5.0.0</shib-profile.version>
+        <shib-attribute.groupId>net.shibboleth</shib-attribute.groupId>
+        <shib-attribute.version>5.0.0</shib-attribute.version>
+        <shib-shared.groupId>net.shibboleth</shib-shared.groupId>
+        <shib-shared.version>9.0.0</shib-shared.version>
+        <checkstyle.configLocation>${project.basedir}/resources/checkstyle/checkstyle.xml</checkstyle.configLocation>
+    </properties>
+
+    <dependencies>
+        <!-- Compile Dependencies -->
+
+        <!-- Provided Dependencies -->
+
+        <!-- Runtime Dependencies -->
+
+        <!-- Test Dependencies -->
+        
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${slf4j.groupId}</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Managed Dependencies -->
+    </dependencies>
+    
+    <dependencyManagement>
+        <dependencies>
+            <!-- IdP BOM when importing IdP dependencies -->
+            <dependency>
+                <groupId>net.shibboleth.idp</groupId>
+                <artifactId>idp-bom</artifactId>
+                <version>${idp.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>${shib-profile.groupId}</groupId>
+                <artifactId>shib-profile-bom</artifactId>
+                <version>${shib-profile.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>${shib-attribute.groupId}</groupId>
+                <artifactId>shib-attribute-bom</artifactId>
+                <version>${shib-attribute.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>${opensaml.groupId}</groupId>
+                <artifactId>opensaml-bom</artifactId>
+                <version>${opensaml.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>${shib-shared.groupId}</groupId>
+                <artifactId>shib-shared-bom</artifactId>
+                <version>${shib-shared.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    
+    <modules>
+        <module>esup-otp-api</module>
+        <module>esup-otp-impl</module>
+    </modules>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>net.shibboleth.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <links combine.children="append">
+                        <link>${javadoc.url}/java-shib-shared/${shib-shared.version}</link>
+                        <link>${javadoc.url}/java-opensaml/${opensaml.version}</link>
+                        <link>${javadoc.url}/java-shib-attribute/${shib-attribute.version}</link>
+                        <link>${javadoc.url}/java-shib-profile/${shib-profile.version}</link>
+                        <link>${javadoc.url}/java-identity-provider/${idp.version}</link>
+                    </links>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <index>true</index>
+                        <manifestEntries>
+                            <Automatic-Module-Name>${automatic.module.name}</Automatic-Module-Name>
+                            <Sealed>true</Sealed>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    
+</project>
