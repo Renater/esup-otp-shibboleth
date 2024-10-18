@@ -109,6 +109,7 @@
     <modules>
         <module>esup-otp-api</module>
         <module>esup-otp-impl</module>
+        <module>esup-otp-dist</module>
     </modules>
     
     <build>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:c="http://www.springframework.org/schema/c" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+
+    default-init-method="initialize" default-destroy-method="destroy">
+
+    <!-- System beans needed for extension to function, loaded after global.xml -->
+  
+    <bean id="authn/TOTP" parent="shibboleth.AuthenticationFlow"
+            p:order="%{idp.authn.TOTP.order:1000}"
+            p:nonBrowserSupported="%{idp.authn.TOTP.nonBrowserSupported:true}"
+            p:passiveAuthenticationSupported="%{idp.authn.TOTP.passiveAuthenticationSupported:true}"
+            p:forcedAuthenticationSupported="%{idp.authn.TOTP.forcedAuthenticationSupported:true}"
+            p:proxyRestrictionsEnforced="%{idp.authn.TOTP.proxyRestrictionsEnforced:%{idp.authn.enforceProxyRestrictions:true}}"
+            p:proxyScopingEnforced="%{idp.authn.TOTP.proxyScopingEnforced:false}"
+            p:discoveryRequired="%{idp.authn.TOTP.discoveryRequired:false}"
+            p:lifetime="%{idp.authn.TOTP.lifetime:%{idp.authn.defaultLifetime:PT1H}}"
+            p:inactivityTimeout="%{idp.authn.TOTP.inactivityTimeout:%{idp.authn.defaultTimeout:PT30M}}"
+            p:reuseCondition-ref="#{'%{idp.authn.TOTP.reuseCondition:shibboleth.Conditions.TRUE}'.trim()}"
+            p:activationCondition-ref="#{'%{idp.authn.TOTP.activationCondition:shibboleth.Conditions.TRUE}'.trim()}"
+            p:subjectDecorator="#{getObject('%{idp.authn.TOTP.subjectDecorator:}'.trim())}">
+        <property name="supportedPrincipals">
+            <list>
+                <bean parent="shibboleth.SAML2AuthnContextClassRef"
+                    c:classRef="urn:oasis:names:tc:SAML:2.0:ac:classes:TimeSyncToken" />
+                <bean parent="shibboleth.SAML1AuthenticationMethod"
+                    c:method="urn:oasis:names:tc:SAML:1.0:am:HardwareToken" />
+            </list>
+        </property>
+        <property name="supportedPrincipalsByString">
+            <bean parent="shibboleth.CommaDelimStringArray"
+                c:_0="#{'%{idp.authn.TOTP.supportedPrincipals:}'.trim()}" />
+        </property>
+    </bean>
+  
+      <!-- Parent bean for use of alternative seed source. -->
+    <bean id="shibboleth.authn.TOTP.StaticSeedSource" abstract="true"
+        class="net.shibboleth.idp.plugin.authn.totp.impl.StaticSeedSource" />
+  
+</beans>
