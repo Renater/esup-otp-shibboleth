@@ -23,6 +23,11 @@
 
     <dependencies>
         <!-- Compile Dependencies -->
+        <dependency>
+            <groupId>fr.renater.shibboleth.esup.otp</groupId>
+            <artifactId>esup-otp-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Provided dependencies -->
         <dependency>
@@ -52,10 +57,120 @@
             <artifactId>idp-core</artifactId>
             <scope>provided</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>${opensaml.groupId}</groupId>
+            <artifactId>opensaml-messaging-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${opensaml.groupId}</groupId>
+            <artifactId>opensaml-profile-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${shib-shared.groupId}</groupId>
+            <artifactId>shib-cli</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${shib-shared.groupId}</groupId>
+            <artifactId>shib-service</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${shib-shared.groupId}</groupId>
+            <artifactId>shib-support</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${slf4j.groupId}</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${spring-webflow.groupId}</groupId>
+            <artifactId>spring-webflow</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${spring.groupId}</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Runtime Dependencies -->
 
         <!-- Test Dependencies -->
+        <dependency>
+            <groupId>${idp.groupId}</groupId>
+            <artifactId>idp-authn-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${idp.groupId}</groupId>
+            <artifactId>idp-testing</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${shib-attribute.groupId}</groupId>
+            <artifactId>shib-attribute-resolver-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${shib-attribute.groupId}</groupId>
+            <artifactId>shib-attribute-testing</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Needed for XMLObject providers. -->
+        <dependency>
+            <groupId>${opensaml.groupId}</groupId>
+            <artifactId>opensaml-core-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${opensaml.groupId}</groupId>
+            <artifactId>opensaml-testing</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${shib-shared.groupId}</groupId>
+            <artifactId>shib-testing</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${spring.groupId}</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Managed Dependencies -->
     </dependencies>

@@ -1,0 +1,66 @@
+<flow xmlns="http://www.springframework.org/schema/webflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
+	parent="authn.abstract, authn/conditions">
+
+	<!-- This is a login flow for TOTP authentication -->
+
+    <!-- First check for HTTP header. -->
+    <action-state id="ExtractTOTPFromHeader">
+        <evaluate expression="ExtractTOTPFromHeader" />
+        <evaluate expression="'proceed'" />
+
+        <transition on="proceed" to="ValidateTOTPCredentials" />
+
+        <!-- Fall through to a different flow if header extract fails on a passive or non-browser request. -->
+        <transition on="#{ opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.authn.context.AuthenticationContext)).isPassive() || !opensamlProfileRequestContext.isBrowserProfile() }" to="ReselectFlow" />
+
+        <transition on="UnknownUsername" to="ReselectFlow" />
+        <transition on="InvalidCredentials" to="DisplayTOTPView" />
+        <transition on="NoCredentials" to="ExtractTOTPFromFormRequest" />
+    </action-state>
+
+	<view-state id="DisplayTOTPView" view="totp">
+		<on-render>
+			<evaluate expression="environment" result="viewScope.environment" />
+			<evaluate expression="opensamlProfileRequestContext" result="viewScope.profileRequestContext" />
+			<evaluate expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.authn.context.AuthenticationContext))" result="viewScope.authenticationContext" />
+            <evaluate expression="authenticationContext.getSubcontext(T(net.shibboleth.idp.ui.context.RelyingPartyUIContext))" result="viewScope.rpUIContext" />
+            <evaluate expression="authenticationContext.getSubcontext(T(net.shibboleth.idp.authn.context.AuthenticationErrorContext))" result="viewScope.authenticationErrorContext" />
+            <evaluate expression="authenticationContext.getSubcontext(T(net.shibboleth.idp.authn.context.AuthenticationWarningContext))" result="viewScope.authenticationWarningContext" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().getBean('TOTPCSPDigester')" result="viewScope.cspDigester" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().getBean('TOTPCSPNonce')" result="viewScope.cspNonce" />
+            <evaluate expression="T(net.shibboleth.shared.codec.HTMLEncoder)" result="viewScope.encoder" />
+			<evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="viewScope.request" />
+			<evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="viewScope.response" />
+			<evaluate
+				expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null"
+				result="viewScope.custom" />
+		</on-render>
+		<transition on="proceed" to="ExtractTOTPFromFormRequest" />
+	</view-state>
+
+    <!-- Then check for propagation via password (or other) form. -->
+    <action-state id="ExtractTOTPFromFormRequest">
+        <evaluate expression="ExtractTOTPFromFormRequest" />
+        <evaluate expression="'proceed'" />
+
+        <transition on="proceed" to="ValidateTOTPCredentials" />
+        <transition on="UnknownUsername" to="ReselectFlow" />
+        <transition on="InvalidCredentials" to="DisplayTOTPView" />
+        <transition on="NoCredentials" to="DisplayTOTPView" />
+    </action-state>
+
+
+	<action-state id="ValidateTOTPCredentials">
+		<evaluate expression="ValidateTOTPCredentials" />
+		<evaluate expression="'proceed'" />
+
+        <transition on="proceed" to="proceed" />
+        <transition on="UnknownUsername" to="ReselectFlow" />
+        <transition on="NoCredentials" to="DisplayTOTPView" />
+        <transition on="InvalidCredentials" to="DisplayTOTPView" />
+	</action-state>
+
+	<bean-import resource="TOTP-beans.xml" />
+
+</flow>
