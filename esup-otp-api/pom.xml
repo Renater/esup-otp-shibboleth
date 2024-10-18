@@ -11,18 +11,73 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <name>esup-otp-api</name>
+    <name>Shibboleth IdP :: Plugins :: Esup otp Login Flow API</name>
+    <description>Esup otp plugin api.</description>
     <artifactId>esup-otp-api</artifactId>
     <packaging>jar</packaging>
+    
+    <properties>
+        <checkstyle.configLocation>${project.basedir}/../resources/checkstyle/checkstyle.xml</checkstyle.configLocation>
+        <automatic.module.name>net.shibboleth.idp.plugin.authn.duo.api</automatic.module.name>
+    </properties>
 
     <dependencies>
         <!-- Compile Dependencies -->
 
         <!-- Provided Dependencies -->
+        <dependency>
+            <groupId>${idp.groupId}</groupId>
+            <artifactId>idp-authn-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${shib-shared.groupId}</groupId>
+            <artifactId>shib-support</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <scope>provided</scope>
+        </dependency>      
+        <dependency>
+            <groupId>${httpclient.httpcore.groupId}</groupId>
+            <artifactId>${httpclient.httpcore.artifactId}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Runtime Dependencies -->
 
         <!-- Test Dependencies -->
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>${shib-shared.groupId}</groupId>
+            <artifactId>shib-testing</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>${spring.groupId}</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Managed Dependencies -->
     </dependencies>
