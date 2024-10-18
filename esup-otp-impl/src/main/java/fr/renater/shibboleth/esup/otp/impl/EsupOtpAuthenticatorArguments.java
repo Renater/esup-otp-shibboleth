@@ -12,14 +12,7 @@
  * limitations under the License.
  */
 
-package net.shibboleth.idp.plugin.authn.totp.impl;
-
-import java.io.PrintStream;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.slf4j.Logger;
+package fr.renater.shibboleth.esup.otp.impl;
 
 import com.beust.jcommander.Parameter;
 
@@ -29,11 +22,16 @@ import net.shibboleth.shared.codec.Base32Support;
 import net.shibboleth.shared.codec.DecodingException;
 import net.shibboleth.shared.primitive.LoggerFactory;
 import net.shibboleth.shared.primitive.StringSupport;
+import org.slf4j.Logger;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.PrintStream;
 
 /**
- * Arguments for {@link TOTPAuthenticatorCLI}.
+ * Arguments for {@link EsupOtpAuthenticatorCLI}.
  */
-public class TOTPAuthenticatorArguments extends AbstractIdPHomeAwareCommandLineArguments {
+public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLineArguments {
 
     /**
      * Name of a specific {@link TOTPAuthenticator}, if one has been requested.
@@ -49,9 +47,18 @@ public class TOTPAuthenticatorArguments extends AbstractIdPHomeAwareCommandLineA
     @Parameter(names = "--account")
     @Nullable private String account;
     
-    /** Raw token seed when verifying codes. */
-    @Nullable private byte[] seed;
+    /** method (bypass, esupnfc, push, random_code_mail, random_code, totp, webauthn). */
+    @Parameter(names = "--method")
+    @Nullable private String method;
     
+    /** Chosen transport. */
+    @Parameter(names = "--transport")
+    @Nullable private String transport;
+    
+    /** Credential account name. */
+    @Parameter(names = "--userHash")
+    @Nullable private String userHash;
+        
     /** Token code to verify. */
     @Nullable private Integer tokenCode;
     
@@ -61,12 +68,33 @@ public class TOTPAuthenticatorArguments extends AbstractIdPHomeAwareCommandLineA
     /** {@inheritDoc} */
     @Nonnull public Logger getLog() {
         if (log == null) {
-            log = LoggerFactory.getLogger(TOTPAuthenticatorArguments.class);
+            log = LoggerFactory.getLogger(EsupOtpAuthenticatorArguments.class);
         }
         assert log != null;
         return log;
     }
     
+    /**
+     * @return Returns the method.
+     */
+    public String getMethod() {
+        return method;
+    }
+
+    /**
+     * @return Returns the transport.
+     */
+    public String getTransport() {
+        return transport;
+    }
+
+    /**
+     * @return Returns the userHash.
+     */
+    public String getUserHash() {
+        return userHash;
+    }
+
     /**
      * Get name of {@link TOTPAuthenticator} bean to access.
      * 
@@ -74,15 +102,6 @@ public class TOTPAuthenticatorArguments extends AbstractIdPHomeAwareCommandLineA
      */
     @Nullable @NotEmpty public String getAuthenticatorName() {
         return authenticatorName;
-    }
-
-    /**
-     * Get token seed when verifying codes.
-     * 
-     * @return raw seed
-     */
-    @Nullable @NotEmpty public byte[] getSeed() {
-        return seed;
     }
 
     /**
@@ -117,11 +136,6 @@ public class TOTPAuthenticatorArguments extends AbstractIdPHomeAwareCommandLineA
         super.validate();
         
         if (getOtherArgs().size() == 3) {
-            try {
-                seed = Base32Support.decode(getOtherArgs().get(1));
-            } catch (final DecodingException e) {
-                throw new IllegalArgumentException(e);
-            }
             tokenCode = Integer.valueOf(getOtherArgs().get(2));
         } else if (getOtherArgs().size() != 1) {
             throw new IllegalArgumentException(
@@ -137,7 +151,6 @@ public class TOTPAuthenticatorArguments extends AbstractIdPHomeAwareCommandLineA
         out.println("   TOTPAuthenticatorCLI [options] springConfiguration [seed] [tokencode]");
         out.println();
         out.println("      springConfiguration      name of Spring configuration resource to use");
-        out.println("      seed                     encoded seed (omit when generating a new credential)");
         out.println("      tokencode                token code to validate (omit when generating a new credential)");
         super.printHelp(out);
         out.println();

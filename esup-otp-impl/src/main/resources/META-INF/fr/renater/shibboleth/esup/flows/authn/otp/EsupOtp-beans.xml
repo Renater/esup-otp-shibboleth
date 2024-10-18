@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+                           
+       default-init-method="initialize"
+       default-destroy-method="destroy">
+
+    <import resource="TOTP-authenticator.xml" />
+
+    <bean id ="ExtendedMessageSourceResources" parent="shibboleth.ListCombiner"
+          p:firstList-ref="#{'%{idp.message.resources:shibboleth.MessageSourceResources}'.trim()}" >
+        <property name="secondList">
+            <util:list >
+                <value>classpath:/net/shibboleth/idp/plugin/authn/totp/messages</value>
+            </util:list>
+        </property>
+    </bean>
+
+    <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource"
+        p:cacheSeconds="%{idp.message.cacheSeconds:300}"
+        p:basenames-ref="ExtendedMessageSourceResources"
+        p:defaultEncoding="UTF-8" />
+
+    <!-- Default username comes from previous c14n or session. -->        
+    <bean id="DefaultUsernameLookupStrategy"
+        class="net.shibboleth.idp.session.context.navigate.CanonicalUsernameLookupStrategy" />
+
+    <bean id="ExtractTOTPFromHeader"
+        class="net.shibboleth.idp.plugin.authn.totp.impl.ExtractTOTPFromHeader" scope="prototype"
+        p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
+        p:usernameLookupStrategy="#{getObject('shibboleth.authn.TOTP.UsernameLookupStrategy') ?: getObject('DefaultUsernameLookupStrategy')}"
+        p:headerName="#{'%{idp.authn.TOTP.headerName:X-Shibboleth-TOTP}'.trim()}" />
+
+    <bean id="ExtractTOTPFromFormRequest"
+        class="net.shibboleth.idp.plugin.authn.totp.impl.ExtractTOTPFromFormRequest" scope="prototype"
+        p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
+        p:usernameLookupStrategy="#{getObject('shibboleth.authn.TOTP.UsernameLookupStrategy') ?: getObject('DefaultUsernameLookupStrategy')}"
+        p:fieldName="#{'%{idp.authn.TOTP.fieldName:tokencode}'.trim()}" />
+            
+    <bean id="ValidateTOTPCredentials"
+        class="net.shibboleth.idp.authn.impl.ValidateCredentials" scope="prototype"
+        p:validators="#{getObject('shibboleth.authn.TOTP.Validator') ?: getObject('DefaultTOTPValidator')}"
+        p:resultCachingPredicate="#{getObject('shibboleth.authn.TOTP.resultCachingPredicate')}"
+        p:addDefaultPrincipals="%{idp.authn.TOTP.addDefaultPrincipals:true}"
+        p:classifiedMessages="#{getObject('shibboleth.authn.TOTP.ClassifiedMessageMap')}"
+        p:lockoutManager="#{getObject('shibboleth.authn.TOTP.AccountLockoutManager')}" />
+    
+    <!-- These are singletons acting as default "back-ends". -->
+    
+    <bean id="DefaultTOTPValidator" class="net.shibboleth.idp.plugin.authn.totp.impl.TOTPCredentialValidator" lazy-init="true"
+        p:seedSource="#{getObject('shibboleth.authn.TOTP.SeedSource') ?: getObject('DefaultSeedSource')}"
+        p:authenticator="#{getObject('shibboleth.authn.TOTP.Authenticator') ?: getObject('DefaultAuthenticator')}" />
+        
+    <bean id="DefaultSeedSource" class="net.shibboleth.idp.plugin.authn.totp.impl.AttributeResolverSeedSource" lazy-init="true"
+        p:attributeResolver-ref="shibboleth.AttributeResolverService"
+        p:sourceAttribute="#{'%{idp.authn.TOTP.tokenSeedAttribute:tokenSeeds}'.trim()}" />
+
+    <!-- Used in views to calculate CSP hashes and nonces, remove and adjust beans in flow when compatibility bumped past 5.0 -->
+    
+    <bean id="TOTPCSPDigester" class="net.shibboleth.shared.codec.StringDigester"
+        c:algorithm="SHA256" c:format="BASE64" />
+
+    <bean id="TOTPCSPNonce" destroy-method=""
+            class="net.shibboleth.shared.security.IdentifierGenerationStrategy" factory-method="getInstance">
+        <constructor-arg>
+            <util:constant
+                static-field="net.shibboleth.shared.security.IdentifierGenerationStrategy.ProviderType.SECURE" />
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="net.shibboleth.shared.security.RandomIdentifierParameterSpec"
+                    c:identifierSize="16">
+                <constructor-arg name="source">
+                    <null/>
+                </constructor-arg>
+                <constructor-arg name="identifierEncoder">
+                    <null/>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+</beans>

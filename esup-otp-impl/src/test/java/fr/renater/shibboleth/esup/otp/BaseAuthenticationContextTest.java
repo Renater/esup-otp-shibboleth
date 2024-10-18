@@ -12,8 +12,9 @@
  * limitations under the License.
  */
 
-package net.shibboleth.idp.plugin.authn.totp.impl;
+package fr.renater.shibboleth.esup.otp;
 
+import jakarta.servlet.http.HttpServletRequest;
 import net.shibboleth.idp.authn.AbstractAuthenticationAction;
 import net.shibboleth.idp.authn.AuthenticationFlowDescriptor;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
@@ -22,17 +23,13 @@ import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileR
 import net.shibboleth.idp.profile.testing.RequestContextBuilder;
 import net.shibboleth.shared.component.ComponentInitializationException;
 import net.shibboleth.shared.logic.FunctionSupport;
-
-import java.util.List;
-
-import javax.annotation.Nonnull;
-
 import org.opensaml.core.testing.OpenSAMLInitBaseTestCase;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.webflow.execution.RequestContext;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.annotation.Nonnull;
+import java.util.List;
 
 /** Base class for further action tests. */
 public class BaseAuthenticationContextTest extends OpenSAMLInitBaseTestCase {

@@ -12,25 +12,22 @@
  * limitations under the License.
  */
 
-package net.shibboleth.idp.plugin.authn.totp.impl;
+package fr.renater.shibboleth.esup.otp.impl;
+
+import fr.renater.shibboleth.esup.otp.connector.EsupOtpConnector;
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
+import net.shibboleth.idp.cli.AbstractIdPHomeAwareCommandLine;
+import net.shibboleth.shared.annotation.constraint.NotEmpty;
+import net.shibboleth.shared.primitive.LoggerFactory;
+import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-
-import com.google.common.net.UrlEscapers;
-
-import net.shibboleth.idp.cli.AbstractIdPHomeAwareCommandLine;
-import net.shibboleth.idp.plugin.authn.totp.impl.TOTPAuthenticator.TOTPCredential;
-import net.shibboleth.shared.annotation.constraint.NotEmpty;
-import net.shibboleth.shared.codec.Base32Support;
-import net.shibboleth.shared.primitive.LoggerFactory;
-
 /**
- * Command line utility for {@link TOTPAuthenticator}.
+ * Command line utility for {@link EsupOtpConnector}.
  */
-public class TOTPAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<TOTPAuthenticatorArguments> {
+public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<EsupOtpAuthenticatorArguments> {
 
     /** Class logger. */
     @Nullable private Logger log;
@@ -39,7 +36,7 @@ public class TOTPAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<TOTPAu
     @Override
     @Nonnull protected Logger getLogger() {
         if (log == null) {
-            log = LoggerFactory.getLogger(TOTPAuthenticatorCLI.class);
+            log = LoggerFactory.getLogger(EsupOtpAuthenticatorCLI.class);
         }
         assert log != null;
         return log;
@@ -47,8 +44,8 @@ public class TOTPAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<TOTPAu
     
     /** {@inheritDoc} */
     @Override
-    @Nonnull protected Class<TOTPAuthenticatorArguments> getArgumentClass() {
-        return TOTPAuthenticatorArguments.class;
+    @Nonnull protected Class<EsupOtpAuthenticatorArguments> getArgumentClass() {
+        return EsupOtpAuthenticatorArguments.class;
     }
 
     /** {@inheritDoc} */
@@ -59,26 +56,26 @@ public class TOTPAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<TOTPAu
     
     /** {@inheritDoc} */
     @Override
-    protected int doRun(@Nonnull final TOTPAuthenticatorArguments args) {
+    protected int doRun(@Nonnull final EsupOtpAuthenticatorArguments args) {
         final int ret = super.doRun(args);
         if (ret != RC_OK) {
             return ret;
         }
         
         try {
-            final TOTPAuthenticator authenticator;
+            final EsupOtpConnector authenticator;
             final String authenticatorName = args.getAuthenticatorName();
             if (authenticatorName != null) {
-                authenticator = getApplicationContext().getBean(authenticatorName, TOTPAuthenticator.class);
+                authenticator = getApplicationContext().getBean(authenticatorName, EsupOtpConnector.class);
             } else {
-                authenticator = getApplicationContext().getBean(TOTPAuthenticator.class);
+                authenticator = getApplicationContext().getBean(EsupOtpConnector.class);
             }
-            
-            final byte[] seed = args.getSeed();
-            final Integer tokenCode = args.getTokenCode();
-            if (seed != null && tokenCode != null) {
 
-                if (authenticator.validate(seed, tokenCode)) {
+            final String username = args.getAccountName();
+            final Integer tokenCode = args.getTokenCode();
+            if (username != null && tokenCode != null) {
+
+                if (authenticator.postVerify(username, tokenCode.toString())) {
                     System.out.println("OK");
                     return RC_OK;
                 }
@@ -87,12 +84,13 @@ public class TOTPAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<TOTPAu
                 return RC_UNKNOWN;
             }
             
+            final String method = args.getMethod() != null ? args.getMethod() : "totp";
+            final String transport = args.getTransport() != null ? args.getTransport() : "sms";
+            
             // Create a new token.
-            final TOTPCredential tc = authenticator.createCredential(args.getIssuer(), args.getAccountName());
-            System.out.println("Seed: " + Base32Support.encode(tc.getKey(), false));
-            System.out.println("URL: " + tc.getTOTPURL());
-            System.out.println("QR Code: https://api.qrserver.com/v1/create-qr-code/?data=" +
-                    UrlEscapers.urlFormParameterEscaper().escape(tc.getTOTPURL()) + "&size=200x200&ecc=M&margin=0");
+            final EsupOtpResponse tc = authenticator.postSendMessage(username, method, transport, "");
+            System.out.println("Send message code: " + tc.getCode());
+            System.out.println("Send message message: " + tc.getMessage());
             
         } catch (final Exception e) {
             if (args.isVerboseOutput()) {
@@ -112,7 +110,7 @@ public class TOTPAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<TOTPAu
      * @param args arguments
      */
     public static void main(@Nonnull final String[] args) {
-        System.exit(new TOTPAuthenticatorCLI().run(args));
+        System.exit(new EsupOtpAuthenticatorCLI().run(args));
     }
     
 }
