@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>fr.renater.shibboleth.esup.otp</groupId>
+        <artifactId>idp-plugin-esup-otp-parent</artifactId>
+        <version>0.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <name>Shibboleth IdP :: Plugins :: Esup otp Login Flow Distribution</name>
+    <description>Esup otp plugin packaging.</description>
+    <artifactId>esup-otp-dist</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+        <dist.finalName>shibboleth-idp-plugin-esup-otp-${project.version}</dist.finalName>
+        <dist.assemblyDirectory>${project.build.directory}/${dist.finalName}</dist.assemblyDirectory>
+        <checkstyle.configLocation>${project.basedir}/../resources/checkstyle/checkstyle.xml</checkstyle.configLocation>
+    </properties>
+
+    <build>
+        <plugins>
+            <!-- Copy src/main/resources to assembly directory. -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <includeEmptyDirs>true</includeEmptyDirs>
+                            <outputDirectory>${dist.assemblyDirectory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/src/main/resources</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Assemble -->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptors>
+                        <descriptor>src/main/assembly/assembly.xml</descriptor>
+                    </descriptors>
+                    <finalName>${dist.finalName}</finalName>
+                    <overrideUid>1000</overrideUid>
+                    <overrideGid>1000</overrideGid>
+                    <tarLongFileMode>gnu</tarLongFileMode>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.shibboleth.maven.enforcer.rules</groupId>
+                        <artifactId>maven-dist-enforcer</artifactId>
+                        <version>${maven-dist-enforcer.version}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>esup-otp-enforce</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <jarEnforcer implementation="net.shibboleth.mvn.enforcer.impl.JarEnforcer">
+                                    <dataGroupId>net.shibboleth.maven.enforcer.rules</dataGroupId>
+                                    <dataArtifactId>maven-dist-enforcer-data</dataArtifactId>
+                                    <dataVersion>${maven-dist-enforcer-data.version}</dataVersion>
+                                    <dataKeyRing>${basedir}/src/main/enforcer/shibbolethKeys.gpg</dataKeyRing>
+                                    <parentPomDir>${basedir}/..</parentPomDir>
+                                    <tgzFiles>${project.build.directory}/${dist.finalName}.tar.gz</tgzFiles>
+                                    <checkSignatures>true</checkSignatures>
+                                    <checkDependencies>true</checkDependencies>
+                                    <listJarSources>false</listJarSources>
+                                    <checkM2>false</checkM2>
+                                </jarEnforcer>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+    </build>
+
+</project>
