@@ -14,7 +14,6 @@
 
 package fr.renater.shibboleth.esup.otp.impl;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -27,6 +26,7 @@ import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 
+import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
 import fr.renater.shibboleth.esup.otp.context.EsupOtpContext;
 import net.shibboleth.idp.authn.AbstractCredentialValidator;
 import net.shibboleth.idp.authn.AuthnEventIds;
@@ -47,7 +47,7 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
     @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpCredentialValidator.class);
 
     /** Lookup strategy for TOTP context. */
-    @Nonnull private Function<AuthenticationContext,EsupOtpContext> esupOtpContextLookupStrategy;
+    @Nonnull private Function<AuthenticationContext, EsupOtpContext> esupOtpContextLookupStrategy;
             
     /** A regular expression to apply for acceptance testing. */
     @Nullable private Pattern matchExpression;
@@ -102,15 +102,11 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
                         AuthnEventIds.NO_CREDENTIALS);
             }
             throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
-        } else if (esupOtpContext.getUsername() == null) {
-            log.info("{} No username available within EsupOtpContext", getLogPrefix());
-            if (errorHandler != null) {
-                errorHandler.handleError(profileRequestContext, authenticationContext, AuthnEventIds.UNKNOWN_USERNAME,
-                        AuthnEventIds.UNKNOWN_USERNAME);
-            }
-            throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
-        } else if (esupOtpContext.getTokenCode() == null) {
-            log.info("{} No tokencode available within EsupOtpContext", getLogPrefix());
+        }
+        
+        final EsupOtpClient client = esupOtpContext.getClient();
+        if(client == null) {
+            log.info("{} No EsupOtpClient available", getLogPrefix());
             if (errorHandler != null) {
                 errorHandler.handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS,
                         AuthnEventIds.NO_CREDENTIALS);
@@ -118,19 +114,25 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
             throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
         }
         
-//        if (EsupOtpContext.getTokenSeeds().isEmpty()) {
-//            // Resolve seeds.
-//            seedSource.accept(profileRequestContext);
-//            
-//            if (EsupOtpContext.getTokenSeeds().isEmpty()) {
-//                log.info("{} No seeds were obtained for user '{}'", getLogPrefix(), EsupOtpContext.getUsername());
-//                if (errorHandler != null) {
-//                    errorHandler.handleError(profileRequestContext, authenticationContext,
-//                            AuthnEventIds.INVALID_CREDENTIALS, AuthnEventIds.INVALID_CREDENTIALS);
-//                }
-//                throw new LoginException(AuthnEventIds.INVALID_CREDENTIALS);
-//            }
-//        }
+        final String username = esupOtpContext.getUsername();
+        if(username == null) {
+            log.info("{} No username available within EsupOtpContext", getLogPrefix());
+            if (errorHandler != null) {
+                errorHandler.handleError(profileRequestContext, authenticationContext, AuthnEventIds.UNKNOWN_USERNAME,
+                        AuthnEventIds.UNKNOWN_USERNAME);
+            }
+            throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
+        }
+        
+        final Integer tokenCode = esupOtpContext.getTokenCode();
+        if(tokenCode == null) {
+            log.info("{} No tokencode available within EsupOtpContext", getLogPrefix());
+            if (errorHandler != null) {
+                errorHandler.handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS,
+                        AuthnEventIds.NO_CREDENTIALS);
+            }
+            throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
+        }
         
         if (matchExpression != null && !matchExpression.matcher(esupOtpContext.getUsername()).matches()) {
             log.debug("{} Username '{}' did not match expression", getLogPrefix(), esupOtpContext.getUsername());
@@ -140,11 +142,7 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
         log.debug("{} Attempting to authenticate token code for '{}' ", getLogPrefix(), esupOtpContext.getUsername());
         
         try {
-            final Integer tokenCode = esupOtpContext.getTokenCode();
-            // Checked above.
-            assert tokenCode != null;
-            
-            if(esupOtpContext.getClient().postVerify(esupOtpContext.getUsername(), tokenCode.toString())) {
+            if(client.postVerify(username, tokenCode.toString())) {
                 log.info("{} Login by '{}' succeeded", getLogPrefix(), esupOtpContext.getUsername());
                 return populateSubject(new Subject(), profileRequestContext, esupOtpContext);
             }

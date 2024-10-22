@@ -19,12 +19,15 @@ import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import fr.renater.shibboleth.esup.otp.EsupOtpIntegration;
+import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
 import net.shibboleth.idp.authn.AbstractAuthenticationAction;
 import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.authn.context.AuthenticationErrorContext;
 import net.shibboleth.idp.session.context.navigate.CanonicalUsernameLookupStrategy;
 import net.shibboleth.shared.logic.Constraint;
+import net.shibboleth.shared.logic.FunctionSupport;
 import net.shibboleth.shared.primitive.LoggerFactory;
 
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
@@ -54,15 +57,20 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
     @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpExtractionAction.class);
     
     /** Lookup strategy for username to use in resolving token seeds. */
-    @Nonnull private Function<ProfileRequestContext,String> usernameLookupStrategy;
+    @Nonnull private Function<ProfileRequestContext, String> usernameLookupStrategy;
     
-    /** Creation strategy for TOTP context. */
+    /** Creation strategy for esup otp context. */
     @Nonnull private Function<AuthenticationContext, EsupOtpContext> esupOtpContextCreationStrategy;
+
+    /** Lookup strategy for esup otp integration. */
+    @Nonnull private Function<ProfileRequestContext, EsupOtpIntegration> esupOtpIntegrationLookupStrategy;
     
     /** Constructor. */
     public EsupOtpExtractionAction() {
         usernameLookupStrategy = new CanonicalUsernameLookupStrategy();
         esupOtpContextCreationStrategy = new ChildContextLookup<>(EsupOtpContext.class, true);
+
+        esupOtpIntegrationLookupStrategy = FunctionSupport.constant(null);
     }
 
     /**
@@ -81,10 +89,21 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
      * 
      * @param strategy lookup/creation strategy
      */
-    public void setTOTPContextCreationStrategy(@Nonnull final Function<AuthenticationContext, EsupOtpContext> strategy) {
+    public void setEsupOtpContextCreationStrategy(@Nonnull final Function<AuthenticationContext, EsupOtpContext> strategy) {
         checkSetterPreconditions();
         
-        esupOtpContextCreationStrategy = Constraint.isNotNull(strategy, "TOTPContext creation strategy cannot be null");
+        esupOtpContextCreationStrategy = Constraint.isNotNull(strategy, "EsupOtpContext creation strategy cannot be null");
+    }
+
+    /**
+     * Set the lookup strategy to locate/create the {@link EsupOtpContext}.
+     *
+     * @param strategy lookup/creation strategy
+     */
+    public void setEsupOtpIntegrationLookupStrategy(@Nonnull final Function<ProfileRequestContext, EsupOtpIntegration> strategy) {
+        checkSetterPreconditions();
+
+        esupOtpIntegrationLookupStrategy = Constraint.isNotNull(strategy, "EsupOtpIntegration creation strategy cannot be null");
     }
     
     /** {@inheritDoc} */
@@ -95,25 +114,34 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
         // Clear error state.
         authenticationContext.removeSubcontext(AuthenticationErrorContext.class);
         
-        final EsupOtpContext totpContext = esupOtpContextCreationStrategy.apply(authenticationContext);
-        if (totpContext == null) {
-            log.warn("{} Unable to create TOTP context", getLogPrefix());
+        final EsupOtpContext esupOtpContext = esupOtpContextCreationStrategy.apply(authenticationContext);
+        if (esupOtpContext == null) {
+            log.warn("{} Unable to create esup otp context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return;
         }
+
+        final EsupOtpIntegration esupOtpIntegration = esupOtpIntegrationLookupStrategy.apply(profileRequestContext);
+        if (esupOtpIntegration == null) {
+            log.warn("{} No EsupOtpIntegration returned by lookup strategy", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
+            return;
+        }
+
+        final EsupOtpClient client = new EsupOtpClientRegistry().getClientOrCreate(esupOtpIntegration);
+        esupOtpContext.setClient(client);
         
-        
-        totpContext.setTokenCode(null);
+        esupOtpContext.setTokenCode(null);
         
         // Fill in username if not set.
-        if (totpContext.getUsername() == null) {
+        if (esupOtpContext.getUsername() == null) {
             final String username = usernameLookupStrategy.apply(profileRequestContext);
             if (username == null) {
                 log.warn("{} No principal name available", getLogPrefix());
                 ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.UNKNOWN_USERNAME);
                 return;
             }
-            totpContext.setUsername(username);
+            esupOtpContext.setUsername(username);
         }
         
         final HttpServletRequest request = getHttpServletRequest();
@@ -130,7 +158,7 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
         }
         
         try {
-            totpContext.setTokenCode(Integer.valueOf(code));
+            esupOtpContext.setTokenCode(Integer.valueOf(code));
         } catch (final NumberFormatException e) {
             log.warn("{} Exception converting code string to an integer", getLogPrefix(), e);
             authenticationContext.ensureSubcontext(AuthenticationErrorContext.class).getClassifiedErrors().add(
