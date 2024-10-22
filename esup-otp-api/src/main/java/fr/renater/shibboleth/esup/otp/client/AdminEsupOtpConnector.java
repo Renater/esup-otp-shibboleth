@@ -15,40 +15,13 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp.connector;
-
-import javax.annotation.concurrent.ThreadSafe;
+package fr.renater.shibboleth.esup.otp.client;
 
 /**
- * An exception to signal an error condition during execution of a Esup Otp client.
+ * Esup otp api admin connector.
  */
-@ThreadSafe
-public class EsupOtpClientException extends Exception {
-
-    /**
-     * Serial UID.
-     */
-    private static final long serialVersionUID = -4532220075956605233L;
+public interface AdminEsupOtpConnector {
     
-    /**
-     * 
-     * Constructor.
-     *
-     * @param message
-     */
-    public EsupOtpClientException(final String message) {
-        super(message);
-    }
     
-    /**
-     * 
-     * Constructor.
-     *
-     * @param message
-     * @param cause
-     */
-    public EsupOtpClientException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
 
 }

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp.connector;
+package fr.renater.shibboleth.esup.otp.client;
 
 /**
  * Esup otp api constants.

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp.connector;
+package fr.renater.shibboleth.esup.otp.client;
 
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpUserInfoResponse;
@@ -23,7 +23,7 @@ import fr.renater.shibboleth.esup.otp.dto.EsupOtpUserInfoResponse;
 /**
  * Esup otp api connector.
  */
-public interface EsupOtpConnector {
+public interface EsupOtpClient {
     
     /**
      * Otp
