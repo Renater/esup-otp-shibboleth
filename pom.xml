@@ -30,6 +30,7 @@
         <shib-shared.groupId>net.shibboleth</shib-shared.groupId>
         <shib-shared.version>9.0.0</shib-shared.version>
         <checkstyle.configLocation>${project.basedir}/resources/checkstyle/checkstyle.xml</checkstyle.configLocation>
+        <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
     </properties>
 
     <dependencies>
@@ -138,6 +139,24 @@
                             <Sealed>true</Sealed>
                         </manifestEntries>
                     </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <keyname>Fouque</keyname>
+                    <useAgent>true</useAgent>
+                    <executable>C:\Program Files (x86)\GnuPG\bin\gpg.exe</executable>
                 </configuration>
             </plugin>
         </plugins>
