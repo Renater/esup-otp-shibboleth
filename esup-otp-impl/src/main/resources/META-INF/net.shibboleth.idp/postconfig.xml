@@ -11,7 +11,7 @@
 
     <!-- System beans needed for extension to function, loaded after global.xml -->
   
-    <bean id="authn/TOTP" parent="shibboleth.AuthenticationFlow"
+    <bean id="authn/EsupOtp" parent="shibboleth.AuthenticationFlow"
             p:order="%{idp.authn.TOTP.order:1000}"
             p:nonBrowserSupported="%{idp.authn.TOTP.nonBrowserSupported:true}"
             p:passiveAuthenticationSupported="%{idp.authn.TOTP.passiveAuthenticationSupported:true}"
@@ -39,7 +39,5 @@
     </bean>
   
       <!-- Parent bean for use of alternative seed source. -->
-    <bean id="shibboleth.authn.TOTP.StaticSeedSource" abstract="true"
-        class="net.shibboleth.idp.plugin.authn.totp.impl.StaticSeedSource" />
   
 </beans>

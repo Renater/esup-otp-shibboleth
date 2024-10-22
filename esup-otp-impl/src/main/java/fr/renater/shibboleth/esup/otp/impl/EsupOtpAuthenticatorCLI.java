@@ -14,7 +14,7 @@
 
 package fr.renater.shibboleth.esup.otp.impl;
 
-import fr.renater.shibboleth.esup.otp.connector.EsupOtpConnector;
+import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
 import net.shibboleth.idp.cli.AbstractIdPHomeAwareCommandLine;
 import net.shibboleth.shared.annotation.constraint.NotEmpty;
@@ -25,7 +25,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Command line utility for {@link EsupOtpConnector}.
+ * Command line utility for {@link EsupOtpClient}.
  */
 public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<EsupOtpAuthenticatorArguments> {
 
@@ -63,12 +63,12 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
         }
         
         try {
-            final EsupOtpConnector authenticator;
+            final EsupOtpClient authenticator;
             final String authenticatorName = args.getAuthenticatorName();
             if (authenticatorName != null) {
-                authenticator = getApplicationContext().getBean(authenticatorName, EsupOtpConnector.class);
+                authenticator = getApplicationContext().getBean(authenticatorName, EsupOtpClient.class);
             } else {
-                authenticator = getApplicationContext().getBean(EsupOtpConnector.class);
+                authenticator = getApplicationContext().getBean(EsupOtpClient.class);
             }
 
             final String username = args.getAccountName();
