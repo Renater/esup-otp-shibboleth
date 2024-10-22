@@ -66,7 +66,6 @@ public class EsupOtpIntegration extends AbstractInitializableComponent {
      *
      */
     public EsupOtpIntegration() {
-        // TODO Auto-generated constructor stub
     }
     
     /** {@inheritDoc} */

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp.connector.impl;
+package fr.renater.shibboleth.esup.otp.client.impl;
 
 import javax.annotation.Nonnull;
 
@@ -26,10 +26,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 
 import fr.renater.shibboleth.esup.otp.EsupOtpIntegration;
+import fr.renater.shibboleth.esup.otp.client.EsupOtpClientException;
+import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
+import fr.renater.shibboleth.esup.otp.client.EsupOtpUriConstants;
 import fr.renater.shibboleth.esup.otp.config.EsupOtpRestTemplate;
-import fr.renater.shibboleth.esup.otp.connector.EsupOtpClientException;
-import fr.renater.shibboleth.esup.otp.connector.EsupOtpConnector;
-import fr.renater.shibboleth.esup.otp.connector.EsupOtpUriConstants;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpUserInfoResponse;
 import net.shibboleth.shared.primitive.LoggerFactory;
@@ -37,7 +37,7 @@ import net.shibboleth.shared.primitive.LoggerFactory;
 /**
  * Esup otp api connector implementation.
  */
-public class EsupOtpConnectorImpl implements EsupOtpConnector {
+public class EsupOtpConnectorImpl implements EsupOtpClient {
 
     /** Class logger. */
     @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpConnectorImpl.class);
@@ -56,15 +56,27 @@ public class EsupOtpConnectorImpl implements EsupOtpConnector {
 
     /** {@inheritDoc} */
     public EsupOtpResponse postSendMessage(String uid, String method, String transport, String hash) throws Exception {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            log.info("get user infos start");
+            final ResponseEntity<EsupOtpUserInfoResponse> response =
+                    restTemplate.getForEntity(EsupOtpUriConstants.GET_USER_INFOS_URI, EsupOtpUserInfoResponse.class,
+                            uid);
+            if(response.getStatusCode().is2xxSuccessful()) {
+                log.info("get user infos success");
+                return response.getBody();
+            }
+            log.info("get user infos error");
+            throw new EsupOtpClientException("Exception occured on get user infos for uid: " + uid);
+        } catch (final RestClientException e) {
+            throw new EsupOtpClientException("RestClientException occured on get user infos for uid: " + uid, e);
+        }
     }
 
     /** {@inheritDoc} */
     public EsupOtpUserInfoResponse getUserInfos(final String uid) throws Exception {
         try {
             log.info("get user infos start");
-            final ResponseEntity<EsupOtpUserInfoResponse> response = 
+            final ResponseEntity<EsupOtpUserInfoResponse> response =
                     restTemplate.getForEntity(EsupOtpUriConstants.GET_USER_INFOS_URI, EsupOtpUserInfoResponse.class,
                             uid);
             if(response.getStatusCode().is2xxSuccessful()) {
