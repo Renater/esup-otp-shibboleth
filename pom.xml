@@ -68,6 +68,19 @@
     
     <dependencyManagement>
         <dependencies>
+            <!-- Esup Otp client dependency -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>esup-otp-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>esup-otp-impl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- IdP BOM when importing IdP dependencies -->
             <dependency>
                 <groupId>net.shibboleth.idp</groupId>
@@ -106,16 +119,10 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
-    <modules>
-        <module>esup-otp-api</module>
-        <module>esup-otp-impl</module>
-        <module>esup-otp-dist</module>
-    </modules>
-    
+
     <build>
         <plugins>
-            <plugin>
+            <!--<plugin>
                 <groupId>net.shibboleth.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
@@ -127,7 +134,7 @@
                         <link>${javadoc.url}/java-identity-provider/${idp.version}</link>
                     </links>
                 </configuration>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -136,7 +143,9 @@
                         <index>true</index>
                         <manifestEntries>
                             <Automatic-Module-Name>${automatic.module.name}</Automatic-Module-Name>
-                            <Sealed>true</Sealed>
+                            <Implementation-Title>${project.artifactId}</Implementation-Title>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Sealed>false</Sealed>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -161,5 +170,12 @@
             </plugin>
         </plugins>
     </build>
+
+    <modules>
+        <module>esup-otp-impl</module>
+        <module>esup-otp-api</module>
+        <!-- All DIST modules must come after the -api and -impl modules -->
+        <module>esup-otp-dist</module>
+    </modules>
     
 </project>
