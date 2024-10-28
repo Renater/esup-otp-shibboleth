@@ -1,7 +1,10 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the University Corporation for Advanced Internet Development,
+ * Inc. (UCAID) under one or more contributor license agreements.  See the
+ * NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The UCAID licenses this file to You under the Apache
+ * License, Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License.  You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -18,8 +21,6 @@ import com.beust.jcommander.Parameter;
 
 import net.shibboleth.idp.cli.AbstractIdPHomeAwareCommandLineArguments;
 import net.shibboleth.shared.annotation.constraint.NotEmpty;
-import net.shibboleth.shared.codec.Base32Support;
-import net.shibboleth.shared.codec.DecodingException;
 import net.shibboleth.shared.primitive.LoggerFactory;
 import net.shibboleth.shared.primitive.StringSupport;
 import org.slf4j.Logger;
@@ -32,20 +33,14 @@ import java.io.PrintStream;
  * Arguments for {@link EsupOtpAuthenticatorCLI}.
  */
 public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLineArguments {
-
-    /**
-     * Name of a specific {@link TOTPAuthenticator}, if one has been requested.
-     */
-    @Parameter(names = "--authenticator")
-    @Nullable private String authenticatorName;
-
+    
     /** Credential issuer. */
-    @Parameter(names = "--issuer")
-    @Nullable private String issuer;
+    @Parameter(names = {"-c", "--command"})
+    @Nullable private String command;
     
     /** Credential account name. */
-    @Parameter(names = "--account")
-    @Nullable private String account;
+    @Parameter(names = "--uid")
+    @Nullable private String uid;
     
     /** method (bypass, esupnfc, push, random_code_mail, random_code, totp, webauthn). */
     @Parameter(names = "--method")
@@ -60,6 +55,7 @@ public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLi
     @Nullable private String userHash;
         
     /** Token code to verify. */
+    @Parameter(names = "--tokencode")
     @Nullable private Integer tokenCode;
     
     /** The Log. */
@@ -74,43 +70,24 @@ public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLi
         return log;
     }
     
-    /**
-     * @return Returns the method.
-     */
+    /** {@inheritDoc} */
+    public String getCommand() {
+        return command;
+    }
+    
+    /** {@inheritDoc} */
     public String getMethod() {
         return method;
     }
 
-    /**
-     * @return Returns the transport.
-     */
+    /** {@inheritDoc} */
     public String getTransport() {
         return transport;
     }
 
-    /**
-     * @return Returns the userHash.
-     */
+    /** {@inheritDoc} */
     public String getUserHash() {
         return userHash;
-    }
-
-    /**
-     * Get name of {@link TOTPAuthenticator} bean to access.
-     * 
-     * @return bean name
-     */
-    @Nullable @NotEmpty public String getAuthenticatorName() {
-        return authenticatorName;
-    }
-
-    /**
-     * Get the token issuer.
-     * 
-     * @return token issuer
-     */
-    @Nullable @NotEmpty public String getIssuer() {
-        return StringSupport.trimOrNull(issuer);
     }
 
     /**
@@ -118,8 +95,8 @@ public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLi
      * 
      * @return token account name
      */
-    @Nullable @NotEmpty public String getAccountName() {
-        return StringSupport.trimOrNull(account);
+    @Nullable @NotEmpty public String getUid() {
+        return StringSupport.trimOrNull(uid);
     }
 
     /**
@@ -135,31 +112,34 @@ public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLi
     public void validate() throws IllegalArgumentException {
         super.validate();
         
-        if (getOtherArgs().size() == 3) {
+        if (getOtherArgs().size() == 0) {
+            throw new IllegalArgumentException("Invalid operation requested, must have one additional arguments");
+        } else if (getOtherArgs().size() == 3) {
             tokenCode = Integer.valueOf(getOtherArgs().get(2));
-        } else if (getOtherArgs().size() != 1) {
-            throw new IllegalArgumentException(
-                    "Invalid operation requested, must have zero or two additional arguments");
         }
     }
 
     /** {@inheritDoc} */
     public void printHelp(@Nonnull final PrintStream out) {
-        out.println("TOTPAuthenticatorCLI");
-        out.println("Provides a command line interface for TOTPAuthenticator operations.");
+        out.println("EsupOtpAuthenticatorCLI");
+        out.println("Provides a command line interface for EsupOtpAuthenticator operations.");
         out.println();
-        out.println("   TOTPAuthenticatorCLI [options] springConfiguration [seed] [tokencode]");
+        out.println("   EsupOtpAuthenticatorCLI [options] [uid] [tokencode]");
         out.println();
-        out.println("      springConfiguration      name of Spring configuration resource to use");
+        out.println("      uid                      user identifier");
         out.println("      tokencode                token code to validate (omit when generating a new credential)");
         super.printHelp(out);
         out.println();
-        out.println(String.format("  --%-20s %s", "authenticator",
-                "Specifies a non-default TOTPAuthenticator bean to use."));
-        out.println(String.format("  --%-20s %s", "issuer",
-                "Specifies a token issuer when generating a new credential."));
-        out.println(String.format("  --%-20s %s", "account",
-                "Specifies a token account name when generating a new credential."));
+        out.println(String.format("  --%-20s %s", "command",
+                "Specify a command to use. (all, ...)"));
+        out.println(String.format("  --%-20s %s", "uid", "Specify user uid."));
+        out.println(String.format("  --%-20s %s", "method",
+                "Specify method. By default it's set to totp."
+                + "Possible values : bypass, esupnfc, push, random_code_mail, random_code, totp, webauthn"));
+        out.println(String.format("  --%-20s %s", "transport", "Specify transport. By default it's set to sms."
+                + "Possible values : sms, mail, push"));
+        out.println(String.format("  --%-20s %s", "userHash", "Specify userHash to call api."));
+        out.println(String.format("  --%-20s %s", "tokencode", "Specify token code to verify."));
         out.println();
     }
 
