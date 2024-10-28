@@ -17,28 +17,35 @@
 
 package fr.renater.shibboleth.esup.otp.dto;
 
+import java.util.List;
+
 /**
- * Esup otp verify dto response.
+ * Esup otp users uid response.
  */
-public class EsupOtpVerifyResponse extends EsupOtpResponse {
+public class EsupOtpUsersResponse extends EsupOtpResponse {
 
-    /** Method response. */
-    private String method;
+    /** uids. */
+    private List<String> uids;
 
     /**
      * {@inheritDoc}
      */
-    public String getMethod() {
-        return method;
+    public List<String> getUids() {
+        return uids;
     }
 
     /**
      * {@inheritDoc}
      */
-    public void setMethod(final String currentMethod) {
-        this.method = currentMethod;
+    public void setUids(final List<String> uidsList) {
+        this.uids = uidsList;
+    }
+
+    /** {@inheritDoc} */
+    public String toString() {
+        return "EsupOtpUsersResponse [code="+ getCode() +", uids=" + uids + "]";
     }
     
     
-
+    
 }

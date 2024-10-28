@@ -16,6 +16,19 @@
                 <exclude>*sources.jar</exclude>
             </excludes>
         </fileSet>
+        <!--  Our API -->
+        <fileSet>
+            <directory>../esup-otp-api/target</directory>
+            <outputDirectory>webapp/WEB-INF/lib</outputDirectory>
+            <includes>
+                <include>esup-otp-api-*.jar</include>
+            </includes>
+            <excludes>
+                <exclude>*test*.jar</exclude>
+                <exclude>*javadoc.jar</exclude>
+                <exclude>*sources.jar</exclude>
+            </excludes>
+        </fileSet>
         <fileSet>
             <directory>../esup-otp-impl/target/dependency</directory>
             <outputDirectory>webapp/WEB-INF/lib</outputDirectory>

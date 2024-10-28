@@ -21,7 +21,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
+import javax.security.auth.Subject;
 
+import net.shibboleth.shared.annotation.constraint.NonnullElements;
 import org.slf4j.Logger;
 
 import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
@@ -31,22 +33,25 @@ import net.shibboleth.shared.logic.Constraint;
 import net.shibboleth.shared.primitive.LoggerFactory;
 import net.shibboleth.shared.primitive.StringSupport;
 
+import java.security.Principal;
+import java.util.Collection; 
+import java.util.Set;
+
 /**
  * Wrapper for use of esup otp api.
  */
 @ThreadSafe
-public class EsupOtpIntegration extends AbstractInitializableComponent {
+public final class DefaultEsupOtpIntegration extends AbstractInitializableComponent implements IEsupOtpIntegration { 
     
     /** Class logger. */
-    @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpIntegration.class);
+    @Nonnull private final Logger log = LoggerFactory.getLogger(DefaultEsupOtpIntegration.class);
     
     /** API host. */
-    @GuardedBy("this") @NonnullAfterInit @NotEmpty private String apiHost;
-    
+    @GuardedBy("this") @NonnullAfterInit @NotEmpty private String apiHost; 
     /** Integration key. */
     @GuardedBy("this") @Nullable private String clientId;
     
-    /** Secret key. */
+    /** Secret key. */ 
     @GuardedBy("this") @Nullable private String secretKey;
     
     /** Api password .*/
@@ -61,11 +66,14 @@ public class EsupOtpIntegration extends AbstractInitializableComponent {
     /** The URL path to the health endpoint.*/
     @GuardedBy("this") @Nullable private String healthEndpoint;
 
+    @GuardedBy("this") @Nonnull private final Subject supportedPrincipals;
+
     /**
      * Constructor.
      *
      */
-    public EsupOtpIntegration() {
+    public DefaultEsupOtpIntegration() {
+        supportedPrincipals = new Subject();
     }
     
     /** {@inheritDoc} */
@@ -185,4 +193,30 @@ public class EsupOtpIntegration extends AbstractInitializableComponent {
         }
     }
 
+    @Nonnull
+    @Override
+    public <T extends Principal> Set<T> getSupportedPrincipals(@Nonnull Class<T> c) {
+        final Set<T> result = supportedPrincipals.getPrincipals(c);
+        assert result != null;
+        return result;
+    }
+
+    /**
+     * Set supported non-user-specific principals that the action will include in the subjects
+     * it generates, in place of any default principals from the flow.
+     *
+     * <p>Setting to a null or empty collection will maintain the default behavior of relying on the flow.</p>
+     *
+     * @param <T> a type of principal to add, if not generic
+     * @param principals supported principals to include
+     */
+    public synchronized <T extends Principal> void setSupportedPrincipals(
+            @Nullable @NonnullElements final Collection<T> principals) {
+        checkSetterPreconditions();
+        supportedPrincipals.getPrincipals().clear();
+
+        if (principals != null && !principals.isEmpty()) {
+            supportedPrincipals.getPrincipals().addAll(Set.copyOf(principals));
+        }
+    }
 }
