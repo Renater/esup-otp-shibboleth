@@ -15,30 +15,21 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp.dto;
+package fr.renater.shibboleth.esup.otp.dto.user;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
 
 /**
- * Esup otp verify dto response.
+ * Esup otp user response.
  */
-public class EsupOtpVerifyResponse extends EsupOtpResponse {
+public class AdminEsupOtpUserInfoResponse extends EsupOtpResponse {
 
-    /** Method response. */
-    private String method;
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getMethod() {
-        return method;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void setMethod(final String currentMethod) {
-        this.method = currentMethod;
-    }
-    
-    
-
+    /** user description. */
+    private UserMethods user;
 }

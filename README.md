@@ -64,3 +64,16 @@ Check
 
 - Main Log : ```$idp_install_path/logs/idp-process.log```
 - Warn and error log : ```$idp_install_path/logs/idp-warn.log```
+
+## Test
+
+- Command utils
+```
+[username@server ~]$ $idp_install_path/bin/esupotpauth.sh --help
+```
+
+- List all user uids
+
+```
+[username@server ~]$ $idp_install_path/bin/esupotpauth.sh --home /usr/share/shibboleth-idp --verbose --command all
+```

@@ -24,7 +24,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
-import fr.renater.shibboleth.esup.otp.EsupOtpIntegration;
+import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 
 
 /**
@@ -38,7 +38,7 @@ public class EsupOtpRestTemplate extends RestTemplate {
      *
      * @param esupOtpIntegration 
      */
-    public EsupOtpRestTemplate(final EsupOtpIntegration esupOtpIntegration) {
+    public EsupOtpRestTemplate(final DefaultEsupOtpIntegration esupOtpIntegration) {
         super();
         this.setUriTemplateHandler(new DefaultUriBuilderFactory(esupOtpIntegration.getAPIHost()));
         this.setRequestFactory(getClientHttpRequestFactory());

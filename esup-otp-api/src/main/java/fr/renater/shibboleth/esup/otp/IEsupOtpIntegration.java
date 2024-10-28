@@ -15,30 +15,13 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp.dto;
+package fr.renater.shibboleth.esup.otp;
+
+import net.shibboleth.idp.authn.principal.PrincipalSupportingComponent;
 
 /**
- * Esup otp verify dto response.
+ *
  */
-public class EsupOtpVerifyResponse extends EsupOtpResponse {
-
-    /** Method response. */
-    private String method;
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getMethod() {
-        return method;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void setMethod(final String currentMethod) {
-        this.method = currentMethod;
-    }
-    
-    
+public interface IEsupOtpIntegration extends PrincipalSupportingComponent {
 
 }

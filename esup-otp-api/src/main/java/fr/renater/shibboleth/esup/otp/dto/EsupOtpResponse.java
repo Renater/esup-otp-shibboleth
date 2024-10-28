@@ -17,9 +17,12 @@
 
 package fr.renater.shibboleth.esup.otp.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * Esup otp base response.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class EsupOtpResponse {
 
     /**
@@ -42,8 +45,8 @@ public class EsupOtpResponse {
     /**
      * {@inheritDoc}
      */
-    public void setCode(String code) {
-        this.code = code;
+    public void setCode(final String stringCode) {
+        this.code = stringCode;
     }
 
     /**
@@ -56,8 +59,8 @@ public class EsupOtpResponse {
     /**
      * {@inheritDoc}
      */
-    public void setMessage(String message) {
-        this.message = message;
+    public void setMessage(final String msg) {
+        this.message = msg;
     }
     
     

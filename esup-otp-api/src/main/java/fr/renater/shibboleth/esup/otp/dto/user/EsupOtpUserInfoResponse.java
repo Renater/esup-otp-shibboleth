@@ -15,60 +15,30 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp.dto;
+package fr.renater.shibboleth.esup.otp.dto.user;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
+
 /**
- * 
+ * Esup otp user response.
  */
 public class EsupOtpUserInfoResponse extends EsupOtpResponse {
 
+    /** user description. */
     private User user;
     
     public static class User {
         
-        private Methods methods;
+        private UserMethods methods;
         
         private Transports transports;
         
         @JsonProperty("last_send_message")
         private LastSendMessage lastSendMessage;
-        
-        public static class Methods {
-            
-            private boolean codeRequired;
-            
-            private boolean waitingFor;
-            
-            private Active totp;
-            
-            @JsonProperty("random_code")
-            private RandomCode randomCode;
-            
-            @JsonProperty("random_code_mail")
-            private RandomCode randomCodeMail;
-            
-            
-            public static class RandomCode extends Active {
-                
-                private List<String> transports;
-            }
-            
-            public static class ByPass extends Active {
-                
-                @JsonProperty("available_code")
-                private int availableCode;
-            }
-            
-            public static class Active {
-                
-                private boolean active;
-            }
-        }
         
         public static class Transports {
             

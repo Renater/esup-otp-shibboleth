@@ -15,30 +15,27 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp.dto;
+package fr.renater.shibboleth.esup.otp.dto.user;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Esup otp verify dto response.
+ * Device dto.
  */
-public class EsupOtpVerifyResponse extends EsupOtpResponse {
+public class Device {
 
-    /** Method response. */
-    private String method;
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getMethod() {
-        return method;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void setMethod(final String currentMethod) {
-        this.method = currentMethod;
-    }
+    /** platform. */
+    private String platform;
+    
+    /** phone number. */
+    @JsonProperty("phone_number")
+    private String phoneNumber;
+    
+    /** manufacturer. */
+    private String manufacturer;
+    
+    /** model. */
+    private String model;
     
     
-
 }
