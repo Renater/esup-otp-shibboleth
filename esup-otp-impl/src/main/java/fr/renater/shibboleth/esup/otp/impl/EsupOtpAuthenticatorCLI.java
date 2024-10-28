@@ -1,7 +1,10 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the University Corporation for Advanced Internet Development,
+ * Inc. (UCAID) under one or more contributor license agreements.  See the
+ * NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The UCAID licenses this file to You under the Apache
+ * License, Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License.  You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -14,12 +17,23 @@
 
 package fr.renater.shibboleth.esup.otp.impl;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
+import fr.renater.shibboleth.esup.otp.client.impl.EsupOtpClientImpl;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpUsersResponse;
+import fr.renater.shibboleth.esup.otp.dto.user.EsupOtpUserInfoResponse;
 import net.shibboleth.idp.cli.AbstractIdPHomeAwareCommandLine;
 import net.shibboleth.shared.annotation.constraint.NotEmpty;
 import net.shibboleth.shared.primitive.LoggerFactory;
 import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.jasminb.jsonapi.retrofit.JSONAPIConverterFactory;
+
+import java.io.PrintStream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -31,6 +45,15 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
 
     /** Class logger. */
     @Nullable private Logger log;
+    
+    private final ObjectMapper objectMapper;
+
+    public EsupOtpAuthenticatorCLI() {
+        ObjectMapper objMapper = new ObjectMapper();
+        objMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        this.objectMapper = objMapper;
+    }
     
     /** {@inheritDoc} */
     @Override
@@ -47,11 +70,13 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
     @Nonnull protected Class<EsupOtpAuthenticatorArguments> getArgumentClass() {
         return EsupOtpAuthenticatorArguments.class;
     }
-
+    
     /** {@inheritDoc} */
     @Override
     @Nonnull @NotEmpty protected String getVersion() {
-        return getClass().getPackage().getImplementationVersion();
+        final String result = getClass().getPackage().getImplementationVersion();
+        assert result != null;
+        return result;
     }
     
     /** {@inheritDoc} */
@@ -63,40 +88,54 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
         }
         
         try {
-            final EsupOtpClient authenticator;
-            final String authenticatorName = args.getAuthenticatorName();
-            if (authenticatorName != null) {
-                authenticator = getApplicationContext().getBean(authenticatorName, EsupOtpClient.class);
+            DefaultEsupOtpIntegration integration = getApplicationContext().getBean(DefaultEsupOtpIntegration.class);
+
+            final EsupOtpClient client = new EsupOtpClientRegistry().getClientOrCreate(integration);
+            
+            if("all".equals(args.getCommand())) {
+                final EsupOtpUsersResponse userUids = client.getUsers();
+                final String response = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(userUids);
+                System.out.println("EsupOtpUsersResponse: \n" + response);
+                return RC_OK;
+            } else if ("protected".equals(args.getCommand()) && args.getUid() != null) {
+                System.out.println("Get Protected user infos");
+                final EsupOtpUserInfoResponse user = client.getUserInfos(args.getUid());
+                final String response = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(user);
+                System.out.println("EsupOtpUserInfoResponse: \n" + response);
+                return RC_OK;
+            } else if (args.getOtherArgs().size() == 1 && args.getUid() != null) {
+                final EsupOtpUserInfoResponse user = client.getOtpUserInfos(args.getUid());
+                final String response = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(user);
+                System.out.println("EsupOtpUserInfoResponse: \n" + response);
+                return RC_OK;
             } else {
-                authenticator = getApplicationContext().getBean(EsupOtpClient.class);
-            }
+                final String username = args.getUid();
+                final Integer tokenCode = args.getTokenCode();
+                if (username != null && tokenCode != null) {
 
-            final String username = args.getAccountName();
-            final Integer tokenCode = args.getTokenCode();
-            if (username != null && tokenCode != null) {
-
-                if (authenticator.postVerify(username, tokenCode.toString())) {
-                    System.out.println("OK");
-                    return RC_OK;
+                    if (client.postVerify(username, tokenCode.toString())) {
+                        System.out.println("OK");
+                        return RC_OK;
+                    }
+                    
+                    System.out.println("INVALID");
+                    return RC_UNKNOWN;
                 }
                 
-                System.out.println("INVALID");
-                return RC_UNKNOWN;
+                final String method = args.getMethod() != null ? args.getMethod() : "totp";
+                final String transport = args.getTransport() != null ? args.getTransport() : "sms";
+                
+                // Create a new token.
+                final EsupOtpResponse tc = client.postSendMessage(username, method, transport, "");
+                System.out.println("Send message code: " + tc.getCode());
+                System.out.println("Send message message: " + tc.getMessage());
             }
-            
-            final String method = args.getMethod() != null ? args.getMethod() : "totp";
-            final String transport = args.getTransport() != null ? args.getTransport() : "sms";
-            
-            // Create a new token.
-            final EsupOtpResponse tc = authenticator.postSendMessage(username, method, transport, "");
-            System.out.println("Send message code: " + tc.getCode());
-            System.out.println("Send message message: " + tc.getMessage());
             
         } catch (final Exception e) {
             if (args.isVerboseOutput()) {
-                getLogger().error("Unable to access TOTPAuthenticator from Spring context", e);
+                getLogger().error("Unable to access EsupOtpAuthenticator from Spring context", e);
             } else {
-                getLogger().error("Unable to access TOTPAuthenticator from Spring context", e.getMessage());
+                getLogger().error("Unable to access EsupOtpAuthenticator from Spring context", e.getMessage());
             }
             return RC_UNKNOWN;
         }

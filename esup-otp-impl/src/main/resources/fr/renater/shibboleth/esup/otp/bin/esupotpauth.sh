@@ -4,4 +4,4 @@ declare LOCATION
 
 LOCATION=$(dirname $0)
 
-$LOCATION/runclass.sh fr.renater.shibboleth.esup.otp.impl.EsupOtpAuthenticatorCLI classpath:/META-INF/fr/renater/shibboleth/esup/flows/authn/otp/EsupOtp-authenticator.xml "$@"
+$LOCATION/runclass.sh fr.renater.shibboleth.esup.otp.impl.EsupOtpAuthenticatorCLI classpath:/META-INF/net/shibboleth/idp/flows/authn/EsupOtp/EsupOtp-authenticator.xml "$@"

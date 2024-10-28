@@ -1,7 +1,10 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the University Corporation for Advanced Internet Development,
+ * Inc. (UCAID) under one or more contributor license agreements.  See the
+ * NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The UCAID licenses this file to You under the Apache
+ * License, Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License.  You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -19,7 +22,7 @@ import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import fr.renater.shibboleth.esup.otp.EsupOtpIntegration;
+import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
 import net.shibboleth.idp.authn.AbstractAuthenticationAction;
 import net.shibboleth.idp.authn.AuthnEventIds;
@@ -63,7 +66,7 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
     @Nonnull private Function<AuthenticationContext, EsupOtpContext> esupOtpContextCreationStrategy;
 
     /** Lookup strategy for esup otp integration. */
-    @Nonnull private Function<ProfileRequestContext, EsupOtpIntegration> esupOtpIntegrationLookupStrategy;
+    @Nonnull private Function<ProfileRequestContext, DefaultEsupOtpIntegration> esupOtpIntegrationLookupStrategy;
     
     /** Constructor. */
     public EsupOtpExtractionAction() {
@@ -89,10 +92,12 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
      * 
      * @param strategy lookup/creation strategy
      */
-    public void setEsupOtpContextCreationStrategy(@Nonnull final Function<AuthenticationContext, EsupOtpContext> strategy) {
+    public void setEsupOtpContextCreationStrategy(
+            @Nonnull final Function<AuthenticationContext, EsupOtpContext> strategy) {
         checkSetterPreconditions();
         
-        esupOtpContextCreationStrategy = Constraint.isNotNull(strategy, "EsupOtpContext creation strategy cannot be null");
+        esupOtpContextCreationStrategy = Constraint.isNotNull(strategy, 
+                "EsupOtpContext creation strategy cannot be null");
     }
 
     /**
@@ -100,10 +105,12 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
      *
      * @param strategy lookup/creation strategy
      */
-    public void setEsupOtpIntegrationLookupStrategy(@Nonnull final Function<ProfileRequestContext, EsupOtpIntegration> strategy) {
+    public void setEsupOtpIntegrationLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, DefaultEsupOtpIntegration> strategy) {
         checkSetterPreconditions();
 
-        esupOtpIntegrationLookupStrategy = Constraint.isNotNull(strategy, "EsupOtpIntegration creation strategy cannot be null");
+        esupOtpIntegrationLookupStrategy = Constraint.isNotNull(strategy, 
+                "EsupOtpIntegration creation strategy cannot be null");
     }
     
     /** {@inheritDoc} */
@@ -121,7 +128,7 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
             return;
         }
 
-        final EsupOtpIntegration esupOtpIntegration = esupOtpIntegrationLookupStrategy.apply(profileRequestContext);
+        final DefaultEsupOtpIntegration esupOtpIntegration = esupOtpIntegrationLookupStrategy.apply(profileRequestContext);
         if (esupOtpIntegration == null) {
             log.warn("{} No EsupOtpIntegration returned by lookup strategy", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);

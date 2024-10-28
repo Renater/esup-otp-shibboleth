@@ -11,18 +11,18 @@
 
     <!-- System beans needed for extension to function, loaded after global.xml -->
   
-    <bean id="authn/EsupOtp" parent="shibboleth.AuthenticationFlow"
-            p:order="%{idp.authn.TOTP.order:1000}"
-            p:nonBrowserSupported="%{idp.authn.TOTP.nonBrowserSupported:true}"
-            p:passiveAuthenticationSupported="%{idp.authn.TOTP.passiveAuthenticationSupported:true}"
-            p:forcedAuthenticationSupported="%{idp.authn.TOTP.forcedAuthenticationSupported:true}"
-            p:proxyRestrictionsEnforced="%{idp.authn.TOTP.proxyRestrictionsEnforced:%{idp.authn.enforceProxyRestrictions:true}}"
-            p:proxyScopingEnforced="%{idp.authn.TOTP.proxyScopingEnforced:false}"
-            p:discoveryRequired="%{idp.authn.TOTP.discoveryRequired:false}"
-            p:lifetime="%{idp.authn.TOTP.lifetime:%{idp.authn.defaultLifetime:PT1H}}"
-            p:inactivityTimeout="%{idp.authn.TOTP.inactivityTimeout:%{idp.authn.defaultTimeout:PT30M}}"
-            p:reuseCondition-ref="#{'%{idp.authn.TOTP.reuseCondition:shibboleth.Conditions.TRUE}'.trim()}"
-            p:activationCondition-ref="#{'%{idp.authn.TOTP.activationCondition:shibboleth.Conditions.TRUE}'.trim()}"
+    <bean p:id="authn/EsupOtp" parent="shibboleth.AuthenticationFlow"
+            p:order="%{idp.authn.esupOtp.order:1000}"
+            p:nonBrowserSupported="%{idp.authn.esupOtp.nonBrowserSupported:false}"
+            p:passiveAuthenticationSupported="%{idp.authn.esupOtp.passiveAuthenticationSupported:true}"
+            p:forcedAuthenticationSupported="%{idp.authn.esupOtp.forcedAuthenticationSupported:true}"
+            p:proxyRestrictionsEnforced="%{idp.authn.esupOtp.proxyRestrictionsEnforced:%{idp.authn.enforceProxyRestrictions:true}}"
+            p:proxyScopingEnforced="%{idp.authn.esupOtp.proxyScopingEnforced:false}"
+            p:discoveryRequired="%{idp.authn.esupOtp.discoveryRequired:false}"
+            p:lifetime="%{idp.authn.esupOtp.lifetime:%{idp.authn.defaultLifetime:PT1H}}"
+            p:inactivityTimeout="%{idp.authn.esupOtp.inactivityTimeout:%{idp.authn.defaultTimeout:PT30M}}"
+            p:reuseCondition-ref="#{'%{idp.authn.esupOtp.reuseCondition:shibboleth.Conditions.TRUE}'.trim()}"
+            p:activationCondition-ref="#{'%{idp.authn.esupOtp.activationCondition:shibboleth.Conditions.TRUE}'.trim()}"
             p:subjectDecorator="#{getObject('%{idp.authn.TOTP.subjectDecorator:}'.trim())}">
         <property name="supportedPrincipals">
             <list>
@@ -34,7 +34,7 @@
         </property>
         <property name="supportedPrincipalsByString">
             <bean parent="shibboleth.CommaDelimStringArray"
-                c:_0="#{'%{idp.authn.TOTP.supportedPrincipals:}'.trim()}" />
+                c:_0="#{'%{idp.authn.esupOtp.supportedPrincipals:}'.trim()}" />
         </property>
     </bean>
   

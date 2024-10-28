@@ -77,12 +77,6 @@
     </bean>
 
     <!-- Esup Otp Integration -->
-    <bean id="EsupOtpIntegration" lazy-init="false"
-          class="fr.renater.shibboleth.esup.otp.EsupOtpIntegration"
-          p:APIHost="%{idp.esup.otp.apiHost:none}"
-          p:apiPassword="%{idp.esup.otp.apiPassword:none}"
-          p:registeredRedirectURI="%{idp.esup.otp.redirectURL:}"
-          p:healthCheckEndpoint="%{idp.esup.otp.endpoint.health:/v1/health_check}" />
     <bean id="EsupOtpIntegrationStrategy" parent="shibboleth.Functions.Constant"
           c:target-ref="EsupOtpIntegration" />
 

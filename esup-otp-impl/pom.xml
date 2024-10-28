@@ -8,7 +8,7 @@
         <groupId>fr.renater.shibboleth.esup.otp</groupId>
         <artifactId>idp-plugin-esup-otp-parent</artifactId>
         <version>0.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <!--<relativePath>../pom.xml</relativePath>-->
     </parent>
 
     <name>Shibboleth IdP :: Plugins :: Esup otp Login Flow Impl</name>
@@ -24,9 +24,8 @@
     <dependencies>
         <!-- Compile Dependencies -->
         <dependency>
-            <groupId>fr.renater.shibboleth.esup.otp</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>esup-otp-api</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <!-- Provided dependencies -->
