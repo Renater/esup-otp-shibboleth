@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 /**
- * Esup otp login flow context classes.
+ * Esup otp login flow implementation classes.
  */
 @NonnullElements
-package fr.renater.shibboleth.esup.otp.context;
+package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
 import net.shibboleth.shared.annotation.constraint.NonnullElements;

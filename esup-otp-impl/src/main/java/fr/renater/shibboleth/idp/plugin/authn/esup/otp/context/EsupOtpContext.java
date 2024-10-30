@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp.context;
+package fr.renater.shibboleth.idp.plugin.authn.esup.otp.context;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

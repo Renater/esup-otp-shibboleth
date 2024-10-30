@@ -48,6 +48,7 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     
     /** API host. */
     @GuardedBy("this") @NonnullAfterInit @NotEmpty private String apiHost; 
+
     /** Integration key. */
     @GuardedBy("this") @Nullable private String clientId;
     

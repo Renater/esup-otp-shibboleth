@@ -29,7 +29,7 @@
                 <exclude>*sources.jar</exclude>
             </excludes>
         </fileSet>
-        <fileSet>
+        <!--<fileSet>
             <directory>../esup-otp-impl/target/dependency</directory>
             <outputDirectory>webapp/WEB-INF/lib</outputDirectory>
             <includes>
@@ -40,9 +40,9 @@
                 <exclude>*javadoc.jar</exclude>
                 <exclude>*sources.jar</exclude>
             </excludes>
-        </fileSet>
+        </fileSet>-->
         <fileSet>
-            <directory>../esup-otp-impl/target/classes/fr/renater/shibboleth/esup/otp</directory>
+            <directory>../esup-otp-impl/target/classes/fr/renater/shibboleth/idp/plugin/authn/esup/otp</directory>
             <outputDirectory>bootstrap</outputDirectory>
             <includes>
                 <include>plugin.properties</include>
