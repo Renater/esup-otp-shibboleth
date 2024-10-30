@@ -1,12 +1,8 @@
 package fr.renater.shibboleth.esup.otp;
 
-import fr.renater.shibboleth.esup.otp.impl.EsupOtpAuthenticatorArguments;
-import fr.renater.shibboleth.esup.otp.impl.EsupOtpAuthenticatorCLI;
-import fr.renater.shibboleth.esup.otp.impl.EsupOtpExtractionAction;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpAuthenticatorArguments;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpAuthenticatorCLI;
 import net.shibboleth.shared.component.ComponentInitializationException;
-import net.shibboleth.shared.logic.FunctionSupport;
-import net.shibboleth.shared.testing.ConstantSupplier;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

@@ -1,3 +1,15 @@
+<!-- TOC -->
+* [Esup Otp Shibboleth](#esup-otp-shibboleth)
+  * [Description](#description)
+  * [Installation](#installation)
+    * [Copy package to the server](#copy-package-to-the-server)
+    * [Enable Multifactor Module](#enable-multifactor-module)
+    * [Install the plugin](#install-the-plugin)
+  * [Configuration](#configuration)
+  * [Log check](#log-check)
+  * [Test](#test)
+<!-- TOC -->
+
 # Esup Otp Shibboleth
 
 ## Description
@@ -9,7 +21,7 @@ Ce plugin est à utilisé au sein d'un login flow de type Multi-Factor. Il perme
 
 | Plugin ID                      | Module(s)         | Authentication Flow ID |
 |--------------------------------|-------------------|------------------------|
-| fr.renater.shibboleth.esup.otp | idp.authn.esupotp | authn/esupotp          |
+| fr.renater.shibboleth.esup.otp | idp.authn.esupotp | authn/EsupOtp          |
 
 ## Installation
 
@@ -43,6 +55,28 @@ Check
 
 ```
 [username@server ~]$ $idp_install_path/bin/plugin.sh -i $idp_install_path/plugins/module.tar.gz --noCheck
+[username@server ~]$ systemctl restart tomcat10.service
+```
+
+#### Tomcat installation not standard
+If your tomcat configuration does not point to the war regenerated after plugin installation, such as the following configuration for example:
+```
+[username@server ~]$ cat /etc/tomcat10/Catalina/localhost/idp.xml
+<Context
+    docBase="$idp_install_path/war/idp.war"
+    privileged="true"
+    swallowOutput="true">
+```
+
+You need to copy jar files into docBase directory to plugin work well:
+
+1. Copy jar into WEB-INF/lib
+2. Add permission on jar files
+3. restart service
+
+```
+[username@server ~]$ cp $idp_install_path/dist/plugin-webapp/WEB-INF/lib/esup-otp-* $idp_install_path/webapp/WEB-INF/lib/.
+[username@server ~]$ chmod o+r $idp_install_path/webapp/WEB-INF/lib/esup-otp-*
 ```
 
 - Remove plugin
@@ -52,12 +86,12 @@ Check
 
 ## Configuration
 
-| property                     | required    | Default value    | Description |
-|:-----------------------------|-------------|------------------|-------------|
-| idp.esup.otp.apiHost         | X           |                  |             |
-| idp.duo.oidc.apiPassword     | X           |                  |             |
-| idp.esup.oidc.redirectURL    |             |                  |             |
-| idp.esup.otp.endpoint.health |             | /v1/health_check |             |
+| property                     |                      required                      | Default value    | Description |
+|:-----------------------------|:--------------------------------------------------:|------------------|-------------|
+| idp.esup.otp.apiHost         |                      &check;                       |                  |             |
+| idp.duo.oidc.apiPassword     |                      &check;                       |                  |             |
+| idp.esup.oidc.redirectURL    |                                                    |                  |             |
+| idp.esup.otp.endpoint.health |                                                    | /v1/health_check |             |
 
 
 ## Log check

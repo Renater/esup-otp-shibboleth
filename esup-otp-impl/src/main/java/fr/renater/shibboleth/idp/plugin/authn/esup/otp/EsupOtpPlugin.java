@@ -15,26 +15,38 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp;
+package fr.renater.shibboleth.idp.plugin.authn.esup.otp;
 
 import java.io.IOException;
 
 import net.shibboleth.idp.module.IdPModule;
-import net.shibboleth.idp.module.impl.PluginIdPModule;
+import net.shibboleth.idp.plugin.impl.FirstPartyIdPPlugin;
 import net.shibboleth.profile.module.ModuleException;
+import net.shibboleth.profile.plugin.PluginException;
+import net.shibboleth.shared.collection.CollectionSupport;
 
 /**
- * {@link IdPModule} implementation.
+ * Details about the Esup otp login plugin.
  */
-public final class EsupOtpModule extends PluginIdPModule {
+public class EsupOtpPlugin extends FirstPartyIdPPlugin {
 
     /**
      * Constructor.
      *
      * @throws IOException
-     * @throws ModuleException
+     * @throws PluginException
      */
-    public EsupOtpModule() throws IOException, ModuleException {
-        super(EsupOtpModule.class);
+    public EsupOtpPlugin() throws IOException, PluginException {
+        super(EsupOtpPlugin.class);
+        try {
+            final IdPModule module = new EsupOtpModule();
+            setEnableOnInstall(CollectionSupport.singleton(module));
+            setDisableOnRemoval(CollectionSupport.singleton(module));
+        } catch (final IOException e) {
+            throw e;
+        } catch (final ModuleException e) {
+            throw new PluginException(e);
+        }
     }
+
 }

@@ -7,8 +7,7 @@
     <parent>
         <groupId>fr.renater.shibboleth.esup.otp</groupId>
         <artifactId>idp-plugin-esup-otp-parent</artifactId>
-        <version>0.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <version>0.0.0</version>
     </parent>
 
     <name>Shibboleth IdP :: Plugins :: Esup otp Login Flow API</name>
@@ -18,7 +17,7 @@
     
     <properties>
         <checkstyle.configLocation>${project.basedir}/../resources/checkstyle/checkstyle.xml</checkstyle.configLocation>
-        <automatic.module.name>net.shibboleth.idp.plugin.authn.duo.api</automatic.module.name>
+        <automatic.module.name>fr.renater.shibboleth.esup.otp.api</automatic.module.name>
     </properties>
 
     <dependencies>

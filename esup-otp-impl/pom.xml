@@ -7,7 +7,7 @@
     <parent>
         <groupId>fr.renater.shibboleth.esup.otp</groupId>
         <artifactId>idp-plugin-esup-otp-parent</artifactId>
-        <version>0.0.0-SNAPSHOT</version>
+        <version>0.0.0</version>
         <!--<relativePath>../pom.xml</relativePath>-->
     </parent>
 
@@ -18,7 +18,7 @@
     
     <properties>
         <checkstyle.configLocation>${project.basedir}/../resources/checkstyle/checkstyle.xml</checkstyle.configLocation>
-        <automatic.module.name>fr.renater.shibboleth.esup.otp.impl</automatic.module.name>
+        <automatic.module.name>fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl</automatic.module.name>
     </properties>
 
     <dependencies>
@@ -205,7 +205,7 @@
                     <archive>
                         <manifestSections>
                             <manifestSection>
-                                <name>fr/renater/shibboleth/esup/otp/</name>
+                                <name>fr/renater/shibboleth/idp/plugin/authn/esup/otp/</name>
                                 <manifestEntries>
                                     <Implementation-Title>${project.artifactId}</Implementation-Title>
                                     <Implementation-Version>${project.version}</Implementation-Version>

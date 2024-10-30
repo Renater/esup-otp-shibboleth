@@ -14,7 +14,7 @@
 
     <!-- Esup Otp Integration -->
     <bean id="EsupOtpIntegration" lazy-init="true"
-          class="fr.renater.shibboleth.esup.otp.EsupOtpIntegration"
+          class="fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration"
           p:APIHost="%{idp.esup.otp.apiHost:http://localhost}"
           p:apiPassword="%{idp.esup.otp.apiPassword:none}"
           p:registeredRedirectURI="%{idp.esup.otp.redirectURL:}"

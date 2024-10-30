@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp.impl;
+package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.SerializationFeature;

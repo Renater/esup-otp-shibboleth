@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp.impl;
+package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

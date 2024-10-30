@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp.impl;
+package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
 import java.util.function.Function;
 
@@ -39,7 +39,7 @@ import org.opensaml.profile.action.EventIds;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 
-import fr.renater.shibboleth.esup.otp.context.EsupOtpContext;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**

@@ -17,7 +17,7 @@
 
 package fr.renater.shibboleth.esup.otp;
 
-import fr.renater.shibboleth.esup.otp.context.EsupOtpContext;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.webflow.execution.Event;
@@ -25,7 +25,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import fr.renater.shibboleth.esup.otp.impl.EsupOtpExtractionAction;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionAction;
 import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.profile.testing.ActionTestingSupport;
 import net.shibboleth.shared.component.ComponentInitializationException;

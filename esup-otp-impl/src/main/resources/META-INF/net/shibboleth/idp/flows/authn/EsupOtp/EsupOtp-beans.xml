@@ -12,7 +12,7 @@
        default-init-method="initialize"
        default-destroy-method="destroy">
 
-    <import resource="EsupOtp-authenticator.xml" />
+    <!--<import resource="EsupOtp-authenticator.xml" />-->
 
     <bean id ="ExtendedMessageSourceResources" parent="shibboleth.ListCombiner"
           p:firstList-ref="#{'%{idp.message.resources:shibboleth.MessageSourceResources}'.trim()}" >
@@ -33,10 +33,10 @@
         class="net.shibboleth.idp.session.context.navigate.CanonicalUsernameLookupStrategy" />
 
     <bean id="EsupOtpExtraction"
-          class="fr.renater.shibboleth.esup.otp.impl.EsupOtpExtractionAction" scope="prototype"
+          class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionAction" scope="prototype"
           p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
           p:usernameLookupStrategy-ref="DefaultUsernameLookupStrategy"
-          p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegration"
+          p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy"
           p:fieldName="#{'%{idp.authn.TOTP.fieldName:tokencode}'.trim()}" />
 
             
@@ -50,7 +50,7 @@
     
     <!-- These are singletons acting as default "back-ends". -->
 
-    <bean id="EsupOtpValidator" class="fr.renater.shibboleth.esup.otp.impl.EsupOtpCredentialValidator" lazy-init="true" />
+    <bean id="EsupOtpValidator" class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpCredentialValidator" lazy-init="true" />
 
     <!-- Used in views to calculate CSP hashes and nonces, remove and adjust beans in flow when compatibility bumped past 5.0 -->
     
@@ -77,7 +77,13 @@
     </bean>
 
     <!-- Esup Otp Integration -->
+    <bean id="DefaultEsupOtpIntegration" lazy-init="true"
+          class="fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration"
+          p:APIHost="%{idp.esup.otp.apiHost:http://localhost}"
+          p:apiPassword="%{idp.esup.otp.apiPassword:none}"
+          p:registeredRedirectURI="%{idp.esup.otp.redirectURL:}"
+          p:healthCheckEndpoint="%{idp.esup.otp.endpoint.health:/v1/health_check}" />
     <bean id="EsupOtpIntegrationStrategy" parent="shibboleth.Functions.Constant"
-          c:target-ref="EsupOtpIntegration" />
+          c:target-ref="DefaultEsupOtpIntegration" />
 
 </beans>
