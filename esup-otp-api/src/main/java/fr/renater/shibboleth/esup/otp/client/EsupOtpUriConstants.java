@@ -160,7 +160,7 @@ public final class EsupOtpUriConstants {
          * @param otp The one-time password for verification.
          * @param api_password The API password for additional security.
          */
-        public static final String POST_VERIFY = "/protected/users/{uid}/{otp}/{api_password}?";
+        public static final String POST_VERIFY = "/protected/users/{uid}/{otp}";
 
         /**
          * DELETE request to remove a specific transport method for a user.
