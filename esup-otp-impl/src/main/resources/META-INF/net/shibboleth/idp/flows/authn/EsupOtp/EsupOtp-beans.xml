@@ -83,7 +83,8 @@
           p:usersSecret="%{idp.esup.otp.usersSecret:none}"
           p:apiPassword="%{idp.esup.otp.apiPassword:none}"
           p:registeredRedirectURI="%{idp.esup.otp.redirectURL:}"
-          p:healthCheckEndpoint="%{idp.esup.otp.endpoint.health:/v1/health_check}" />
+          p:healthCheckEndpoint="%{idp.esup.otp.endpoint.health:/v1/health_check}"
+          p:supportedMethods="%{idp.esup.otp.supportedMethods:totp,webauthn,push,bypass,random_code,random_code_mail}"/>
     <bean id="EsupOtpIntegrationStrategy" parent="shibboleth.Functions.Constant"
           c:target-ref="DefaultEsupOtpIntegration" />
 

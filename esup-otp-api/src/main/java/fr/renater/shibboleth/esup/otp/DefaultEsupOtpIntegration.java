@@ -23,18 +23,18 @@ import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.security.auth.Subject;
 
-import net.shibboleth.shared.annotation.constraint.NonnullElements;
+import net.shibboleth.shared.annotation.constraint.*;
+import net.shibboleth.shared.collection.CollectionSupport;
 import org.slf4j.Logger;
 
-import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
-import net.shibboleth.shared.annotation.constraint.NotEmpty;
 import net.shibboleth.shared.component.AbstractInitializableComponent;
 import net.shibboleth.shared.logic.Constraint;
 import net.shibboleth.shared.primitive.LoggerFactory;
 import net.shibboleth.shared.primitive.StringSupport;
 
 import java.security.Principal;
-import java.util.Collection; 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -70,6 +70,9 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     /** The URL path to the health endpoint.*/
     @GuardedBy("this") @Nullable private String healthEndpoint;
 
+    /** The list of supported methods for otp.*/
+    @GuardedBy("this") @Nonnull @NonnullElements private Set<String> supportedMethods;
+
     @GuardedBy("this") @Nonnull private final Subject supportedPrincipals;
 
     /**
@@ -77,6 +80,7 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
      *
      */
     public DefaultEsupOtpIntegration() {
+        supportedMethods = new HashSet<String>();
         supportedPrincipals = new Subject();
     }
     
@@ -210,6 +214,25 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
             log.debug("Integration redirect_uri is being pinned to '{}'",computedRedirectURI);
             redirectURI = computedRedirectURI;
         }
+    }
+
+    /**
+     * Set the redirect_uri to use.
+     *
+     * @param methods the methods allowed
+     */
+    public synchronized void setSupportedMethods(@Nullable @NonnullElements final Collection<String> methods) {
+        checkSetterPreconditions();
+        supportedMethods.clear();
+        
+        if(methods != null && !methods.isEmpty()) {
+            supportedMethods = CollectionSupport.copyToSet(StringSupport.normalizeStringCollection(methods));
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Nonnull public synchronized Set<String> getSupportedMethods() {
+        return supportedMethods;
     }
 
     @Nonnull
