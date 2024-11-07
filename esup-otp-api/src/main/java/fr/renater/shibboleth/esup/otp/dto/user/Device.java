@@ -17,11 +17,16 @@
 
 package fr.renater.shibboleth.esup.otp.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.Data;
 
 /**
  * Device dto.
  */
+@Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Device {
 
     /** platform. */

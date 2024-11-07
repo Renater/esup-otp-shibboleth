@@ -17,21 +17,27 @@
 
 package fr.renater.shibboleth.esup.otp.dto.user;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.Data;
 
 /**
  *
  */
+@Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserMethods {
 
     private boolean codeRequired;
     
     private boolean waitingFor;
-    
+        
     private UserMethod totp;
     
     private UserMethod webauthn;
@@ -48,6 +54,20 @@ public class UserMethods {
     
     private UserMethod esupnfc;
     
+    @JsonIgnore
+    public Map<String, UserMethod> getAll() {
+        Map<String, UserMethod> userMethodByType = new HashMap<String, UserMethods.UserMethod>();
+        userMethodByType.put("totp", totp);
+        userMethodByType.put("webauthn", webauthn);
+        userMethodByType.put("random_code", randomCode);
+        userMethodByType.put("random_code_mail", randomCodeMail);
+        userMethodByType.put("bypass", bypass);
+        userMethodByType.put("push", push);
+        userMethodByType.put("esupnfc", esupnfc);
+        return userMethodByType;
+    }
+    
+    @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class UserMethod {
     

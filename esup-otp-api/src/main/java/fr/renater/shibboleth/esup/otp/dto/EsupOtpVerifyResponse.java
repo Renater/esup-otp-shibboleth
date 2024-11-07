@@ -17,28 +17,17 @@
 
 package fr.renater.shibboleth.esup.otp.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Data;
+
 /**
  * Esup otp verify dto response.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Data
 public class EsupOtpVerifyResponse extends EsupOtpResponse {
 
     /** Method response. */
     private String method;
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getMethod() {
-        return method;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void setMethod(final String currentMethod) {
-        this.method = currentMethod;
-    }
-    
-    
 
 }

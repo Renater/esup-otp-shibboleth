@@ -19,10 +19,15 @@ package fr.renater.shibboleth.esup.otp.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import fr.renater.shibboleth.esup.otp.config.EsupOtpMessageDeserializer;
+import lombok.Data;
+
 /**
  * Esup otp base response.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Data
 public class EsupOtpResponse {
 
     /**
@@ -33,37 +38,7 @@ public class EsupOtpResponse {
     /**
      * Message.
      */
-    private String message;
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getCode() {
-        return code;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void setCode(final String stringCode) {
-        this.code = stringCode;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getMessage() {
-        return message;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void setMessage(final String msg) {
-        this.message = msg;
-    }
-    
-    
-    
+    @JsonDeserialize(using = EsupOtpMessageDeserializer.class)
+    private Object message;
     
 }

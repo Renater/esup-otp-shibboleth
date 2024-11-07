@@ -17,20 +17,26 @@
 
 package fr.renater.shibboleth.esup.otp.dto.user;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
+import lombok.Data;
 
 /**
  * Esup otp user response.
  */
+@Data
 public class EsupOtpUserInfoResponse extends EsupOtpResponse {
 
     /** user description. */
     private User user;
-    
+
+    @Data
     public static class User {
         
         private UserMethods methods;
@@ -40,6 +46,7 @@ public class EsupOtpUserInfoResponse extends EsupOtpResponse {
         @JsonProperty("last_send_message")
         private LastSendMessage lastSendMessage;
         
+        @Data
         public static class Transports {
             
             private String mail;
@@ -47,13 +54,24 @@ public class EsupOtpUserInfoResponse extends EsupOtpResponse {
             private String sms;
             
             private String push;
+
+            @JsonIgnore
+            public Map<String, String> getAll() {
+                Map<String, String> transportByType = new HashMap<String, String>();
+                transportByType.put("mail", mail);
+                transportByType.put("sms", sms);
+                transportByType.put("push", push);
+                return transportByType;
+            }
+            
         }
         
+        @Data
         public static class LastSendMessage {
             
             private String method;
             
-            private LocalDateTime time;
+            private Instant time;
             
             private boolean auto;
         }
