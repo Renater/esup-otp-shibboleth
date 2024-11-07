@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import net.shibboleth.shared.primitive.LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
@@ -34,7 +36,9 @@ import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
  * Abstract esup otp client. 
  */
 public abstract class AbstractEsupOtpConnector {
-    
+
+    /** Class logger. */
+    @Nonnull private final Logger log = LoggerFactory.getLogger(AbstractEsupOtpConnector.class);
     
     /** Rest template. */
     private final EsupOtpRestTemplate restTemplate;
@@ -73,7 +77,7 @@ public abstract class AbstractEsupOtpConnector {
     }
     
     protected <T extends EsupOtpResponse> T post(@Nonnull final String uri, 
-            @Nonnull final Class<T> responseClass, @Nonnull final Object... uriVariables) 
+            @Nonnull final Class<T> responseClass, boolean throwException, @Nonnull final Object... uriVariables)
                     throws EsupOtpClientException {
         try {
             
@@ -83,7 +87,7 @@ public abstract class AbstractEsupOtpConnector {
             
             final ResponseEntity<T> response = restTemplate.exchange(request, responseClass);
             
-            if(!response.getStatusCode().is2xxSuccessful()) {
+            if(throwException && !response.getStatusCode().is2xxSuccessful()) {
                 throw new EsupOtpClientException(
                         "Exception occured on call : " + uri + 
                         " with uri variables : " + Arrays.asList(uriVariables).stream()

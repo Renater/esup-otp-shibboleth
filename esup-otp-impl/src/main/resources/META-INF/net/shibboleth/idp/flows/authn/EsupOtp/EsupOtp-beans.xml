@@ -80,6 +80,7 @@
     <bean id="DefaultEsupOtpIntegration" lazy-init="true"
           class="fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration"
           p:APIHost="%{idp.esup.otp.apiHost:http://localhost}"
+          p:usersSecret="%{idp.esup.otp.usersSecret:none}"
           p:apiPassword="%{idp.esup.otp.apiPassword:none}"
           p:registeredRedirectURI="%{idp.esup.otp.redirectURL:}"
           p:healthCheckEndpoint="%{idp.esup.otp.endpoint.health:/v1/health_check}" />

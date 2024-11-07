@@ -45,11 +45,10 @@ public interface EsupOtpClient {
      * @param uid The unique identifier of the user.
      * @param method The method used for sending the message.
      * @param transport The transport mechanism used for sending the message.
-     * @param hash A hash value for verification or security purposes.
      * @return EsupOtpResponse The response object containing the result of the message send operation.
      * @throws EsupOtpClientException If an error occurs while sending the message.
      */
-    EsupOtpResponse postSendMessage(String uid, String method, String transport, String hash) 
+    EsupOtpResponse postSendMessage(String uid, String method, String transport)
             throws EsupOtpClientException;
     
     
