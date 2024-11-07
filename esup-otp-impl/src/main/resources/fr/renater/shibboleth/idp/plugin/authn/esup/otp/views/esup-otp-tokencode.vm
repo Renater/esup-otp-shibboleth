@@ -1,0 +1,69 @@
+##
+## Velocity Template for DisplayTOTPView view-state
+##
+## Velocity context will contain the following properties
+## flowExecutionUrl - the form action location
+## flowRequestContext - the Spring Web Flow RequestContext
+## flowExecutionKey - the SWF execution key (this is built into the flowExecutionUrl)
+## profileRequestContext - root of context tree
+## authenticationContext - context with authentication request information
+## authenticationErrorContext - context with login error state
+## authenticationWarningContext - context with login warning state
+## rpUIContext - the context with SP UI information from the metadata
+## encoder - HTMLEncoder class
+## cspDigester - Calculates base64-encoded SHA-2 hashes (call apply)
+## cspNonce - Calculates secure nonces (call generateIdentifier)
+## request - HttpServletRequest
+## response - HttpServletResponse
+## environment - Spring Environment object for property resolution
+## custom - arbitrary object injected by deployer
+##
+#set ($esupOtpContext = $authenticationContext.getSubcontext('fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext'))
+#set ($rpContext = $profileRequestContext.getSubcontext('net.shibboleth.profile.context.RelyingPartyContext'))
+##
+#set ($onClick = "this.childNodes[0].nodeValue='#springMessageText('idp.login.pleasewait', 'Logging in, please wait...')'")
+$response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 'sha256-$cspDigester.apply($onClick)'")
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>#springMessageText("idp.title", "Web Login Service")</title>
+        #parse("head.vm")
+    </head>
+    <body>
+        <main class="main">
+            <section class="small-12 small-centered medium-8 large-7">
+                #parse("header.vm")
+
+                #parse("esup-otp-error.vm")
+
+                <form action="$flowExecutionUrl" method="post">
+                    #parse("csrf/csrf.vm")
+
+                    #parse("info.vm")
+
+                    <fieldset class="small-10 medium-10 large-7 small-centered margin-top">
+                        
+                        <label for="tokencode"><i class="fa fa-lg fa-lock"></i> #springMessageText("idp.totp.field", "Token Code")</label>
+                        <input class="form-element form-field" id="tokencode" name="tokencode" type="text" value="" />
+
+                        <button class="button float-right" type="submit" name="_eventId_proceed"
+                            onClick="$onClick"
+                            >#springMessageText("idp.login.login", "Login")</button>
+                    </fieldset>
+                    
+                    <article class="small-10 medium-10 large-7 small-centered text-center">
+                        <p class="callout primary">
+                            #springMessageText("idp.esup.otp.updatechoices", "Update choices.")
+                            <br/><br/>
+                            #springMessageText("idp.esup.otp.manager", "Go to application") : <a href="#springMessageText("idp.esup.otp.manager.link", "https://otpmanager-test.fr/preferences")" target="_blank">#springMessageText("idp.esup.otp.manager.here", "here")</a> 
+                        </p>
+                    </article>
+                </form>
+
+                #parse("help.vm")
+
+            </section>
+        </main>
+        #parse("footer.vm")
+     </body>
+</html>
