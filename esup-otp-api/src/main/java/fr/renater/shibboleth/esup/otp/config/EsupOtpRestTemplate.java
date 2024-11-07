@@ -21,8 +21,13 @@ import javax.annotation.Nonnull;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 
@@ -43,6 +48,7 @@ public class EsupOtpRestTemplate extends RestTemplate {
         this.setUriTemplateHandler(new DefaultUriBuilderFactory(esupOtpIntegration.getAPIHost()));
         this.setRequestFactory(getClientHttpRequestFactory());
         this.getInterceptors().add(new EsupOtpHttpClientInterceptor(esupOtpIntegration.getApiPassword()));
+        this.getMessageConverters().add(0, createMappingJacksonHttpMessageConverter());
     }
     
     private @Nonnull ClientHttpRequestFactory getClientHttpRequestFactory() {
@@ -52,5 +58,21 @@ public class EsupOtpRestTemplate extends RestTemplate {
         clientHttpRequestFactory.setConnectTimeout(timeout);
         return clientHttpRequestFactory;
     }
+    
+    private MappingJackson2HttpMessageConverter createMappingJacksonHttpMessageConverter() {
+
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setObjectMapper(createObjectMapper());
+        return converter;
+    }
+    
+    private ObjectMapper createObjectMapper() {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        return objectMapper;
+   }
 
 }
