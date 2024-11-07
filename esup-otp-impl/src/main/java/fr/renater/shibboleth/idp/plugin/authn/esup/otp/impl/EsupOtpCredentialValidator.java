@@ -25,13 +25,11 @@ import javax.annotation.Nullable;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
 
-import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
-import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
-import net.shibboleth.shared.logic.FunctionSupport;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 
+import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
 import net.shibboleth.idp.authn.AbstractCredentialValidator;
@@ -40,8 +38,10 @@ import net.shibboleth.idp.authn.CredentialValidator;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.authn.context.SubjectCanonicalizationContext;
 import net.shibboleth.idp.authn.principal.TOTPPrincipal;
+import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
 import net.shibboleth.shared.component.ComponentInitializationException;
 import net.shibboleth.shared.logic.Constraint;
+import net.shibboleth.shared.logic.FunctionSupport;
 import net.shibboleth.shared.primitive.LoggerFactory;
 
 /**
@@ -158,14 +158,6 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
         }
         
         final EsupOtpClient client = clientRegistry.getClientOrCreate(esupOtpIntegration);
-        if(client == null) {
-            log.info("{} No EsupOtpClient available", getLogPrefix());
-            if (errorHandler != null) {
-                errorHandler.handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS,
-                        AuthnEventIds.NO_CREDENTIALS);
-            }
-            throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
-        }
         
         final String username = esupOtpContext.getUsername();
         if(username == null) {

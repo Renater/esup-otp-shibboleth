@@ -17,25 +17,27 @@
 
 package fr.renater.shibboleth.esup.otp;
 
+import java.security.Principal;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.security.auth.Subject;
 
-import net.shibboleth.shared.annotation.constraint.*;
-import net.shibboleth.shared.collection.CollectionSupport;
 import org.slf4j.Logger;
 
+import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
+import net.shibboleth.shared.annotation.constraint.NonnullElements;
+import net.shibboleth.shared.annotation.constraint.NotEmpty;
+import net.shibboleth.shared.collection.CollectionSupport;
 import net.shibboleth.shared.component.AbstractInitializableComponent;
 import net.shibboleth.shared.logic.Constraint;
 import net.shibboleth.shared.primitive.LoggerFactory;
 import net.shibboleth.shared.primitive.StringSupport;
-
-import java.security.Principal;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Wrapper for use of esup otp api.
@@ -73,6 +75,7 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     /** The list of supported methods for otp.*/
     @GuardedBy("this") @Nonnull @NonnullElements private Set<String> supportedMethods;
 
+    /** The supported principal subject. */
     @GuardedBy("this") @Nonnull private final Subject supportedPrincipals;
 
     /**

@@ -77,7 +77,7 @@ public abstract class AbstractEsupOtpConnector {
     }
     
     protected <T extends EsupOtpResponse> T post(@Nonnull final String uri, 
-            @Nonnull final Class<T> responseClass, boolean throwException, @Nonnull final Object... uriVariables)
+            @Nonnull final Class<T> responseClass, final boolean throwException, @Nonnull final Object... uriVariables)
                     throws EsupOtpClientException {
         try {
             
@@ -90,8 +90,8 @@ public abstract class AbstractEsupOtpConnector {
             if(throwException && !response.getStatusCode().is2xxSuccessful()) {
                 throw new EsupOtpClientException(
                         "Exception occured on call : " + uri + 
-                        " with uri variables : " + Arrays.asList(uriVariables).stream()
-                        .collect(Collectors.mapping(Object::toString, Collectors.joining(","))));
+                        " with uri variables : " + Arrays.stream(uriVariables)
+                                .map(Object::toString).collect(Collectors.joining(",")));
             }
             
             return response.getBody();

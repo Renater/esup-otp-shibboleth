@@ -17,11 +17,13 @@
 
 package fr.renater.shibboleth.esup.otp;
 
-import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
-import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.webflow.execution.Event;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpClientRegistry;
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionAction;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionTokenAction;
 import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
@@ -29,17 +31,6 @@ import net.shibboleth.idp.profile.testing.ActionTestingSupport;
 import net.shibboleth.shared.component.ComponentInitializationException;
 import net.shibboleth.shared.logic.FunctionSupport;
 import net.shibboleth.shared.testing.ConstantSupplier;
-import org.mockito.Mockito;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.webflow.execution.Event;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.mockito.ArgumentMatchers.any;
 
 /**
  *
