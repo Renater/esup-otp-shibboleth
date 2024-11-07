@@ -19,9 +19,10 @@ package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
-import fr.renater.shibboleth.esup.otp.client.impl.EsupOtpClientImpl;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpUsersResponse;
 import fr.renater.shibboleth.esup.otp.dto.user.EsupOtpUserInfoResponse;
@@ -30,10 +31,8 @@ import net.shibboleth.shared.annotation.constraint.NotEmpty;
 import net.shibboleth.shared.primitive.LoggerFactory;
 import org.slf4j.Logger;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.jasminb.jsonapi.retrofit.JSONAPIConverterFactory;
-
-import java.io.PrintStream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -50,6 +49,9 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
 
     public EsupOtpAuthenticatorCLI() {
         ObjectMapper objMapper = new ObjectMapper();
+        objMapper.registerModule(new JavaTimeModule());
+        objMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        
         objMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objMapper.enable(SerializationFeature.INDENT_OUTPUT);
         this.objectMapper = objMapper;
@@ -126,7 +128,7 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
                 final String transport = args.getTransport() != null ? args.getTransport() : "sms";
                 
                 // Create a new token.
-                final EsupOtpResponse tc = client.postSendMessage(username, method, transport, "");
+                final EsupOtpResponse tc = client.postSendMessage(username, method, transport);
                 System.out.println("Send message code: " + tc.getCode());
                 System.out.println("Send message message: " + tc.getMessage());
             }

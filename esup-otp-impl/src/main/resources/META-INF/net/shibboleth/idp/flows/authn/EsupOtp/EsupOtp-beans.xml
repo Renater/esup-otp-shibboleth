@@ -32,12 +32,22 @@
     <bean id="DefaultUsernameLookupStrategy"
         class="net.shibboleth.idp.session.context.navigate.CanonicalUsernameLookupStrategy" />
 
+    <bean id="EsupOtpClientRegistry" scope="singleton"
+          class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpClientRegistry" />
+
+    <bean id="EsupOtpGetUserInfo"
+          class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpGetUserInfo" scope="prototype"
+          p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
+          p:usernameLookupStrategy-ref="DefaultUsernameLookupStrategy"
+          p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy"
+          p:clientRegistry-ref="EsupOtpClientRegistry" />
+
     <bean id="EsupOtpExtraction"
           class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionAction" scope="prototype"
           p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
           p:usernameLookupStrategy-ref="DefaultUsernameLookupStrategy"
           p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy"
-          p:fieldName="#{'%{idp.authn.TOTP.fieldName:tokencode}'.trim()}" />
+          p:clientRegistry-ref="EsupOtpClientRegistry" />
 
             
     <bean id="ValidateEsupOtpCredentials"
@@ -50,7 +60,10 @@
     
     <!-- These are singletons acting as default "back-ends". -->
 
-    <bean id="EsupOtpValidator" class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpCredentialValidator" lazy-init="true" />
+    <bean id="EsupOtpValidator"
+          class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpCredentialValidator" lazy-init="true"
+          p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy"
+          p:clientRegistry-ref="EsupOtpClientRegistry" />
 
     <!-- Used in views to calculate CSP hashes and nonces, remove and adjust beans in flow when compatibility bumped past 5.0 -->
     

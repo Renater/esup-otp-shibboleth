@@ -92,7 +92,7 @@ public class EsupOtpClientRegistry extends AbstractIdentifiableInitializableComp
 //            try {
                 assert integration != null;
                 log.debug("Creating a new Esup otp client for integration '{}'",integration);
-                return new EsupOtpClientImpl(new EsupOtpRestTemplate(integration));
+                return new EsupOtpClientImpl(integration);
 //            } catch (final DuoClientException e) {
 //                //wrap the exception in a runtime exception.
 //                throw new EsupOtpClientInitializationException("Could not initialise "

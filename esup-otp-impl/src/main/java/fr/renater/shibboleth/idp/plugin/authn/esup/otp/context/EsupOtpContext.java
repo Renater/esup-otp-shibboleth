@@ -24,44 +24,30 @@ import org.opensaml.messaging.context.BaseContext;
 
 import com.google.common.base.Strings;
 
-import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
 import net.shibboleth.shared.annotation.constraint.NotEmpty;
+
+import java.util.*;
 
 /**
  * Context class for state of a Esup otp validation.
  */
 public class EsupOtpContext extends BaseContext {
     
-    /** The Duo OIDC client to use for the lifetime of this authentication request.*/
-    @Nullable private EsupOtpClient client;
-    
     /** The subject identifier with respect to the token "back-end". */
     @Nullable @NotEmpty private String username;
 
+    /** The choices configured by user". */
+    @Nullable private Set<String> enabledChoices;
+
+    /** The transports configured by user". */
+    @Nullable private Map<String, String> configuredTransports;
+
+    /** The token code supplied. */
+    @Nullable private String transportChoose;
+
     /** The token code supplied. */
     @Nullable private Integer tokenCode;
-    
-    /**
-     * Get the client used to communicate with the Duo OIDC API.
-     * 
-     * @return the duo client.
-     */
-    @Nullable public EsupOtpClient getClient() {
-        return client;
-    }
-    
-    /**
-     * Set the client used to communicate with the Duo OIDC API.
-     * 
-     * @param duoClient the duo client.
-     * 
-     * @return this context.
-     */
-    @Nonnull public EsupOtpContext setClient(@Nullable final EsupOtpClient duoClient) {
-        client = duoClient;
-        return this;
-    }
-    
+
     /**
      * Get the username.
      *
@@ -85,6 +71,80 @@ public class EsupOtpContext extends BaseContext {
             username = name;
         }
         
+        return this;
+    }
+
+    /**
+     * Get the enabledChoices.
+     *
+     * @return the enabledChoices
+     */
+    public @Nullable List<String> getEnabledChoices() {
+        return enabledChoices != null ? enabledChoices.stream().toList() : new ArrayList<String>();
+    }
+
+    /**
+     * Set the enabledChoices.
+     *
+     * @param choices the possible choices for user
+     *
+     * @return this context
+     */
+    @Nonnull public EsupOtpContext setEnabledChoices(@Nullable final Set<String> choices) {
+        if(choices == null) {
+            enabledChoices = new HashSet<>();
+        } else {
+            enabledChoices = choices;
+        }
+
+        return this;
+    }
+
+    /**
+     * Get the configured transports.
+     *
+     * @return the configuredTransports
+     */
+    @Nullable public Map<String, String> getConfiguredTransports() {
+        return configuredTransports;
+    }
+
+    /**
+     * Set the configuredTransports.
+     *
+     * @param transportsByType the possible transports for user
+     *
+     * @return this context
+     */
+    @Nonnull public EsupOtpContext setConfiguredTransports(@Nullable final Map<String, String> transportsByType) {
+        if(transportsByType == null) {
+            configuredTransports = new HashMap<>();
+        } else {
+            configuredTransports = transportsByType;
+        }
+
+        return this;
+    }
+
+    /**
+     * Get the transport choose.
+     *
+     * @return the transport choose (method.transport)
+     */
+    @Nullable public String getTransportChoose() {
+        return transportChoose;
+    }
+
+    /**
+     * Set the transport choose.
+     *
+     * @param methodAndTransport the transport choose (method.transport)
+     *
+     * @return this context
+     */
+    @Nonnull public EsupOtpContext setTransportChoose(@Nullable final String methodAndTransport) {
+        transportChoose = methodAndTransport;
+
         return this;
     }
 

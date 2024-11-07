@@ -25,6 +25,9 @@ import javax.annotation.Nullable;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
 
+import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
+import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
+import net.shibboleth.shared.logic.FunctionSupport;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
@@ -49,15 +52,35 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
     /** Class logger. */
     @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpCredentialValidator.class);
 
-    /** Lookup strategy for TOTP context. */
+    /** Lookup strategy for EsupOtp context. */
     @Nonnull private Function<AuthenticationContext, EsupOtpContext> esupOtpContextLookupStrategy;
+
+    /** Lookup strategy for esup otp integration. */
+    @Nonnull private Function<ProfileRequestContext, DefaultEsupOtpIntegration> esupOtpIntegrationLookupStrategy;
             
     /** A regular expression to apply for acceptance testing. */
     @Nullable private Pattern matchExpression;
+
+    /** The registry for locating the EsupOtpClient for the established integration.*/
+    @NonnullAfterInit
+    private EsupOtpClientRegistry clientRegistry;
     
     /** Constructor. */
     public EsupOtpCredentialValidator() {
         esupOtpContextLookupStrategy = new ChildContextLookup<>(EsupOtpContext.class);
+
+        esupOtpIntegrationLookupStrategy = FunctionSupport.constant(null);
+    }
+
+    /**
+     * Set the EsupOtp client registry.
+     *
+     * @param esupOtpClientRegistry the registry
+     */
+    public void setClientRegistry(@Nonnull final EsupOtpClientRegistry esupOtpClientRegistry) {
+        checkSetterPreconditions();
+
+        clientRegistry = Constraint.isNotNull(esupOtpClientRegistry,"EsupOtpClient registry can not be null");
     }
         
     /**
@@ -70,6 +93,19 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
         checkSetterPreconditions();
         
         esupOtpContextLookupStrategy = Constraint.isNotNull(strategy, "EsupOtpContext lookup strategy cannot be null");
+    }
+
+    /**
+     * Set the lookup strategy to locate/create the {@link EsupOtpContext}.
+     *
+     * @param strategy lookup/creation strategy
+     */
+    public void setEsupOtpIntegrationLookupStrategy(
+            @Nonnull final Function<ProfileRequestContext, DefaultEsupOtpIntegration> strategy) {
+        checkSetterPreconditions();
+
+        esupOtpIntegrationLookupStrategy = Constraint.isNotNull(strategy,
+                "EsupOtpIntegration creation strategy cannot be null");
     }
     
     /**
@@ -87,6 +123,10 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
     @Override
     protected void doInitialize() throws ComponentInitializationException {
         super.doInitialize();
+
+        if (clientRegistry ==  null) {
+            throw new ComponentInitializationException("EsupOtp Client Registry cannot be null");
+        }
     }
 
 // Checkstyle: CyclomaticComplexity OFF
@@ -106,8 +146,18 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
             }
             throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
         }
+
+        final DefaultEsupOtpIntegration esupOtpIntegration = esupOtpIntegrationLookupStrategy.apply(profileRequestContext);
+        if (esupOtpIntegration == null) {
+            log.warn("{} No EsupOtpIntegration returned by lookup strategy", getLogPrefix());
+            if (errorHandler != null) {
+                errorHandler.handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS,
+                        AuthnEventIds.NO_CREDENTIALS);
+            }
+            throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
+        }
         
-        final EsupOtpClient client = esupOtpContext.getClient();
+        final EsupOtpClient client = clientRegistry.getClientOrCreate(esupOtpIntegration);
         if(client == null) {
             log.info("{} No EsupOtpClient available", getLogPrefix());
             if (errorHandler != null) {
