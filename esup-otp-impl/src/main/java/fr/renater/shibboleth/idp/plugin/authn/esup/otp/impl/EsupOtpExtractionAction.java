@@ -17,6 +17,7 @@
 
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
+import java.util.Map;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
@@ -24,11 +25,14 @@ import javax.annotation.Nullable;
 
 import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
+import fr.renater.shibboleth.esup.otp.client.EsupOtpClientException;
 import net.shibboleth.idp.authn.AbstractAuthenticationAction;
 import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.authn.context.AuthenticationErrorContext;
 import net.shibboleth.idp.session.context.navigate.CanonicalUsernameLookupStrategy;
+import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
+import net.shibboleth.shared.component.ComponentInitializationException;
 import net.shibboleth.shared.logic.Constraint;
 import net.shibboleth.shared.logic.FunctionSupport;
 import net.shibboleth.shared.primitive.LoggerFactory;
@@ -43,8 +47,7 @@ import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
-/**
- * An action that derives a username from a lookup strategy, a TOTP code from an arbitrary source,
+ * An action that derives a username from a lookup strategy, get otp code from form or header,
  * creates a {@link EsupOtpContext}, and attaches it to the {@link AuthenticationContext}.
  * 
  * @event {@link org.opensaml.profile.action.EventIds#PROCEED_EVENT_ID}
@@ -52,12 +55,14 @@ import jakarta.servlet.http.HttpServletRequest;
  * @event {@link AuthnEventIds#UNKNOWN_USERNAME}
  * @event {@link AuthnEventIds#INVALID_CREDENTIALS}
  * @pre <pre>ProfileRequestContext.getSubcontext(AuthenticationContext.class) != null</pre>
- * @post <pre>AuthenticationContext.getSubcontext(TOTPContext.class) != null</pre>
+ * @post <pre>AuthenticationContext.getSubcontext(EsupOtpContext.class) != null</pre>
  */
 public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
 
     /** Class logger. */
     @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpExtractionAction.class);
+
+    private static final String CLIENT_EXCEPTION = "ClientException";
     
     /** Lookup strategy for username to use in resolving token seeds. */
     @Nonnull private Function<ProfileRequestContext, String> usernameLookupStrategy;
@@ -67,6 +72,10 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
 
     /** Lookup strategy for esup otp integration. */
     @Nonnull private Function<ProfileRequestContext, DefaultEsupOtpIntegration> esupOtpIntegrationLookupStrategy;
+
+    /** The registry for locating the EsupOtpClient for the established integration.*/
+    @NonnullAfterInit
+    private EsupOtpClientRegistry clientRegistry;
     
     /** Constructor. */
     public EsupOtpExtractionAction() {
@@ -74,6 +83,17 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
         esupOtpContextCreationStrategy = new ChildContextLookup<>(EsupOtpContext.class, true);
 
         esupOtpIntegrationLookupStrategy = FunctionSupport.constant(null);
+    }
+
+    /**
+     * Set the EsupOtp client registry.
+     *
+     * @param esupOtpClientRegistry the registry
+     */
+    public void setClientRegistry(@Nonnull final EsupOtpClientRegistry esupOtpClientRegistry) {
+        checkSetterPreconditions();
+
+        clientRegistry = Constraint.isNotNull(esupOtpClientRegistry,"EsupOtpClient registry can not be null");
     }
 
     /**
@@ -112,6 +132,15 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
         esupOtpIntegrationLookupStrategy = Constraint.isNotNull(strategy, 
                 "EsupOtpIntegration creation strategy cannot be null");
     }
+
+    /** {@inheritDoc} */
+    @Override protected void doInitialize() throws ComponentInitializationException {
+        super.doInitialize();
+
+        if (clientRegistry ==  null) {
+            throw new ComponentInitializationException("EsupOtp Client Registry cannot be null");
+        }
+    }
     
     /** {@inheritDoc} */
     @Override
@@ -135,8 +164,7 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
             return;
         }
 
-        final EsupOtpClient client = new EsupOtpClientRegistry().getClientOrCreate(esupOtpIntegration);
-        esupOtpContext.setClient(client);
+        final EsupOtpClient client = clientRegistry.getClientOrCreate(esupOtpIntegration);
         
         esupOtpContext.setTokenCode(null);
         
@@ -158,38 +186,49 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
             return;
         }
         
-        final String code = extractCode(request);
-        if (code == null) {
+        final String transport = extractTransport(request);
+        if (transport == null) {
+            ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
+            return;
+        }
+        log.info("Transport choose : {}", transport);
+        esupOtpContext.setTransportChoose(transport);
+        
+        Map<String, String> configuredTransports = esupOtpContext.getConfiguredTransports();
+        if(configuredTransports == null || configuredTransports.isEmpty()) {
+            log.debug("{} Profile action does not contain configured transports", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
             return;
         }
         
+        String transportTo = configuredTransports.get(transport);
+
         try {
-            esupOtpContext.setTokenCode(Integer.valueOf(code));
-        } catch (final NumberFormatException e) {
-            log.warn("{} Exception converting code string to an integer", getLogPrefix(), e);
+            if("push".equals(transport)) {
+                client.postSendMessage(esupOtpContext.getUsername(), transport, transport);
+            } else {
+                String[] method_transport = transport.split("\\.");
+                client.postSendMessage(esupOtpContext.getUsername(), method_transport[0], method_transport[1]);
+            }
+
+        } catch (EsupOtpClientException e) {
+            log.info("{} Send message with option '{}' to '{}' failed", getLogPrefix(), transport, esupOtpContext.getUsername(), e);
             authenticationContext.ensureSubcontext(AuthenticationErrorContext.class).getClassifiedErrors().add(
-                    AuthnEventIds.INVALID_CREDENTIALS);
-            ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.INVALID_CREDENTIALS);
+                    CLIENT_EXCEPTION);
+            ActionSupport.buildEvent(profileRequestContext, CLIENT_EXCEPTION);
         }
     }
 
     /**
-     * Gets the token code from the HTTP request.
-     * First get from form request (input "tokencode"),
-     * Second get from header ("X-Shibboleth-ESUPOTP")
+     * Gets the transport choose from the HTTP request.
+     * First get from form request (input "transportchoose"),
      * 
      * @param httpRequest current HTTP request
      * 
      * @return the token code, or null
      */
-    @Nullable protected String extractCode(@Nonnull final HttpServletRequest httpRequest) {
-        String code = httpRequest.getParameter("tokencode");
-        if(code == null) {
-            code = httpRequest.getHeader("X-Shibboleth-ESUPOTP");
-        }
-        
-        return code;
+    @Nullable protected String extractTransport(@Nonnull final HttpServletRequest httpRequest) {
+        return httpRequest.getParameter("transportchoose");
     }
     
 }
