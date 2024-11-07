@@ -14,6 +14,7 @@
 
 package fr.renater.shibboleth.esup.otp;
 
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
 import jakarta.servlet.http.HttpServletRequest;
 import net.shibboleth.idp.authn.AbstractAuthenticationAction;
 import net.shibboleth.idp.authn.AuthenticationFlowDescriptor;
@@ -36,12 +37,15 @@ public class BaseAuthenticationContextTest extends OpenSAMLInitBaseTestCase {
 
     protected RequestContext src;
     protected ProfileRequestContext prc;
+    protected AuthenticationContext ac;
+    protected EsupOtpContext eoc;
     protected List<AuthenticationFlowDescriptor> authenticationFlows;
 
     protected void initializeMembers() throws ComponentInitializationException {        
         src = new RequestContextBuilder().buildRequestContext();
         prc = new WebflowRequestContextProfileRequestContextLookup().apply(src);
-        prc.addSubcontext(new AuthenticationContext(), true);
+        ac = new AuthenticationContext();
+        prc.addSubcontext(ac, true);
 
         authenticationFlows = List.of(new AuthenticationFlowDescriptor(),
                 new AuthenticationFlowDescriptor(), new AuthenticationFlowDescriptor());
@@ -68,6 +72,12 @@ public class BaseAuthenticationContextTest extends OpenSAMLInitBaseTestCase {
         final HttpServletRequest req = action.getHttpServletRequest();
         assert req != null;
         return (MockHttpServletRequest)req;
+    }
+
+    protected void addEsupOtpContext() {
+        eoc = new EsupOtpContext();
+        eoc.setUsername("jdoe");
+        ac.addSubcontext(eoc, true);
     }
 
 }

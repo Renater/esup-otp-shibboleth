@@ -4,9 +4,16 @@
 
 	<!-- This is a login flow for Esup otp authentication -->
 
-    <!-- First send otp message. -->
+	<!-- First get options for user. -->
+	<action-state id="GetUserInfoOptions">
+		<evaluate expression="EsupOtpGetUserInfo" />
+		<evaluate expression="'proceed'" />
 
-    <!-- First check for HTTP header. -->
+		<transition on="proceed" to="DisplayEsupOtpView" />
+		<transition on="ClientException" to="ReselectFlow" />
+		<transition on="UnknownUsername" to="ReselectFlow" />
+		<transition on="NoCredentials" to="ReselectFlow" />
+	</action-state>
 
 	<view-state id="DisplayEsupOtpView" view="esup-otp">
 		<on-render>
@@ -24,8 +31,9 @@
 			<evaluate
 				expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null"
 				result="viewScope.custom" />
+			<!--<evaluate expression="authenticationContext.ensureSubcontext(T(fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext))" result="viewScope.esupOtpContext" />-->
 		</on-render>
-		<transition on="proceed" to="ExtractTOTPFromFormRequest" />
+		<transition on="proceed" to="EsupOtpExtraction" />
 	</view-state>
 
     <!-- Then check for propagation via password (or other) form. -->
@@ -33,12 +41,42 @@
         <evaluate expression="EsupOtpExtraction" />
         <evaluate expression="'proceed'" />
 
-        <transition on="proceed" to="ValidateEsupOtpCredentials" />
+        <transition on="proceed" to="DisplayEsupOtpTokenCodeView" />
         <transition on="UnknownUsername" to="ReselectFlow" />
         <transition on="InvalidCredentials" to="DisplayEsupOtpView" />
         <transition on="NoCredentials" to="DisplayEsupOtpView" />
     </action-state>
 
+	<view-state id="DisplayEsupOtpTokenCodeView" view="esup-otp-tokencode">
+		<on-render>
+			<evaluate expression="environment" result="viewScope.environment" />
+			<evaluate expression="opensamlProfileRequestContext" result="viewScope.profileRequestContext" />
+			<evaluate expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.authn.context.AuthenticationContext))" result="viewScope.authenticationContext" />
+			<evaluate expression="authenticationContext.getSubcontext(T(net.shibboleth.idp.ui.context.RelyingPartyUIContext))" result="viewScope.rpUIContext" />
+			<evaluate expression="authenticationContext.getSubcontext(T(net.shibboleth.idp.authn.context.AuthenticationErrorContext))" result="viewScope.authenticationErrorContext" />
+			<evaluate expression="authenticationContext.getSubcontext(T(net.shibboleth.idp.authn.context.AuthenticationWarningContext))" result="viewScope.authenticationWarningContext" />
+			<evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().getBean('TOTPCSPDigester')" result="viewScope.cspDigester" />
+			<evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().getBean('TOTPCSPNonce')" result="viewScope.cspNonce" />
+			<evaluate expression="T(net.shibboleth.shared.codec.HTMLEncoder)" result="viewScope.encoder" />
+			<evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="viewScope.request" />
+			<evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="viewScope.response" />
+			<evaluate
+					expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null"
+					result="viewScope.custom" />
+			<!--<evaluate expression="authenticationContext.ensureSubcontext(T(fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext))" result="viewScope.esupOtpContext" />-->
+		</on-render>
+		<transition on="proceed" to="EsupOtpExtractionToken" />
+	</view-state>
+
+	<action-state id="EsupOtpExtractionToken">
+		<evaluate expression="EsupOtpExtractionToken" />
+		<evaluate expression="'proceed'" />
+
+		<transition on="proceed" to="ValidateEsupOtpCredentials" />
+		<transition on="UnknownUsername" to="ReselectFlow" />
+		<transition on="InvalidCredentials" to="DisplayEsupOtpView" />
+		<transition on="NoCredentials" to="DisplayEsupOtpView" />
+	</action-state>
 
 	<action-state id="ValidateEsupOtpCredentials">
 		<evaluate expression="ValidateEsupOtpCredentials" />
