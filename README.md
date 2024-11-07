@@ -111,3 +111,7 @@ You need to copy jar files into docBase directory to plugin work well:
 ```
 [username@server ~]$ $idp_install_path/bin/esupotpauth.sh --home /usr/share/shibboleth-idp --verbose --command all
 ```
+
+### Development
+
+Java 17, Spring framework 6, Lombok

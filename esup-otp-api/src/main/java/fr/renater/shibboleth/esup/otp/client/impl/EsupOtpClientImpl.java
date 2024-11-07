@@ -19,6 +19,7 @@ package fr.renater.shibboleth.esup.otp.client.impl;
 
 import javax.annotation.Nonnull;
 
+import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import org.slf4j.Logger;
 
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClientException;
@@ -31,6 +32,12 @@ import fr.renater.shibboleth.esup.otp.dto.EsupOtpVerifyResponse;
 import fr.renater.shibboleth.esup.otp.dto.user.EsupOtpUserInfoResponse;
 import net.shibboleth.shared.primitive.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Calendar;
+import java.util.TimeZone;
+
 /**
  * Esup otp api connector implementation.
  */
@@ -38,27 +45,42 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
 
     /** Class logger. */
     @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpClientImpl.class);
+
+    private final DefaultEsupOtpIntegration esupOtpIntegration;
     
     /**
      * Constructor.
      *
-     * @param esupOtpRestTemplate
+     * @param esupOtpIntegration
      */
-    public EsupOtpClientImpl(final EsupOtpRestTemplate esupOtpRestTemplate) {
-        super(esupOtpRestTemplate);
+    public EsupOtpClientImpl(final DefaultEsupOtpIntegration esupOtpIntegration) {
+        super(new EsupOtpRestTemplate(esupOtpIntegration));
+
+        this.esupOtpIntegration = esupOtpIntegration;
     }
    
     
     /** {@inheritDoc} */
     public EsupOtpUserInfoResponse getOtpUserInfos(final String uid) throws EsupOtpClientException {
-        return get(EsupOtpUriConstants.Public.GET_USER_INFOS, EsupOtpUserInfoResponse.class, uid);
+        try {
+            String hash = getUserHash(uid);
+            return get(EsupOtpUriConstants.Public.GET_USER_INFOS, EsupOtpUserInfoResponse.class, uid, hash);
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            throw new EsupOtpClientException("Get user hash failed", e);
+        }
+
     }
 
     /** {@inheritDoc} */
-    public EsupOtpResponse postSendMessage(final String uid, final String method, 
-            final String transport, final String hash) throws EsupOtpClientException {
-        return post(EsupOtpUriConstants.Public.POST_MESSAGE, EsupOtpUserInfoResponse.class, 
-                uid, method, transport, hash);
+    public EsupOtpResponse postSendMessage(final String uid, final String method,
+                                                  final String transport) throws EsupOtpClientException {
+        try {
+            String hash = getUserHash(uid);
+            return post(EsupOtpUriConstants.Public.POST_MESSAGE, EsupOtpResponse.class,
+                    true, uid, method, transport, hash);
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            throw new EsupOtpClientException("Get user hash failed", e);
+        }
     }
 
     /** {@inheritDoc} */
@@ -85,7 +107,7 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     public EsupOtpResponse postConfirmActivate(final String uid, final String method, final String activationCode)
             throws EsupOtpClientException {
         return post(EsupOtpUriConstants.Protected.POST_CONFIRM_ACTIVATE, EsupOtpResponse.class, 
-                uid, method, activationCode);
+                true, uid, method, activationCode);
     }
 
     /** {@inheritDoc} */
@@ -103,18 +125,18 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
 
     /** {@inheritDoc} */
     public EsupOtpResponse postSecret(final String uid, final String method) throws EsupOtpClientException {
-        return post(EsupOtpUriConstants.Protected.POST_SECRET, EsupOtpResponse.class, uid, method);
+        return post(EsupOtpUriConstants.Protected.POST_SECRET, EsupOtpResponse.class, true, uid, method);
     }
 
     /** {@inheritDoc} */
     public boolean postVerify(final String uid, final String otp) throws EsupOtpClientException {
-        final EsupOtpVerifyResponse response = post(EsupOtpUriConstants.Protected.POST_VERIFY, EsupOtpVerifyResponse.class, 
-                uid, otp);
-        final boolean result = response != null ? response.getCode().equals("Ok") : false;
-        if(!result) {
+        final EsupOtpVerifyResponse response = post(EsupOtpUriConstants.Protected.POST_VERIFY, 
+                EsupOtpVerifyResponse.class, false, uid, otp);
+        final boolean valid = response != null && response.getCode().equals("Ok");
+        if(!valid) {
             log.info("Invalid token entered");
         }
-        return result;
+        return valid;
     }
 
     /** {@inheritDoc} */
@@ -161,6 +183,33 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     /** {@inheritDoc} */
     public EsupOtpResponse deleteMethodSecret(final String uid, final String method) throws EsupOtpClientException {
         return delete(EsupOtpUriConstants.Admin.DELETE_SECRET, EsupOtpResponse.class, uid, method);
+    }
+
+    public String getUserHash(String uid) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest md5Md = MessageDigest.getInstance("MD5");
+        String md5 = bytesToHex(md5Md.digest(esupOtpIntegration.getUsersSecret().getBytes())).toLowerCase();
+        String salt = md5 + getSalt(uid);
+        MessageDigest sha256Md = MessageDigest.getInstance("SHA-256");
+        String userHash = bytesToHex(sha256Md.digest(salt.getBytes())).toLowerCase();
+        return userHash;
+    }
+
+    private String bytesToHex(byte[] bytes) {
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : bytes) {
+            String hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1) hexString.append('0');
+            hexString.append(hex);
+        }
+        return hexString.toString();
+    }
+
+    public String getSalt(String uid) {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        String salt = uid + day + hour;
+        return salt;
     }
 
 }

@@ -54,9 +54,12 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     
     /** Secret key. */ 
     @GuardedBy("this") @Nullable private String secretKey;
+
+    /** Users secret .*/
+    @GuardedBy("this") @NonnullAfterInit @NotEmpty private String usersSecret;
     
-    /** Api password .*/
-    @GuardedBy("this") @Nullable private String apiPassword;
+    /** password .*/
+    @GuardedBy("this") @NonnullAfterInit @NotEmpty private String apiPassword;
     
     /** The used (by clients) redirect_uri to send the client after authorisation .*/
     @GuardedBy("this") @Nullable private String redirectURI;
@@ -126,6 +129,21 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
         checkComponentActive();
         assert secretKey != null;
         return secretKey;
+    }
+
+    /**
+     * Set the users secret to use.
+     *
+     * @param usrSecret secret key
+     */
+    public synchronized void setUsersSecret(@Nonnull @NotEmpty final String usrSecret) {
+        checkSetterPreconditions();
+        usersSecret = StringSupport.trimOrNull(usrSecret);
+    }
+
+    /** {@inheritDoc} */
+    @Nonnull @NotEmpty public synchronized String getUsersSecret() {
+        return usersSecret;
     }
     
     /**
