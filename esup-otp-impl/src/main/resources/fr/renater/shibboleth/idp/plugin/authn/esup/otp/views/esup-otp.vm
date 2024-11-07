@@ -18,15 +18,32 @@
 ## environment - Spring Environment object for property resolution
 ## custom - arbitrary object injected by deployer
 ##
+#set ($esupOtpContext = $authenticationContext.getSubcontext('fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext'))
 #set ($rpContext = $profileRequestContext.getSubcontext('net.shibboleth.profile.context.RelyingPartyContext'))
 ##
-#set ($onClick = "this.childNodes[0].nodeValue='#springMessageText('idp.login.pleasewait', 'Logging in, please wait...')'")
+#set ($onClick = "this.childNodes[0].nodeValue='#springMessageText('idp.esup.otp.sending', 'Sending in, please wait...')'")
 $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 'sha256-$cspDigester.apply($onClick)'")
 <!DOCTYPE html>
 <html>
     <head>
         <title>#springMessageText("idp.title", "Web Login Service")</title>
         #parse("head.vm")
+        <script>
+            // Fonction de vérification de la sélection
+            function checkSelection() {
+                const selectElement = document.getElementById("transportchoose");
+                const submitButton = document.getElementById("submitButton");
+    
+                // Active ou désactive le bouton en fonction de la sélection
+                submitButton.disabled = (selectElement.value === "");
+            }
+    
+            // Ajoute l'écouteur d'événement une fois le contenu chargé
+            document.addEventListener("DOMContentLoaded", function() {
+                const selectElement = document.getElementById("transportchoose");
+                selectElement.addEventListener("change", checkSelection);
+            });
+        </script>
     </head>
     <body>
         <main class="main">
@@ -39,23 +56,44 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                     #parse("csrf/csrf.vm")
 
                     #parse("info.vm")
-                    <fieldset class="small-10 medium-10 large-7 small-centered margin-top">
-                        <label for="tokencode"><i class="fa fa-lg fa-lock"></i>#springMessageText("idp.totp.field", "Token Code")</label>
-                        <input class="form-element form-field" id="tokencode" name="tokencode" type="text" value="" />
 
-                        <button class="button float-right" type="submit" name="_eventId_proceed"
-                            onClick="this.childNodes[0].nodeValue='#springMessageText("idp.login.pleasewait", "Logging in, please wait...")'"
-                            >#springMessageText("idp.login.login", "Login")</button>
-                    </fieldset>
+                    #if ($esupOtpContext.getEnabledChoices().isEmpty())
+                        <article class="small-10 medium-10 large-7 small-centered text-center">
+                            <p class="callout warning">
+                                #springMessageText("idp.esup.otp.nochoices", "No choice configured.")
+                                <br/><br/>
+                                #springMessageText("idp.esup.otp.manager", "Go to application") : <a href="#springMessageText("idp.esup.otp.manager.link", "https://otpmanager-test.fr/preferences")" target="_blank">#springMessageText("idp.esup.otp.manager.here", "here")</a> 
+                            </p>
+                        </article>
+                    #else
+                        <fieldset class="small-10 medium-10 large-7 small-centered margin-top">
+                        
+                            <label for="transportchoose"><i class="fa fa-lg fa-rocket"></i> #springMessageText("idp.esup.otp.choices", "Generate token with below method")</label>
+                            <select class="form-element" id="transportchoose" name="transportchoose" required>
+                                <option value="" disabled selected>Selectionnez une option disponible</option>
+                                #foreach($option in $esupOtpContext.getEnabledChoices())
+                                    <option value="$option">
+                                    $springMacroRequestContext.getMessage("idp.esup.otp.label.$option", $option)
+                                    </option>
+                                #end       
+                            </select>
+                            ### TODO Test below
+                            ###springFormSingleSelect("transportchoose", $selectOptions, "required")
 
-
-
-                    <div class="grid">
-                        <div class="grid-item">
-                            <button type="submit" name="_eventId_proceed"
-                                onClick="$onClick">#springMessageText("idp.login.login", "Login")</button>
-                        </div>
-                    </div>
+                            <button class="button float-right" type="submit" name="_eventId_proceed" id="submitButton"
+                                disabled
+                                onClick="$onClick"
+                                >#springMessageText("idp.esup.otp.send", "Send")</button>
+                        </fieldset>
+                        
+                        <article class="small-10 medium-10 large-7 small-centered text-center">
+                            <p class="callout primary">
+                                #springMessageText("idp.esup.otp.updatechoices", "Update choices.")
+                                <br/><br/>
+                                #springMessageText("idp.esup.otp.manager", "Go to application") : <a href="#springMessageText("idp.esup.otp.manager.link", "https://otpmanager-test.fr/preferences")" target="_blank">#springMessageText("idp.esup.otp.manager.here", "here")</a> 
+                            </p>
+                        </article>
+                    #end
                 </form>
 
                 #parse("help.vm")
