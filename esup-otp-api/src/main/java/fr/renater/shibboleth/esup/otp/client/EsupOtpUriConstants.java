@@ -17,8 +17,6 @@
 
 package fr.renater.shibboleth.esup.otp.client;
 
-import java.net.URI;
-
 /**
  * Esup otp api constants.
  */

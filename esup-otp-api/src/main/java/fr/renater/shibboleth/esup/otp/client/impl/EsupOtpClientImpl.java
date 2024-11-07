@@ -17,13 +17,19 @@
 
 package fr.renater.shibboleth.esup.otp.client.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Calendar;
+import java.util.TimeZone;
+
 import javax.annotation.Nonnull;
 
-import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import org.slf4j.Logger;
 
-import fr.renater.shibboleth.esup.otp.client.EsupOtpClientException;
+import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
+import fr.renater.shibboleth.esup.otp.client.EsupOtpClientException;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpUriConstants;
 import fr.renater.shibboleth.esup.otp.config.EsupOtpRestTemplate;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
@@ -31,12 +37,6 @@ import fr.renater.shibboleth.esup.otp.dto.EsupOtpUsersResponse;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpVerifyResponse;
 import fr.renater.shibboleth.esup.otp.dto.user.EsupOtpUserInfoResponse;
 import net.shibboleth.shared.primitive.LoggerFactory;
-
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Calendar;
-import java.util.TimeZone;
 
 /**
  * Esup otp api connector implementation.
@@ -46,26 +46,27 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     /** Class logger. */
     @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpClientImpl.class);
 
+    /** Esup otp integration configuration. */
     private final DefaultEsupOtpIntegration esupOtpIntegration;
     
     /**
      * Constructor.
      *
-     * @param esupOtpIntegration
+     * @param integration
      */
-    public EsupOtpClientImpl(final DefaultEsupOtpIntegration esupOtpIntegration) {
-        super(new EsupOtpRestTemplate(esupOtpIntegration));
+    public EsupOtpClientImpl(final DefaultEsupOtpIntegration integration) {
+        super(new EsupOtpRestTemplate(integration));
 
-        this.esupOtpIntegration = esupOtpIntegration;
+        this.esupOtpIntegration = integration;
     }
    
     
     /** {@inheritDoc} */
     public EsupOtpUserInfoResponse getOtpUserInfos(final String uid) throws EsupOtpClientException {
         try {
-            String hash = getUserHash(uid);
+            final String hash = getUserHash(uid);
             return get(EsupOtpUriConstants.Public.GET_USER_INFOS, EsupOtpUserInfoResponse.class, uid, hash);
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+        } catch (final NoSuchAlgorithmException | UnsupportedEncodingException e) {
             throw new EsupOtpClientException("Get user hash failed", e);
         }
 
@@ -75,10 +76,10 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     public EsupOtpResponse postSendMessage(final String uid, final String method,
                                                   final String transport) throws EsupOtpClientException {
         try {
-            String hash = getUserHash(uid);
+            final String hash = getUserHash(uid);
             return post(EsupOtpUriConstants.Public.POST_MESSAGE, EsupOtpResponse.class,
                     true, uid, method, transport, hash);
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+        } catch (final NoSuchAlgorithmException | UnsupportedEncodingException e) {
             throw new EsupOtpClientException("Get user hash failed", e);
         }
     }
@@ -185,30 +186,49 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
         return delete(EsupOtpUriConstants.Admin.DELETE_SECRET, EsupOtpResponse.class, uid, method);
     }
 
-    public String getUserHash(String uid) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest md5Md = MessageDigest.getInstance("MD5");
-        String md5 = bytesToHex(md5Md.digest(esupOtpIntegration.getUsersSecret().getBytes())).toLowerCase();
-        String salt = md5 + getSalt(uid);
-        MessageDigest sha256Md = MessageDigest.getInstance("SHA-256");
-        String userHash = bytesToHex(sha256Md.digest(salt.getBytes())).toLowerCase();
+    /**
+     * Compute user hash for request need it.
+     * @param uid
+     * @return user hash
+     * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
+     */
+    public String getUserHash(final String uid) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        final MessageDigest md5Md = MessageDigest.getInstance("MD5");
+        final String md5 = bytesToHex(md5Md.digest(esupOtpIntegration.getUsersSecret().getBytes())).toLowerCase();
+        final String salt = md5 + getSalt(uid);
+        final MessageDigest sha256Md = MessageDigest.getInstance("SHA-256");
+        final String userHash = bytesToHex(sha256Md.digest(salt.getBytes())).toLowerCase();
         return userHash;
     }
 
-    private String bytesToHex(byte[] bytes) {
-        StringBuilder hexString = new StringBuilder();
-        for (byte b : bytes) {
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) hexString.append('0');
+    /**
+     * Convert bytes array to hexadecimal string.
+     * @param bytes
+     * @return hexadecimal string.
+     */
+    private String bytesToHex(final byte[] bytes) {
+        final StringBuilder hexString = new StringBuilder();
+        for (final byte b : bytes) {
+            final String hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
             hexString.append(hex);
         }
         return hexString.toString();
     }
 
-    public String getSalt(String uid) {
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        String salt = uid + day + hour;
+    /**
+     * Get salt for uid.
+     * @param uid
+     * @return salt.
+     */
+    public String getSalt(final String uid) {
+        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        final int day = calendar.get(Calendar.DAY_OF_MONTH);
+        final int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        final String salt = uid + day + hour;
         return salt;
     }
 

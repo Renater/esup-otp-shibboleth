@@ -17,9 +17,20 @@
 
 package fr.renater.shibboleth.esup.otp;
 
+import static org.mockito.ArgumentMatchers.any;
+
+import java.util.List;
+import java.util.Map;
+
+import org.mockito.Mockito;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.webflow.execution.Event;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClientException;
-import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
 import fr.renater.shibboleth.esup.otp.dto.user.EsupOtpUserInfoResponse;
 import fr.renater.shibboleth.esup.otp.dto.user.UserMethods;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
@@ -31,19 +42,6 @@ import net.shibboleth.idp.profile.testing.ActionTestingSupport;
 import net.shibboleth.shared.component.ComponentInitializationException;
 import net.shibboleth.shared.logic.FunctionSupport;
 import net.shibboleth.shared.testing.ConstantSupplier;
-import org.mockito.Mockito;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.webflow.execution.Event;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.mockito.ArgumentMatchers.any;
 
 /**
  *

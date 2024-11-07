@@ -61,14 +61,14 @@ public class EsupOtpRestTemplate extends RestTemplate {
     
     private MappingJackson2HttpMessageConverter createMappingJacksonHttpMessageConverter() {
 
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setObjectMapper(createObjectMapper());
         return converter;
     }
     
     private ObjectMapper createObjectMapper() {
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        final ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
