@@ -73,12 +73,16 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                                 <option value="" disabled selected>Selectionnez une option disponible</option>
                                 #foreach($option in $esupOtpContext.getEnabledChoices())
                                     <option value="$option">
-                                    $springMacroRequestContext.getMessage("idp.esup.otp.label.$option", $option)
+                                    #set ($dotIndex = $option.lastIndexOf("."))
+                                    #if ($dotIndex == -1)
+                                        #set ($arg = $esupOtpContext.getConfiguredTransports().get($option))
+                                    #else
+                                        #set ($arg = $esupOtpContext.getConfiguredTransports().get($option.substring($dotIndex + 1)))
+                                    #end
+                                    $springMacroRequestContext.getMessage("idp.esup.otp.label.$option", [$arg], $option)
                                     </option>
                                 #end       
                             </select>
-                            ### TODO Test below
-                            ###springFormSingleSelect("transportchoose", $selectOptions, "required")
 
                             <button class="button float-right" type="submit" name="_eventId_proceed" id="submitButton"
                                 disabled
