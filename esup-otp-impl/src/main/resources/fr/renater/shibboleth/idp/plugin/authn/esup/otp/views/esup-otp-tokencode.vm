@@ -19,6 +19,9 @@
 ## custom - arbitrary object injected by deployer
 ##
 #set ($esupOtpContext = $authenticationContext.getSubcontext('fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext'))
+#if ("push" == $esupOtpContext.getTransportChoose())
+    #set ($apiUrl = $environment.getProperty("idp.esup.otp.apiHost"))
+#end
 #set ($rpContext = $profileRequestContext.getSubcontext('net.shibboleth.profile.context.RelyingPartyContext'))
 ##
 #set ($onClick = "this.childNodes[0].nodeValue='#springMessageText('idp.login.pleasewait', 'Logging in, please wait...')'")
@@ -28,6 +31,58 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
     <head>
         <title>#springMessageText("idp.title", "Web Login Service")</title>
         #parse("head.vm")
+        #if ("push" == $esupOtpContext.getTransportChoose())
+            <script src="$apiUrl/js/socket.io.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+            <script type="text/javascript">
+                function raw_hash(algo, data) {
+                    if (algo === 'MD5') {
+                        return CryptoJS.MD5(data).toString(CryptoJS.enc.Hex);
+                    } else if (algo === 'SHA256') {
+                        return CryptoJS.SHA256(data).toString(CryptoJS.enc.Hex);
+                    } else {
+                        throw new Error('Algorithme non supporté');
+                    }
+                }
+
+                /** @param {string} data */
+                function md5(data) {
+                    return raw_hash('MD5', data)
+                }
+
+                /** @param {String} uid */
+                function get_hash() {
+                    const d = new Date();
+                    const present_salt = d.getUTCDate()+d.getUTCHours().toString();
+                    //console.log("present-salt for ${esupOtpContext.getUsername()}:", present_salt);
+                    return raw_hash('SHA256', raw_hash('MD5', "${environment.getProperty('idp.esup.otp.usersSecret')}") + "${esupOtpContext.getUsername()}" + present_salt);
+                }
+
+                // Fonction d'initialisation du socket
+                function initializeSocket() {
+                    var socket = io.connect("$apiUrl", {
+                        reconnect: true,
+                        path: "/sockets",
+                        query: "uid=${esupOtpContext.getUsername()}&hash=" + get_hash() + "&app=cas"
+                    });
+                    socket.on('connect', function () {
+                        console.log("Socket connect");
+                    });
+                    socket.on('userAuth', function (data) {
+                        if (data.code == "Ok") {
+                          submitCode(data.otp);
+                        }
+                    });
+                }
+
+                function submitCode(code) {
+                    document.getElementById("tokencode").value = code;
+                    document.getElementById("submitPush").click();
+                }
+
+                initializeSocket();
+            </script>
+        #end
     </head>
     <body>
         <main class="main">
@@ -36,29 +91,44 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 
                 #parse("esup-otp-error.vm")
 
-                <form action="$flowExecutionUrl" method="post">
-                    #parse("csrf/csrf.vm")
-
-                    #parse("info.vm")
-
-                    <fieldset class="small-10 medium-10 large-7 small-centered margin-top">
-                        
-                        <label for="tokencode"><i class="fa fa-lg fa-lock"></i> #springMessageText("idp.totp.field", "Token Code")</label>
-                        <input class="form-element form-field" id="tokencode" name="tokencode" type="text" value="" />
-
-                        <button class="button float-right" type="submit" name="_eventId_proceed"
+                #if ("push".equals($esupOtpContext.getTransportChoose()))
+                    <form id="pushForm" action="$flowExecutionUrl" method="post">
+                        <input type="hidden" id="tokencode" name="tokencode" type="text" value="" />
+                        <button id="submitPush" style="display: none;" type="submit" name="_eventId_proceed"
                             onClick="$onClick"
                             >#springMessageText("idp.login.login", "Login")</button>
-                    </fieldset>
-                    
+                    </form>
+
                     <article class="small-10 medium-10 large-7 small-centered text-center">
                         <p class="callout primary">
-                            #springMessageText("idp.esup.otp.updatechoices", "Update choices.")
-                            <br/><br/>
-                            #springMessageText("idp.esup.otp.manager", "Go to application") : <a href="#springMessageText("idp.esup.otp.manager.link", "https://otpmanager-test.fr/preferences")" target="_blank">#springMessageText("idp.esup.otp.manager.here", "here")</a> 
+                            #springMessageText("idp.esup.otp.wait", "Wait phone validation.")
                         </p>
                     </article>
-                </form>
+                #else
+                    <form action="$flowExecutionUrl" method="post">
+                        #parse("csrf/csrf.vm")
+
+                        #parse("info.vm")
+
+                        <fieldset class="small-10 medium-10 large-7 small-centered margin-top">
+
+                            <label for="tokencode"><i class="fa fa-lg fa-lock"></i> #springMessageText("idp.totp.field", "Token Code")</label>
+                            <input class="form-element form-field" id="tokencode" name="tokencode" type="text" value="" />
+
+                            <button class="button float-right" type="submit" name="_eventId_proceed"
+                                onClick="$onClick"
+                                >#springMessageText("idp.login.login", "Login")</button>
+                        </fieldset>
+                    </form>
+                #end
+
+                <article class="small-10 medium-10 large-7 small-centered text-center">
+                    <p class="callout primary">
+                        #springMessageText("idp.esup.otp.updatechoices", "Update choices.")
+                        <br/><br/>
+                        #springMessageText("idp.esup.otp.manager", "Go to application") : <a href="#springMessageText("idp.esup.otp.manager.link", "https://otpmanager-test.fr/preferences")" target="_blank">#springMessageText("idp.esup.otp.manager.here", "here")</a>
+                    </p>
+                </article>
 
                 #parse("help.vm")
 
