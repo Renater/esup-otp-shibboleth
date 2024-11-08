@@ -82,6 +82,116 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 
                 initializeSocket();
             </script>
+        #else
+            <script>
+                // Fonction de vérification de la sélection
+                function checkInputLength() {
+                    const tokenInputElement = document.getElementById("tokencode");
+                    const submitButton = document.getElementById("submitButton");
+
+                    // Active ou désactive le bouton en fonction de la sélection
+                    submitButton.disabled = (tokenInputElement.textLength != 5);
+                }
+
+                // Ajoute l'écouteur d'événement une fois le contenu chargé
+                document.addEventListener("DOMContentLoaded", function() {
+                    const tokenInputElement = document.getElementById("tokencode");
+                    tokenInputElement.addEventListener('keydown', (e) => {
+                        // prevent if input is not number
+                        if (!isFinite(e.key) && e.cancelable) {
+                            e.preventDefault();
+                        }
+                    });
+                    tokenInputElement.addEventListener('keypress', (e) => {
+                        checkInputLength();
+                    });
+                });
+            </script>
+            <style>
+                @media all {
+                    .input-wrap {
+                        position: relative;
+                        display: flex;
+                        padding: 0px;
+                    }
+
+                    .input-wrap.token {
+                        width: 300px;
+                        margin-bottom: 10px;
+                        column-gap: 10px;
+                    }
+
+                    .token-input {
+                        position: absolute;
+                        left: 0px;
+                        top: 0px;
+                        z-index: 2;
+                        width: 400px;
+                        height: 50px;
+                        margin-bottom: 0px;
+                        padding: 0px 0px 0px 12px;
+                        border-style: none;
+                        border-width: 1px;
+                        border-color: black;
+                        background-color: transparent;
+                        font-family: Verdana, Geneva, sans-serif;
+                        color: rgb(0, 0, 0);
+                        font-size: 23px;
+                        font-weight: 400;
+                        text-align: left;
+                        letter-spacing: 35.5px;
+                        text-transform: uppercase;
+                    }
+
+                    .token-input:hover ~ .one-input {
+                        border-color: #0491c6;
+                        box-shadow: none;
+                    }
+
+                    .one-input {
+                        position: relative;
+                        min-height: 40px;
+                        margin-bottom: 20px;
+                        padding: 8px 12px;
+                        border-style: solid;
+                        border-width: 1px;
+                        border-color: rgba(18, 19, 49, 0.25);
+                        border-radius: 5px;
+                        background-color: white;
+                        box-shadow: rgba(0, 0, 0, 0.1) 0px 5px 10px -5px;
+                        transition-property: box-shadow, border-color;
+                        transition-duration: 200ms, 200ms;
+                        transition-timing-function: ease, ease;
+                        color: rgb(18, 19, 49);
+                    }
+
+                    .token-fake {
+                        width: 40px;
+                        height: 50px;
+                        background-color: transparent;
+                    }
+
+                }
+
+                .input {
+                    display: block;
+                    line-height: 1.42857143;
+                    box-shadow: none;
+                }
+
+                .input:focus {
+                    outline: 0;
+                    background-color: transparent;
+                    border: none;
+                    box-shadow: none;
+                }
+
+                .input:focus ~ .one-input {
+                    border-color: #0491c6;
+                    box-shadow: none;
+                }
+
+            </style>
         #end
     </head>
     <body>
@@ -109,6 +219,26 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                         #parse("csrf/csrf.vm")
 
                         #parse("info.vm")
+
+                        <fieldset class="small-10 medium-10 large-7 small-centered margin-top">
+
+                            <label for="tokencode"><i class="fa fa-lg fa-lock"></i> #springMessageText("idp.totp.field", "Token Code")</label>
+                            <div class="input-wrap token">
+                                <input class="form-element form-field token-input input" id="tokencode" name="tokencode" type="text" value="" minlength="6" maxlength="6" placeholder="000000" autocomplete="off" required />
+                                <div class="one-input token-fake"></div>
+                                <div class="one-input token-fake"></div>
+                                <div class="one-input token-fake"></div>
+                                <div class="one-input token-fake"></div>
+                                <div class="one-input token-fake"></div>
+                                <div class="one-input token-fake"></div>
+                            </div>
+
+
+                            <button class="button float-right" type="submit" name="_eventId_proceed" id="submitButton"
+                                disabled
+                                onClick="$onClick"
+                                >#springMessageText("idp.login.login", "Login")</button>
+                        </fieldset>
 
                         <fieldset class="small-10 medium-10 large-7 small-centered margin-top">
 
