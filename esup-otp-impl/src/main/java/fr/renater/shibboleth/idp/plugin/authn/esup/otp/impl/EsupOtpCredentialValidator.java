@@ -183,7 +183,7 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
             log.debug("{} Username '{}' did not match expression", getLogPrefix(), esupOtpContext.getUsername());
             return null;
         }
-                
+
         log.debug("{} Attempting to authenticate token code for '{}' ", getLogPrefix(), esupOtpContext.getUsername());
         
         try {

@@ -161,6 +161,7 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
         
         try {
             esupOtpContext.setTokenCode(Integer.valueOf(code));
+            log.debug("Get token code : {}", esupOtpContext.getTokenCode());
         } catch (final NumberFormatException e) {
             log.warn("{} Exception converting code string to an integer", getLogPrefix(), e);
             authenticationContext.ensureSubcontext(AuthenticationErrorContext.class).getClassifiedErrors().add(
