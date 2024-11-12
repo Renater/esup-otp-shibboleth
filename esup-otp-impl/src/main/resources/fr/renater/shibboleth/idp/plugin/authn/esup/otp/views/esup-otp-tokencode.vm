@@ -84,13 +84,19 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
             </script>
         #else
             <script>
-                // Fonction de vérification de la sélection
+                // Fonction de vérification de la longueur du token
                 function checkInputLength() {
                     const tokenInputElement = document.getElementById("tokencode");
-                    const submitButton = document.getElementById("submitButton");
 
-                    // Active ou désactive le bouton en fonction de la sélection
-                    submitButton.disabled = (tokenInputElement.textLength != 5);
+                    const inputLength = tokenInputElement.textLength + 1;
+
+                    // Check inputLength = 6
+                    disableSubmitButton(inputLength != 6);
+                }
+
+                function disableSubmitButton(disable) {
+                    const submitButton = document.getElementById("submitButton");
+                    submitButton.disabled = disable
                 }
 
                 // Ajoute l'écouteur d'événement une fois le contenu chargé
@@ -98,8 +104,11 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                     const tokenInputElement = document.getElementById("tokencode");
                     tokenInputElement.addEventListener('keydown', (e) => {
                         // prevent if input is not number
-                        if (!isFinite(e.key) && e.cancelable) {
+                        if (e.key.length == 1 && /[a-zA-Z]/.test(e.key)) {
                             e.preventDefault();
+                        }
+                        if(e.key == "Backspace" || e.key == "Delete") {
+                            disableSubmitButton(true);
                         }
                     });
                     tokenInputElement.addEventListener('keypress', (e) => {
@@ -191,6 +200,17 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                     box-shadow: none;
                 }
 
+                .token-overflow {
+                    z-index: 5;
+                    width: 30px;
+                    height: 50px;
+                    background-color: #fff;
+                    position: absolute;
+                    top: 0%;
+                    left: 100%;
+                    right: auto;
+                }
+
             </style>
         #end
     </head>
@@ -224,13 +244,14 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 
                             <label for="tokencode"><i class="fa fa-lg fa-lock"></i> #springMessageText("idp.totp.field", "Token Code")</label>
                             <div class="input-wrap token">
-                                <input class="form-element form-field token-input input" id="tokencode" name="tokencode" type="text" value="" minlength="6" maxlength="6" placeholder="000000" autocomplete="off" required />
+                                <input class="form-element form-field token-input input" id="tokencode" name="tokencode" type="text" inputmode="numeric" value="" minlength="6" maxlength="6" placeholder="000000" autocomplete="off" required />
                                 <div class="one-input token-fake"></div>
                                 <div class="one-input token-fake"></div>
                                 <div class="one-input token-fake"></div>
                                 <div class="one-input token-fake"></div>
                                 <div class="one-input token-fake"></div>
                                 <div class="one-input token-fake"></div>
+                                <div class="token-overflow"></div>
                             </div>
 
 
