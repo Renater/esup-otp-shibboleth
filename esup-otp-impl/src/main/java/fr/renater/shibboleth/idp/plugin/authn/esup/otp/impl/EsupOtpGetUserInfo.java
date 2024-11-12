@@ -192,33 +192,35 @@ public class EsupOtpGetUserInfo extends AbstractAuthenticationAction {
         esupOtpContext.setUsername("afouque");
         
         try {
-        	log.info("Get Esup otp user infos for username: {}", esupOtpContext.getUsername());
+        	log.debug("Get Esup otp user infos for username: {}", esupOtpContext.getUsername());
 			EsupOtpUserInfoResponse userInfo = client.getUserInfos(esupOtpContext.getUsername());
 			
 			if(!"Ok".equals(userInfo.getCode())) {
 				ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.UNKNOWN_USERNAME);
 				return;
 			}
-            // TODO replace with log.debug
-            log.info("Get UserInfo : {}", getObjectMapper().writeValueAsString(userInfo));
 
             Set<String> choices = getChoices(esupOtpIntegration.getSupportedMethods(), userInfo);
-            log.info("Choices possible for {} : {}", esupOtpContext.getUsername(), choices);
             esupOtpContext.setEnabledChoices(choices);
+            log.debug("Choices possible for {} : {}", esupOtpContext.getUsername(), esupOtpContext.getEnabledChoices());
 
-            log.info("Transports possible for {} : {}", esupOtpContext.getUsername(), userInfo.getUser().getTransports().getAll());
-            esupOtpContext.setConfiguredTransports(userInfo.getUser().getTransports().getAll());
+            esupOtpContext.setConfiguredTransports(getTransports(userInfo));
+            log.debug("Transports possible for {} : {}", esupOtpContext.getUsername(), esupOtpContext.getConfiguredTransports());
 			
 		} catch (EsupOtpClientException e) {
 			log.warn("{} Client exception occured", getLogPrefix(), e);
 			authenticationContext.ensureSubcontext(AuthenticationErrorContext.class).getClassifiedErrors().add(
                     CLIENT_EXCEPTION);
 			ActionSupport.buildEvent(profileRequestContext, CLIENT_EXCEPTION);
-		} catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+		}
     }
-    
+
+    /**
+     * Get available choices for user
+     * @param supportedMethods list of methods configured in properties
+     * @param userInfo receive from esup-otp-api
+     * @return
+     */
     private Set<String> getChoices(Set<String> supportedMethods, EsupOtpUserInfoResponse userInfo) {
         Map<String, UserMethod> allUserMethodByType = userInfo.getUser().getMethods().getAll();
         Set<String> choices = new HashSet<>();
@@ -238,14 +240,15 @@ public class EsupOtpGetUserInfo extends AbstractAuthenticationAction {
         return choices;
     }
 
-    private ObjectMapper getObjectMapper() {
-        ObjectMapper objMapper = new ObjectMapper();
-        objMapper.registerModule(new JavaTimeModule());
-        objMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        objMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        return objMapper;
+    /**
+     * Get transports with value null safe
+     * @param userInfo receive from esup-otp-api
+     * @return map of transport by type without null values
+     */
+    private Map<String, String> getTransports(EsupOtpUserInfoResponse userInfo) {
+        return userInfo.getUser().getTransports().getAll().entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
-    
+
 }

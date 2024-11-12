@@ -92,7 +92,19 @@ You need to copy jar files into docBase directory to plugin work well:
 | idp.duo.oidc.apiPassword     |                      &check;                       |                  |             |
 | idp.esup.oidc.redirectURL    |                                                    |                  |             |
 | idp.esup.otp.endpoint.health |                                                    | /v1/health_check |             |
+|                              |                                                    |                  |             |
 
+
+## Log configuration
+
+To activate debug logs for plugin you need to edit conf/logback.xml file like this : 
+
+```
+<!-- To log request and response from esup-otp-api -->
+<logger name="org.apache.hc.client5.http.wire" level="DEBUG" />
+<!-- To add debug logs of plugin -->
+<logger name="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl" level="DEBUG" />
+```
 
 ## Log check
 

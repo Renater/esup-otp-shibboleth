@@ -191,7 +191,7 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
             ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
             return;
         }
-        log.info("Transport choose : {}", transport);
+        log.debug("Transport choose : {}", transport);
         esupOtpContext.setTransportChoose(transport);
         
         Map<String, String> configuredTransports = esupOtpContext.getConfiguredTransports();
@@ -201,7 +201,7 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
             return;
         }
         
-        String transportTo = configuredTransports.get(transport);
+        // String transportTo = configuredTransports.get(transport);
 
         try {
             if("push".equals(transport)) {

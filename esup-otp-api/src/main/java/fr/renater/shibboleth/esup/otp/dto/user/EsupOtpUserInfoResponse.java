@@ -55,18 +55,16 @@ public class EsupOtpUserInfoResponse extends EsupOtpResponse {
             
             private String push;
 
+            /**
+             * Get All transports
+             * @return
+             */
             @JsonIgnore
             public Map<String, String> getAll() {
                 Map<String, String> transportByType = new HashMap<String, String>();
-                if(mail != null) {
-                    transportByType.put("mail", mail);
-                }
-                if(sms != null) {
-                    transportByType.put("sms", sms);
-                }
-                if(push != null) {
-                    transportByType.put("push", push);
-                }
+                transportByType.put("mail", mail);
+                transportByType.put("sms", sms);
+                transportByType.put("push", push);
                 return transportByType;
             }
             
