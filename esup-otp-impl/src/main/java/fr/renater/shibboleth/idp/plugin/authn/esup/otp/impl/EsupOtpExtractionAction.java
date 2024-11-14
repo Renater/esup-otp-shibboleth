@@ -46,6 +46,8 @@ import org.slf4j.Logger;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
 import jakarta.servlet.http.HttpServletRequest;
 
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.*;
+
 /**
  * An action that derives a username from a lookup strategy, get otp code from form or header,
  * creates a {@link EsupOtpContext}, and attaches it to the {@link AuthenticationContext}.
@@ -204,13 +206,14 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
         // String transportTo = configuredTransports.get(transport);
 
         try {
-            if("push".equals(transport)) {
-                client.postSendMessage(esupOtpContext.getUsername(), transport, transport);
-            } else {
-                String[] method_transport = transport.split("\\.");
-                client.postSendMessage(esupOtpContext.getUsername(), method_transport[0], method_transport[1]);
+            if(!BYPASS_METHOD.equals(transport) && !TOTP_METHOD.equals(transport)) {
+                if(SUPPORTED_METHODS_WITHOUT_TRANSPORT.contains(transport)) {
+                    client.postSendMessage(esupOtpContext.getUsername(), transport, transport);
+                } else {
+                    String[] method_transport = transport.split("\\.");
+                    client.postSendMessage(esupOtpContext.getUsername(), method_transport[0], method_transport[1]);
+                }
             }
-
         } catch (EsupOtpClientException e) {
             log.info("{} Send message with option '{}' to '{}' failed", getLogPrefix(), transport, esupOtpContext.getUsername(), e);
             authenticationContext.ensureSubcontext(AuthenticationErrorContext.class).getClassifiedErrors().add(

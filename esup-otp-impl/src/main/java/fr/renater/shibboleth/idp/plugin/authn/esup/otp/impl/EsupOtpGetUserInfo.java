@@ -52,6 +52,8 @@ import net.shibboleth.shared.logic.Constraint;
 import net.shibboleth.shared.logic.FunctionSupport;
 import net.shibboleth.shared.primitive.LoggerFactory;
 
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.SUPPORTED_METHODS_WITHOUT_TRANSPORT;
+
 /**
  * An action that get esup otp user informations from a username from a lookup strategy,
  * creates a {@link EsupOtpContext}, and attaches it to the {@link AuthenticationContext}.
@@ -226,9 +228,18 @@ public class EsupOtpGetUserInfo extends AbstractAuthenticationAction {
         Set<String> choices = new HashSet<>();
         allUserMethodByType.entrySet().stream()
             .filter(entry -> entry.getValue() != null)
-            .filter(entry -> supportedMethods.contains(entry.getKey()) && entry.getValue().isActive() && !entry.getValue().getTransports().isEmpty())
+            .filter(entry -> {
+                if(supportedMethods.contains(entry.getKey()) && entry.getValue().isActive()) {
+                    if(SUPPORTED_METHODS_WITHOUT_TRANSPORT.contains(entry.getKey())) {
+                        return true;
+                    } else {
+                       return !entry.getValue().getTransports().isEmpty();
+                    }
+                }
+                return false;
+            })
             .forEach(entry -> {
-                if("push".equals(entry.getKey())) {
+                if(SUPPORTED_METHODS_WITHOUT_TRANSPORT.contains(entry.getKey())) {
                     choices.add(entry.getKey());
                 } else {
                     Set<String> choiceWithTransport = entry.getValue().getTransports().stream()
