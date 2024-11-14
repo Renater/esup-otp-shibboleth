@@ -221,7 +221,7 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 
                 #parse("esup-otp-error.vm")
 
-                #if ("push".equals($esupOtpContext.getTransportChoose()))
+                #if ("push".equals($esupOtpContext.getTransportChoose()) || "webauthn".equals($esupOtpContext.getTransportChoose()))
                     <form id="pushForm" action="$flowExecutionUrl" method="post">
                         <input type="hidden" id="tokencode" name="tokencode" type="text" value="" />
                         <button id="submitPush" style="display: none;" type="submit" name="_eventId_proceed"
@@ -240,6 +240,14 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 
                         #parse("info.vm")
 
+                        #if ("bypass".equals($esupOtpContext.getTransportChoose())
+                            <article class="small-10 medium-10 large-7 small-centered text-center">
+                                <p class="callout primary">
+                                    #springMessageText("idp.esup.otp.bypass", "Enter bypass code.")
+                                </p>
+                            </article>
+                        #end
+
                         <fieldset class="small-10 medium-10 large-7 small-centered margin-top">
 
                             <label for="tokencode"><i class="fa fa-lg fa-lock"></i> #springMessageText("idp.totp.field", "Token Code")</label>
@@ -257,16 +265,6 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 
                             <button class="button float-right" type="submit" name="_eventId_proceed" id="submitButton"
                                 disabled
-                                onClick="$onClick"
-                                >#springMessageText("idp.login.login", "Login")</button>
-                        </fieldset>
-
-                        <fieldset class="small-10 medium-10 large-7 small-centered margin-top">
-
-                            <label for="tokencode"><i class="fa fa-lg fa-lock"></i> #springMessageText("idp.totp.field", "Token Code")</label>
-                            <input class="form-element form-field" id="tokencode" name="tokencode" type="text" value="" />
-
-                            <button class="button float-right" type="submit" name="_eventId_proceed"
                                 onClick="$onClick"
                                 >#springMessageText("idp.login.login", "Login")</button>
                         </fieldset>
