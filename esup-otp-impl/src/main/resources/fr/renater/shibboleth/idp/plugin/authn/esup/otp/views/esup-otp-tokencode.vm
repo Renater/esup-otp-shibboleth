@@ -11,6 +11,7 @@
 ## authenticationWarningContext - context with login warning state
 ## rpUIContext - the context with SP UI information from the metadata
 ## encoder - HTMLEncoder class
+## esupOtpEncoder - EsupOtpEncoder class
 ## cspDigester - Calculates base64-encoded SHA-2 hashes (call apply)
 ## cspNonce - Calculates secure nonces (call generateIdentifier)
 ## request - HttpServletRequest
@@ -19,7 +20,7 @@
 ## custom - arbitrary object injected by deployer
 ##
 #set ($esupOtpContext = $authenticationContext.getSubcontext('fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext'))
-#if ("push" == $esupOtpContext.getTransportChoose())
+#if ("push" == $esupOtpContext.getTransportChoose() || "webauthn" == $esupOtpContext.getTransportChoose())
     #set ($apiUrl = $environment.getProperty("idp.esup.otp.apiHost"))
 #end
 #set ($rpContext = $profileRequestContext.getSubcontext('net.shibboleth.profile.context.RelyingPartyContext'))
@@ -82,6 +83,79 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 
                 initializeSocket();
             </script>
+            <style>
+                .loader {
+                    border: 8px solid #f3f3f3;
+                    border-top: 8px solid #0491c6;
+                    border-radius: 50%;
+                    width: 60px;
+                    height: 60px;
+                    animation: spin 2s linear infinite;
+                }
+
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            </style>
+        #elseif ("webauthn" == $esupOtpContext.getTransportChoose())
+            <!--<script type="text/javascript" src="$request.getContextPath()/js/webauthn/webauthn-support.js" #if ($nonce)nonce="$nonce"#end></script>-->
+
+            <script type="module" #if ($nonce)nonce="$nonce"#end>
+                import {
+                    get,
+                    parseRequestOptionsFromJSON,
+                    supported,
+                } from "$request.getContextPath()/js/webauthn-json.browser-ponyfill.js";
+
+                window.addEventListener("load", () => {
+                    try {
+                        var isSupported = supported();
+                        if (!isSupported) {
+                            document.getElementById('supportedDiv').classList.add('hidden')
+                            document.getElementById("supportedDiv").disabled = true;
+                            document.getElementById("authenticate").disabled = true;
+                            document.getElementById("authenticator_assertion_form").disabled = true;
+                            document.getElementById("error").disabled = false;
+                            document.getElementById('error').classList.remove('hidden')
+                        } else {
+                            document.getElementById("authenticate").onclick = authenticate;
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                });
+
+                async function authenticate() {
+                    // Some UI changes
+                    try {
+                        document.getElementById('authenticate').textContent='#springMessageText("idp.webauthn.authn.inprogress", "Authenticating...")'
+                    } catch (e) {
+                        // No issue if this does not work
+                    }
+                    var pkCredRequestOptions = $esupOtpEncoder.serializePublicKeyCredentialRequestOptionsAsJSON($esupOtpContext.getWebauthnCredentialRequestOptions())
+                    var parsedRequestOptions = parseRequestOptionsFromJSON(pkCredRequestOptions);
+                    await get(parsedRequestOptions)
+                        .then(function (pkCredAssertion) {
+                            document.getElementById("publicKeyCredential").value = JSON.stringify(pkCredAssertion);
+                            document.getElementById("authenticationSubmit").click();
+                        }).catch(function (err) {
+                            console.error(err);
+                            document.getElementById('authenticate').textContent='#springMessageText("idp.esup.otp.webauthn.retry", "Login failed, retry")'
+                        });
+                }
+            </script>
+            <style>
+                .hidden {
+                    display: none;
+                }
+
+                .center {
+                    margin-left: auto;
+                    margin-right: auto;
+                    text-align: center;
+                }
+            </style>
         #else
             <script>
                 // Fonction de vérification de la longueur du token
@@ -221,17 +295,35 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 
                 #parse("esup-otp-error.vm")
 
-                #if ("push".equals($esupOtpContext.getTransportChoose()) || "webauthn".equals($esupOtpContext.getTransportChoose()))
+                #if ("push" == $esupOtpContext.getTransportChoose())
                     <form id="pushForm" action="$flowExecutionUrl" method="post">
                         <input type="hidden" id="tokencode" name="tokencode" type="text" value="" />
                         <button id="submitPush" style="display: none;" type="submit" name="_eventId_proceed"
-                            onClick="$onClick"
-                            >#springMessageText("idp.login.login", "Login")</button>
+                                onClick="$onClick"
+                        >#springMessageText("idp.login.login", "Login")</button>
                     </form>
 
                     <article class="small-10 medium-10 large-7 small-centered text-center">
                         <p class="callout primary">
                             #springMessageText("idp.esup.otp.wait", "Wait phone validation.")
+                        </p>
+                        <div class="loader"></div>
+                    </article>
+                #elseif ("webauthn" == $esupOtpContext.getTransportChoose())
+                    <form id="authenticator_assertion_form" action="$flowExecutionUrl" method="post">
+                        <input type="hidden" id="publicKeyCredential" name="publicKeyCredential" />
+                        <button class="hidden" id="authenticationSubmit" type="submit"
+                                name="_eventId_proceed">#springMessageText("idp.esup.otp.webauthn.submit", "Submit
+                            authentication")</button>
+                    </form>
+                    <div class="center">
+                        <button id="authenticate">#springMessageText("idp.esup.otp.webauthn.authenticate",
+                            "Login with passkey or security key")</button>
+                    </div>
+
+                    <article id="error" class="small-10 medium-10 large-7 small-centered text-center hidden">
+                        <p class="callout error">
+                            #springMessageText("idp.esup.otp.error", "Initialization 2FA exception occured.")
                         </p>
                     </article>
                 #else
@@ -240,7 +332,7 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 
                         #parse("info.vm")
 
-                        #if ("bypass".equals($esupOtpContext.getTransportChoose())
+                        #if ("bypass" == $esupOtpContext.getTransportChoose())
                             <article class="small-10 medium-10 large-7 small-centered text-center">
                                 <p class="callout primary">
                                     #springMessageText("idp.esup.otp.bypass", "Enter bypass code.")

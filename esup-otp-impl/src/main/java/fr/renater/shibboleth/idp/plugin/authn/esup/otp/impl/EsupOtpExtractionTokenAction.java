@@ -22,7 +22,10 @@ import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnPublicKeyCredential;
 import net.shibboleth.idp.authn.AbstractAuthenticationAction;
 import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
@@ -40,6 +43,9 @@ import org.slf4j.Logger;
 
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
 import jakarta.servlet.http.HttpServletRequest;
+
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpEncoder.getWebAuthnObjectMapper;
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.WEBAUTHN_METHOD;
 
 /**
  * An action that derives a username from a lookup strategy, get otp code from form or header,
@@ -132,7 +138,8 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
             return;
         }
-        
+
+        esupOtpContext.setPublicKeyCredentialAssertionResponse(null);
         esupOtpContext.setTokenCode(null);
         
         // Fill in username if not set.
@@ -145,6 +152,12 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
             }
             esupOtpContext.setUsername(username);
         }
+
+        if(esupOtpContext.getTransportChoose() == null) {
+            log.warn("{} No transport choose", getLogPrefix());
+            ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
+            return;
+        }
         
         final HttpServletRequest request = getHttpServletRequest();
         if (request == null) {
@@ -152,23 +165,45 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
             ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
             return;
         }
-        
-        final String code = extractCode(request);
-        if (code == null) {
-            ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
-            return;
-        }
-        
-        try {
-            esupOtpContext.setTokenCode(Integer.valueOf(code));
-            log.debug("Get token code : {}", esupOtpContext.getTokenCode());
-        } catch (final NumberFormatException e) {
-            log.warn("{} Exception converting code string to an integer", getLogPrefix(), e);
-            authenticationContext.ensureSubcontext(AuthenticationErrorContext.class).getClassifiedErrors().add(
-                    AuthnEventIds.INVALID_CREDENTIALS);
-            ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.INVALID_CREDENTIALS);
+
+        if(WEBAUTHN_METHOD.equals(esupOtpContext.getTransportChoose())) {
+            final String pkCredAssertionJson = extractPublicKeyCredentialAssertionJson(request);
+
+            if (pkCredAssertionJson == null) {
+                log.debug("{} No PublicKeyCredential with authenticator assertion response in request",getLogPrefix());
+                ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
+                return;
+            }
+
+
+            try {
+                esupOtpContext.setPublicKeyCredentialAssertionResponse(parseAssertionResponseJson(pkCredAssertionJson));
+            } catch (JsonProcessingException e) {
+                log.debug("{} Could not parse PublicKeyCredential response from request parameter '{}'",
+                        getLogPrefix(), "publicKeyCredential", e);
+                ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
+            }
+
+        } else {
+            final String code =  extractCode(request);
+            if (code == null) {
+                ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
+                return;
+            }
+
+            try {
+                esupOtpContext.setTokenCode(Integer.valueOf(code));
+                log.debug("Get token code : {}", esupOtpContext.getTokenCode());
+            } catch (final NumberFormatException e) {
+                log.warn("{} Exception converting code string to an integer", getLogPrefix(), e);
+                authenticationContext.ensureSubcontext(AuthenticationErrorContext.class).getClassifiedErrors().add(
+                        AuthnEventIds.INVALID_CREDENTIALS);
+                ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.INVALID_CREDENTIALS);
+            }
         }
     }
+
+
 
     /**
      * Gets the token code from the HTTP request.
@@ -186,6 +221,15 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
         }
         
         return code;
+    }
+
+    private String extractPublicKeyCredentialAssertionJson(HttpServletRequest httpRequest) {
+        return httpRequest.getParameter("publicKeyCredential");
+    }
+
+    private WebAuthnPublicKeyCredential parseAssertionResponseJson(String json) throws JsonProcessingException {
+        ObjectMapper objectMapper = getWebAuthnObjectMapper();
+        return objectMapper.readValue(json, WebAuthnPublicKeyCredential.class);
     }
     
 }

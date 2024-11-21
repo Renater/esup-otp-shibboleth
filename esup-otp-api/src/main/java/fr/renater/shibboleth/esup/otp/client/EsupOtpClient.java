@@ -19,6 +19,8 @@ package fr.renater.shibboleth.esup.otp.client;
 
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpUsersResponse;
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpVerifyWebAuthnRequest;
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpWebauthnResponse;
 import fr.renater.shibboleth.esup.otp.dto.user.EsupOtpUserInfoResponse;
 
 /**
@@ -50,7 +52,15 @@ public interface EsupOtpClient {
      */
     EsupOtpResponse postSendMessage(String uid, String method, String transport)
             throws EsupOtpClientException;
-    
+
+    /**
+     * Generates a WebAuthn secret for the specified user.
+     *
+     * @param uid The unique identifier of the user.
+     * @return EsupOtpWebauthnResponse The response object containing the result of the WebAuthn secret generation.
+     * @throws EsupOtpClientException If an error occurs during the secret generation process.
+     */
+    EsupOtpWebauthnResponse postGenerateWebauthnSecret(String uid) throws EsupOtpClientException;
     
 
     //----------------------------------------------------------------
@@ -146,6 +156,15 @@ public interface EsupOtpClient {
      * @throws EsupOtpClientException If an error occurs during the verification process.
      */
     boolean postVerify(String uid, String otp) throws EsupOtpClientException;
+
+    /**
+     * Verifies the WebAuthn authentication for the specified user.
+     *
+     * @param uid The unique identifier of the user.
+     * @return boolean Returns true if the WebAuthn verification is successful; otherwise, false.
+     * @throws EsupOtpClientException If an error occurs during the WebAuthn verification process.
+     */
+    boolean postVerifyWebauthn(String uid, EsupOtpVerifyWebAuthnRequest body) throws EsupOtpClientException;
 
     /**
      * Deletes a specified transport method for the given user.

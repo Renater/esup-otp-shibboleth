@@ -18,7 +18,7 @@
           p:firstList-ref="#{'%{idp.message.resources:shibboleth.MessageSourceResources}'.trim()}" >
         <property name="secondList">
             <util:list >
-                <value>classpath:/fr/renater/shibboleth/esup/otp/messages</value>
+                <value>classpath:/fr/renater/shibboleth/idp/plugin/authn/esup/otp/messages</value>
             </util:list>
         </property>
     </bean>
@@ -34,6 +34,8 @@
 
     <bean id="EsupOtpClientRegistry" scope="singleton"
           class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpClientRegistry" />
+
+
 
     <bean id="EsupOtpGetUserInfo"
           class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpGetUserInfo" scope="prototype"

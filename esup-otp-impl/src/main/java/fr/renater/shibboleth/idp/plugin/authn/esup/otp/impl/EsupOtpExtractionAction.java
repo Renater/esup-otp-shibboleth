@@ -26,6 +26,8 @@ import javax.annotation.Nullable;
 import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClientException;
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpWebauthnResponse;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.mapper.WebauthnMapper;
 import net.shibboleth.idp.authn.AbstractAuthenticationAction;
 import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
@@ -78,7 +80,7 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
     /** The registry for locating the EsupOtpClient for the established integration.*/
     @NonnullAfterInit
     private EsupOtpClientRegistry clientRegistry;
-    
+
     /** Constructor. */
     public EsupOtpExtractionAction() {
         usernameLookupStrategy = new CanonicalUsernameLookupStrategy();
@@ -206,7 +208,11 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
         // String transportTo = configuredTransports.get(transport);
 
         try {
-            if(!BYPASS_METHOD.equals(transport) && !TOTP_METHOD.equals(transport)) {
+            if(WEBAUTHN_METHOD.equals(transport)) {
+                EsupOtpWebauthnResponse response = client.postGenerateWebauthnSecret(esupOtpContext.getUsername());
+                esupOtpContext.setWebauthnCredentialRequestOptions(WebauthnMapper.INSTANCE.toWebAuthnDto(response));
+                log.debug("Set WebauthnCredentialRequestOptions : {}", esupOtpContext.getWebauthnCredentialRequestOptions());
+            } else if(!BYPASS_METHOD.equals(transport) && !TOTP_METHOD.equals(transport)) {
                 if(SUPPORTED_METHODS_WITHOUT_TRANSPORT.contains(transport)) {
                     client.postSendMessage(esupOtpContext.getUsername(), transport, transport);
                 } else {
