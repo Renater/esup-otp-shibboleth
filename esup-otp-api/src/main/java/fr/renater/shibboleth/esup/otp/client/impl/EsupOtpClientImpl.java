@@ -26,6 +26,10 @@ import java.util.TimeZone;
 import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
+import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
 
 import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
@@ -35,6 +39,9 @@ import fr.renater.shibboleth.esup.otp.config.EsupOtpRestTemplate;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpUsersResponse;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpVerifyResponse;
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpVerifyWebAuthnRequest;
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpVerifyWebAuthnResponse;
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpWebauthnResponse;
 import fr.renater.shibboleth.esup.otp.dto.user.EsupOtpUserInfoResponse;
 import net.shibboleth.shared.primitive.LoggerFactory;
 
@@ -79,6 +86,17 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
             final String hash = getUserHash(uid);
             return post(EsupOtpUriConstants.Public.POST_MESSAGE, EsupOtpResponse.class,
                     true, uid, method, transport, hash);
+        } catch (final NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            throw new EsupOtpClientException("Get user hash failed", e);
+        }
+    }
+
+    @Override
+    public EsupOtpWebauthnResponse postGenerateWebauthnSecret(final String uid) throws EsupOtpClientException {
+        try {
+            final String hash = getUserHash(uid);
+            return post(EsupOtpUriConstants.Public.POST_GENERATE_WEBAUTHN, EsupOtpWebauthnResponse.class,
+                    true, uid, hash);
         } catch (final NoSuchAlgorithmException | UnsupportedEncodingException e) {
             throw new EsupOtpClientException("Get user hash failed", e);
         }
@@ -138,6 +156,33 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
             log.info("Invalid token entered");
         }
         return valid;
+    }
+
+    /** {@inheritDoc} */
+    public boolean postVerifyWebauthn(final String uid, final EsupOtpVerifyWebAuthnRequest body) 
+            throws EsupOtpClientException {
+        try {
+
+            final RequestEntity<?> request = RequestEntity
+                    .post(EsupOtpUriConstants.Public.POST_VERIFY_WEBAUTHN, uid)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body);
+
+            final ResponseEntity<EsupOtpVerifyWebAuthnResponse> response = 
+                    restTemplate.exchange(request, EsupOtpVerifyWebAuthnResponse.class);
+
+            if(response.getStatusCode().is2xxSuccessful()) {
+               return true;
+            }
+
+            throw new EsupOtpClientException(
+                    "Exception occured on call : " + EsupOtpUriConstants.Public.POST_VERIFY_WEBAUTHN +
+                            " with uri variables : " + uid);
+
+        }  catch (final RestClientException e) {
+            throw new EsupOtpClientException("RestClientException occured on call: " + 
+                    EsupOtpUriConstants.Public.POST_VERIFY_WEBAUTHN, e);
+        }
     }
 
     /** {@inheritDoc} */

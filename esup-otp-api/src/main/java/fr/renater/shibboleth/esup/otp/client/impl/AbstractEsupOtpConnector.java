@@ -41,7 +41,7 @@ public abstract class AbstractEsupOtpConnector {
     @Nonnull private final Logger log = LoggerFactory.getLogger(AbstractEsupOtpConnector.class);
     
     /** Rest template. */
-    private final EsupOtpRestTemplate restTemplate;
+    protected final EsupOtpRestTemplate restTemplate;
     
     /**
      * Constructor.

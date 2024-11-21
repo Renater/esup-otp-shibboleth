@@ -81,7 +81,7 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                                     #end
                                     $springMacroRequestContext.getMessage("idp.esup.otp.label.$option", [$arg], $option)
                                     </option>
-                                #end       
+                                #end
                             </select>
 
                             <button class="button float-right" type="submit" name="_eventId_proceed" id="submitButton"

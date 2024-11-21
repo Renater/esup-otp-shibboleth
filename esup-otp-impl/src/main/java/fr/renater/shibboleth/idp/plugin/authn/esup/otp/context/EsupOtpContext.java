@@ -20,6 +20,8 @@ package fr.renater.shibboleth.idp.plugin.authn.esup.otp.context;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnDto;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnPublicKeyCredential;
 import org.opensaml.messaging.context.BaseContext;
 
 import com.google.common.base.Strings;
@@ -45,8 +47,15 @@ public class EsupOtpContext extends BaseContext {
     /** The token code supplied. */
     @Nullable private String transportChoose;
 
+    /** The webauthn dto. */
+    @Nullable private WebAuthnDto webauthnCredentialRequestOptions;
+
+    /** A public key credential with assertion response that is the result of authentication.*/
+    @Nullable private WebAuthnPublicKeyCredential publicKeyCredentialAssertionResponse;
+
     /** The token code supplied. */
     @Nullable private Integer tokenCode;
+
 
     /**
      * Get the username.
@@ -131,6 +140,28 @@ public class EsupOtpContext extends BaseContext {
      *
      * @return the transport choose (method.transport)
      */
+    @Nullable public WebAuthnDto getWebauthnCredentialRequestOptions() {
+        return webauthnCredentialRequestOptions;
+    }
+
+    /**
+     * Set the webauthn values.
+     *
+     * @param webauthndto the webauthn dto.
+     *
+     * @return this context
+     */
+    @Nonnull public EsupOtpContext setWebauthnCredentialRequestOptions(@Nullable final WebAuthnDto webauthndto) {
+        webauthnCredentialRequestOptions = webauthndto;
+
+        return this;
+    }
+
+    /**
+     * Get the transport choose.
+     *
+     * @return the transport choose (method.transport)
+     */
     @Nullable public String getTransportChoose() {
         return transportChoose;
     }
@@ -168,5 +199,15 @@ public class EsupOtpContext extends BaseContext {
         tokenCode = code;
         
         return this;
+    }
+
+    @Nonnull public EsupOtpContext setPublicKeyCredentialAssertionResponse(@Nullable final WebAuthnPublicKeyCredential pkCredAssertion) {
+        this.publicKeyCredentialAssertionResponse = pkCredAssertion;
+
+        return this;
+    }
+
+    @Nullable public WebAuthnPublicKeyCredential getPublicKeyCredentialAssertionResponse() {
+        return publicKeyCredentialAssertionResponse;
     }
 }

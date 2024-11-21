@@ -16,7 +16,6 @@
     <packaging>jar</packaging>
     
     <properties>
-        <lombok.version>1.18.30</lombok.version>    
         <checkstyle.configLocation>${project.basedir}/../resources/checkstyle/checkstyle.xml</checkstyle.configLocation>
         <automatic.module.name>fr.renater.shibboleth.esup.otp.api</automatic.module.name>
     </properties>
@@ -72,7 +71,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
 

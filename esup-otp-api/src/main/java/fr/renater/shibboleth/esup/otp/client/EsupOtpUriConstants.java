@@ -50,6 +50,26 @@ public final class EsupOtpUriConstants {
         public static final String POST_MESSAGE = "/users/{uid}/methods/{method}/transports/{transport}/{hash}";
 
         /**
+         * POST request to generate a WebAuthn secret for the specified user with a security hash.
+         *
+         * Endpoint: /users/{uid}/methods/webauthn/secret/{hash}
+         *
+         * @param uid The unique identifier of the user.
+         * @param hash A hash used for verification or security purposes.
+         */
+        public static final String POST_GENERATE_WEBAUTHN = "/users/{uid}/methods/webauthn/secret/{hash}";
+
+        /**
+         * POST request to verify WebAuthn login for the specified user with a security hash.
+         *
+         * Endpoint: /users/{uid}/webauthn/login/{hash}
+         *
+         * @param uid The unique identifier of the user.
+         * @param hash A hash used for verification or security purposes.
+         */
+        public static final String POST_VERIFY_WEBAUTHN = "/users/{uid}/webauthn/login/{hash}";
+
+        /**
          * Constructor.
          *
          */

@@ -25,6 +25,9 @@ import javax.annotation.Nullable;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
 
+import fr.renater.shibboleth.esup.otp.EsupOtpPrincipal;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnPublicKeyCredential;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.mapper.WebauthnMapper;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
@@ -43,6 +46,8 @@ import net.shibboleth.shared.component.ComponentInitializationException;
 import net.shibboleth.shared.logic.Constraint;
 import net.shibboleth.shared.logic.FunctionSupport;
 import net.shibboleth.shared.primitive.LoggerFactory;
+
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.WEBAUTHN_METHOD;
 
 /**
  * A {@link CredentialValidator} that checks for a {@link EsupOtpContext}.
@@ -168,15 +173,27 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
             }
             throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
         }
-        
+
+        final WebAuthnPublicKeyCredential assertion = esupOtpContext.getPublicKeyCredentialAssertionResponse();
         final Integer tokenCode = esupOtpContext.getTokenCode();
-        if(tokenCode == null) {
-            log.info("{} No tokencode available within EsupOtpContext", getLogPrefix());
-            if (errorHandler != null) {
-                errorHandler.handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS,
-                        AuthnEventIds.NO_CREDENTIALS);
+        if(WEBAUTHN_METHOD.equals(esupOtpContext.getTransportChoose())) {
+            if(assertion == null) {
+                log.warn("{} No PublicKeyCredential with authenticator assertion found, can not authenticate '{}'", getLogPrefix(), username);
+                if (errorHandler != null) {
+                    errorHandler.handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS,
+                            AuthnEventIds.NO_CREDENTIALS);
+                }
+                throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
             }
-            throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
+        } else {
+            if(tokenCode == null) {
+                log.warn("{} No tokencode available within EsupOtpContext", getLogPrefix());
+                if (errorHandler != null) {
+                    errorHandler.handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS,
+                            AuthnEventIds.NO_CREDENTIALS);
+                }
+                throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
+            }
         }
         
         if (matchExpression != null && !matchExpression.matcher(esupOtpContext.getUsername()).matches()) {
@@ -187,11 +204,17 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
         log.debug("{} Attempting to authenticate token code for '{}' ", getLogPrefix(), esupOtpContext.getUsername());
         
         try {
-            if(client.postVerify(username, tokenCode.toString())) {
-                log.info("{} Login by '{}' succeeded", getLogPrefix(), esupOtpContext.getUsername());
-                return populateSubject(new Subject(), profileRequestContext, esupOtpContext);
+            if(WEBAUTHN_METHOD.equals(esupOtpContext.getTransportChoose())) {
+                if(client.postVerifyWebauthn(username, WebauthnMapper.INSTANCE.toEsupOtpVerifyWebAuthnRequestDto(assertion))) {
+                    log.info("{} Login by '{}' with webauthn succeeded", getLogPrefix(), esupOtpContext.getUsername());
+                    return populateSubject(new Subject(), profileRequestContext, esupOtpContext);
+                }
+            } else {
+                if(client.postVerify(username, tokenCode.toString())) {
+                    log.info("{} Login by '{}' succeeded", getLogPrefix(), esupOtpContext.getUsername());
+                    return populateSubject(new Subject(), profileRequestContext, esupOtpContext);
+                }
             }
-            
             throw new LoginException(AuthnEventIds.INVALID_CREDENTIALS);
         } catch (final Exception e) {
             log.info("{} Login by '{}' failed", getLogPrefix(), esupOtpContext.getUsername(), e);
