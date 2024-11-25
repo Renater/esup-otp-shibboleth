@@ -6,7 +6,8 @@
     ## This handles errors that are classified by the message maps in the authentication config.
     #set ($eventId = $authenticationErrorContext.getClassifiedErrors().iterator().next())
     #if ($eventId == "InvalidCredentials")
-        #set ($message = $springMacroRequestContext.getMessage("bad-tokencode.message", "The supplied token code was invalid."))
+        #set ($arg = $esupOtpContext.getTransportChoose().toUpperCase())
+        #set ($message = $springMacroRequestContext.getMessage("bad-tokencode.message", [$arg], "The supplied token code was invalid."))
     #elseif ($eventId != "ReselectFlow")
         #set ($eventKey = $springMacroRequestContext.getMessage("$eventId", "login"))
         #set ($message = $springMacroRequestContext.getMessage("${eventKey}.message", "Login Failure: $eventId"))
