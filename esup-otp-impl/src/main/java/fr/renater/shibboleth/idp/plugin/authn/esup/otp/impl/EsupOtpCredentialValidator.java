@@ -17,6 +17,8 @@
 
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
+import java.security.Principal;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -28,6 +30,7 @@ import javax.security.auth.login.LoginException;
 import fr.renater.shibboleth.esup.otp.EsupOtpPrincipal;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnPublicKeyCredential;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.mapper.WebauthnMapper;
+import org.jetbrains.annotations.NotNull;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
@@ -40,7 +43,6 @@ import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.authn.CredentialValidator;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.authn.context.SubjectCanonicalizationContext;
-import net.shibboleth.idp.authn.principal.TOTPPrincipal;
 import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
 import net.shibboleth.shared.component.ComponentInitializationException;
 import net.shibboleth.shared.logic.Constraint;
@@ -207,12 +209,12 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
             if(WEBAUTHN_METHOD.equals(esupOtpContext.getTransportChoose())) {
                 if(client.postVerifyWebauthn(username, WebauthnMapper.INSTANCE.toEsupOtpVerifyWebAuthnRequestDto(assertion))) {
                     log.info("{} Login by '{}' with webauthn succeeded", getLogPrefix(), esupOtpContext.getUsername());
-                    return populateSubject(new Subject(), profileRequestContext, esupOtpContext);
+                    return populateSubject(new Subject(), esupOtpContext, esupOtpIntegration);
                 }
             } else {
                 if(client.postVerify(username, tokenCode.toString())) {
                     log.info("{} Login by '{}' succeeded", getLogPrefix(), esupOtpContext.getUsername());
-                    return populateSubject(new Subject(), profileRequestContext, esupOtpContext);
+                    return populateSubject(new Subject(), esupOtpContext, esupOtpIntegration);
                 }
             }
             throw new LoginException(AuthnEventIds.INVALID_CREDENTIALS);
@@ -226,31 +228,27 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
         }
     }
 // Checkstyle: CyclomaticComplexity ON
-    
 
     /**
      * Decorate the subject with "standard" content from the validation.
      * 
      * @param subject the subject being returned
-     * @param profileRequestContext current profile request context
-     * @param esupOtpContext the TOTP context being validated
+     * @param esupOtpContext the EsupOtp context being validated
+     * @param esupOtpIntegration the EsupOtp integration
      * 
      * @return the decorated subject
      */
     @Nonnull protected Subject populateSubject(@Nonnull final Subject subject,
-            @Nonnull final ProfileRequestContext profileRequestContext,
-            @Nonnull final EsupOtpContext esupOtpContext) {
+            @Nonnull final EsupOtpContext esupOtpContext,
+            @Nonnull final DefaultEsupOtpIntegration esupOtpIntegration) {
         
         final String username = esupOtpContext.getUsername();
         // Checked earlier.
         assert username != null;
-        subject.getPrincipals().add(new TOTPPrincipal(username));
-        
-        // Bypass c14n. We already operate on a canonical name, so just re-confirm it.
-        profileRequestContext.ensureSubcontext(SubjectCanonicalizationContext.class).setPrincipalName(
-                esupOtpContext.getUsername());
-        
-        return super.populateSubject(subject);
+        subject.getPrincipals().add(new EsupOtpPrincipal(username));
+        final Set<Principal> princs = esupOtpIntegration.getSupportedPrincipals(Principal.class);
+        subject.getPrincipals().addAll(princs);
+        return subject;
     }
     
 }

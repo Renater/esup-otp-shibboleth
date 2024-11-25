@@ -24,18 +24,18 @@
             p:reuseCondition-ref="#{'%{idp.authn.esupOtp.reuseCondition:shibboleth.Conditions.TRUE}'.trim()}"
             p:activationCondition-ref="#{'%{idp.authn.esupOtp.activationCondition:shibboleth.Conditions.TRUE}'.trim()}"
             p:subjectDecorator="#{getObject('%{idp.authn.TOTP.subjectDecorator:}'.trim())}">
-        <property name="supportedPrincipals">
-            <list>
-                <bean parent="shibboleth.SAML2AuthnContextClassRef"
-                    c:classRef="urn:oasis:names:tc:SAML:2.0:ac:classes:TimeSyncToken" />
-                <bean parent="shibboleth.SAML1AuthenticationMethod"
-                    c:method="urn:oasis:names:tc:SAML:1.0:am:HardwareToken" />
-            </list>
-        </property>
         <property name="supportedPrincipalsByString">
             <bean parent="shibboleth.CommaDelimStringArray"
                 c:_0="#{'%{idp.authn.esupOtp.supportedPrincipals:}'.trim()}" />
         </property>
+    </bean>
+
+    <bean p:id="esupotp" class="net.shibboleth.idp.authn.principal.GenericPrincipalService"
+          c:claz="fr.renater.shibboleth.esup.otp.EsupOtpPrincipal">
+        <constructor-arg name="serializer">
+            <bean class="net.shibboleth.idp.authn.principal.SimplePrincipalSerializer"
+                  c:claz="fr.renater.shibboleth.esup.otp.EsupOtpPrincipal" c:name="ESUPOTP" />
+        </constructor-arg>
     </bean>
   
       <!-- Parent bean for use of alternative seed source. -->
