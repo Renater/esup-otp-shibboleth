@@ -159,13 +159,17 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
         #else
             <script>
                 // Fonction de vérification de la longueur du token
-                function checkInputLength() {
+                function validInputLength(addOneChar) {
                     const tokenInputElement = document.getElementById("tokencode");
 
-                    const inputLength = tokenInputElement.textLength + 1;
+                    var inputLength = tokenInputElement.textLength;
+                    if(addOneChar) {
+                        inputLength = inputLength + 1;
+                    }
 
+                    return inputLength == 6;
                     // Check inputLength = 6
-                    disableSubmitButton(inputLength != 6);
+                    // disableSubmitButton(inputLength != 6);
                 }
 
                 function disableSubmitButton(disable) {
@@ -186,7 +190,16 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                         }
                     });
                     tokenInputElement.addEventListener('keypress', (e) => {
-                        checkInputLength();
+                        if (e.key == "Enter") {
+                            e.preventDefault();
+                            const validCode = validInputLength(false);
+                            if(validCode) {
+                                document.getElementById("submitButton").click();
+                            }
+                        } else {
+                            const validCode = validInputLength(true);
+                            disableSubmitButton(!validCode);
+                        }
                     });
                 });
             </script>
