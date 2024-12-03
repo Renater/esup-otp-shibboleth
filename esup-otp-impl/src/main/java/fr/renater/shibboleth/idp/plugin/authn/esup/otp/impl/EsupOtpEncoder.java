@@ -8,27 +8,43 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnDto;
+import net.shibboleth.shared.annotation.ParameterName;
+import net.shibboleth.shared.annotation.constraint.NotEmpty;
 import net.shibboleth.shared.primitive.LoggerFactory;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
 import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.TimeZone;
 
+/**
+ * An Custom encoder for esup otp plugin.
+ */
+@ThreadSafe
 public final class EsupOtpEncoder {
 
     /** Class logger. */
     @Nonnull
     private static final Logger log = LoggerFactory.getLogger(EsupOtpEncoder.class);
 
-    private static String usersSecret;
+    @NotEmpty private String usersSecret;
 
-    /** Private constructor */
-    private EsupOtpEncoder() {
-        // Do nothing
+    public EsupOtpEncoder() {
+
+    }
+
+    /** Constructor */
+    public EsupOtpEncoder(@Nonnull @NotEmpty @ParameterName(name="usersSecret") String usrSecret) {
+        this.usersSecret = usrSecret;
+    }
+
+    public void setUsersSecret(@Nonnull @NotEmpty final String usrSecret) {
+        usersSecret = usrSecret;
     }
 
     public static ObjectMapper getWebAuthnObjectMapper() {
@@ -72,14 +88,20 @@ public final class EsupOtpEncoder {
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
      */
-    /*public static String getUserHash(final String uid) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public String getUserHash(final String uid) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        log.debug("Get user hash start");
+        if (usersSecret == null) {
+            log.warn("Users secret not configured");
+            return null;
+        }
         final MessageDigest md5Md = MessageDigest.getInstance("MD5");
-        final String md5 = bytesToHex(md5Md.digest(esupOtpIntegration.getUsersSecret().getBytes())).toLowerCase();
+        final String md5 = bytesToHex(md5Md.digest(usersSecret.getBytes())).toLowerCase();
         final String salt = md5 + getSalt(uid);
         final MessageDigest sha256Md = MessageDigest.getInstance("SHA-256");
         final String userHash = bytesToHex(sha256Md.digest(salt.getBytes())).toLowerCase();
+        log.debug("Get user hash for {} = {}", uid, userHash);
         return userHash;
-    }*/
+    }
 
     /**
      * Convert bytes array to hexadecimal string.

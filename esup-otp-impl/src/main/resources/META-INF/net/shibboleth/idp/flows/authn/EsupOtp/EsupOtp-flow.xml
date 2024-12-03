@@ -38,7 +38,7 @@
 
     <!-- Then check for propagation via password (or other) form. -->
     <action-state id="EsupOtpExtraction">
-        <evaluate expression="EsupOtpExtraction" />
+        <evaluate expression="EsupOtpExtractionAction" />
         <evaluate expression="'proceed'" />
 
         <transition on="proceed" to="DisplayEsupOtpTokenCodeView" />
@@ -57,8 +57,8 @@
 			<evaluate expression="authenticationContext.getSubcontext(T(net.shibboleth.idp.authn.context.AuthenticationWarningContext))" result="viewScope.authenticationWarningContext" />
 			<evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().getBean('TOTPCSPDigester')" result="viewScope.cspDigester" />
 			<evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().getBean('TOTPCSPNonce')" result="viewScope.cspNonce" />
+			<evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().getBean('EsupOTPEncoder')" result="viewScope.esupOtpEncoder" />
 			<evaluate expression="T(net.shibboleth.shared.codec.HTMLEncoder)" result="viewScope.encoder" />
-			<evaluate expression="T(fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpEncoder)" result="viewScope.esupOtpEncoder" />
 			<evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="viewScope.request" />
 			<evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="viewScope.response" />
 			<evaluate
@@ -66,11 +66,12 @@
 					result="viewScope.custom" />
 			<!--<evaluate expression="authenticationContext.ensureSubcontext(T(fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext))" result="viewScope.esupOtpContext" />-->
 		</on-render>
+		<transition on="resend" to="EsupOtpExtraction" />
 		<transition on="proceed" to="EsupOtpExtractionToken" />
 	</view-state>
 
 	<action-state id="EsupOtpExtractionToken">
-		<evaluate expression="EsupOtpExtractionToken" />
+		<evaluate expression="EsupOtpExtractionTokenAction" />
 		<evaluate expression="'proceed'" />
 
 		<transition on="proceed" to="ValidateEsupOtpCredentials" />
