@@ -17,17 +17,30 @@
 
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.BYPASS_METHOD;
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.SUPPORTED_METHODS_WITHOUT_TRANSPORT;
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.TOTP_METHOD;
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.WEBAUTHN_METHOD;
+
 import java.util.Map;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.opensaml.messaging.context.navigate.ChildContextLookup;
+import org.opensaml.profile.action.ActionSupport;
+import org.opensaml.profile.action.EventIds;
+import org.opensaml.profile.context.ProfileRequestContext;
+import org.slf4j.Logger;
+
 import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClientException;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpWebauthnResponse;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.mapper.WebauthnMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import net.shibboleth.idp.authn.AbstractAuthenticationAction;
 import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
@@ -38,17 +51,6 @@ import net.shibboleth.shared.component.ComponentInitializationException;
 import net.shibboleth.shared.logic.Constraint;
 import net.shibboleth.shared.logic.FunctionSupport;
 import net.shibboleth.shared.primitive.LoggerFactory;
-
-import org.opensaml.messaging.context.navigate.ChildContextLookup;
-import org.opensaml.profile.action.ActionSupport;
-import org.opensaml.profile.action.EventIds;
-import org.opensaml.profile.context.ProfileRequestContext;
-import org.slf4j.Logger;
-
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
-import jakarta.servlet.http.HttpServletRequest;
-
-import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.*;
 
 /**
  * An action that derives a username from a lookup strategy, get otp code from form or header,
@@ -185,18 +187,24 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
         
         final HttpServletRequest request = getHttpServletRequest();
         if (request == null) {
-            log.debug("{} Profile action does not contain an HttpServletRequest", getLogPrefix());
+            log.warn("{} Profile action does not contain an HttpServletRequest", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
             return;
         }
-        
-        final String transport = extractTransport(request);
-        if (transport == null) {
-            ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
-            return;
+
+        // In case of resend we reuse transport already choose.
+        if (esupOtpContext.getTransportChoose() == null) {
+            final String transport = extractTransport(request);
+            if(transport == null) {
+                log.warn("{} No transport can be extracted from HttpServletRequest", getLogPrefix());
+                ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
+                return;
+            }
+            log.debug("Transport choose : {}", transport);
+            esupOtpContext.setTransportChoose(transport);
+        } else {
+            log.debug("Reuse transport choose : {}", esupOtpContext.getTransportChoose());
         }
-        log.debug("Transport choose : {}", transport);
-        esupOtpContext.setTransportChoose(transport);
         
         Map<String, String> configuredTransports = esupOtpContext.getConfiguredTransports();
         if(configuredTransports == null || configuredTransports.isEmpty()) {
@@ -204,24 +212,22 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
             ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
             return;
         }
-        
-        // String transportTo = configuredTransports.get(transport);
 
         try {
-            if(WEBAUTHN_METHOD.equals(transport)) {
+            if(WEBAUTHN_METHOD.equals(esupOtpContext.getTransportChoose())) {
                 EsupOtpWebauthnResponse response = client.postGenerateWebauthnSecret(esupOtpContext.getUsername());
                 esupOtpContext.setWebauthnCredentialRequestOptions(WebauthnMapper.INSTANCE.toWebAuthnDto(response));
                 log.debug("Set WebauthnCredentialRequestOptions : {}", esupOtpContext.getWebauthnCredentialRequestOptions());
-            } else if(!BYPASS_METHOD.equals(transport) && !TOTP_METHOD.equals(transport)) {
-                if(SUPPORTED_METHODS_WITHOUT_TRANSPORT.contains(transport)) {
-                    client.postSendMessage(esupOtpContext.getUsername(), transport, transport);
+            } else if(!BYPASS_METHOD.equals(esupOtpContext.getTransportChoose()) && !TOTP_METHOD.equals(esupOtpContext.getTransportChoose())) {
+                if(SUPPORTED_METHODS_WITHOUT_TRANSPORT.contains(esupOtpContext.getTransportChoose())) {
+                    client.postSendMessage(esupOtpContext.getUsername(), esupOtpContext.getTransportChoose(), esupOtpContext.getTransportChoose());
                 } else {
-                    String[] method_transport = transport.split("\\.");
+                    String[] method_transport = esupOtpContext.getTransportChoose().split("\\.");
                     client.postSendMessage(esupOtpContext.getUsername(), method_transport[0], method_transport[1]);
                 }
             }
         } catch (EsupOtpClientException e) {
-            log.info("{} Send message with option '{}' to '{}' failed", getLogPrefix(), transport, esupOtpContext.getUsername(), e);
+            log.error("{} Send message with option '{}' to '{}' failed", getLogPrefix(), esupOtpContext.getTransportChoose(), esupOtpContext.getUsername(), e);
             authenticationContext.ensureSubcontext(AuthenticationErrorContext.class).getClassifiedErrors().add(
                     CLIENT_EXCEPTION);
             ActionSupport.buildEvent(profileRequestContext, CLIENT_EXCEPTION);
