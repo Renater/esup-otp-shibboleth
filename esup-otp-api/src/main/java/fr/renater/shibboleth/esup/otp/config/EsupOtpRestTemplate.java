@@ -19,6 +19,12 @@ package fr.renater.shibboleth.esup.otp.config;
 
 import javax.annotation.Nonnull;
 
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.core5.util.TimeValue;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -30,6 +36,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
+
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -52,11 +60,35 @@ public class EsupOtpRestTemplate extends RestTemplate {
     }
     
     private @Nonnull ClientHttpRequestFactory getClientHttpRequestFactory() {
-        final int timeout = 5000;
         final HttpComponentsClientHttpRequestFactory clientHttpRequestFactory 
             = new HttpComponentsClientHttpRequestFactory();
-        clientHttpRequestFactory.setConnectTimeout(timeout);
+        clientHttpRequestFactory.setHttpClient(httpClient());
         return clientHttpRequestFactory;
+    }
+
+    private CloseableHttpClient httpClient() {
+        return HttpClientBuilder.create()
+                .setDefaultRequestConfig(requestConfig())
+                .evictExpiredConnections()
+                .evictIdleConnections(TimeValue.of(5000, TimeUnit.MILLISECONDS))
+                .setRetryStrategy(new RetryOverHttpError())
+                .setConnectionManager(poolingHttpClientConnectionManager())
+                .build();
+    }
+
+    private RequestConfig requestConfig() {
+        return RequestConfig.custom()
+                .setConnectionRequestTimeout(5000, TimeUnit.MILLISECONDS)
+                .build();
+    }
+
+    private PoolingHttpClientConnectionManager poolingHttpClientConnectionManager() {
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+        ConnectionConfig connectionConfig = ConnectionConfig.custom()
+                .setConnectTimeout(5000, TimeUnit.MILLISECONDS)
+                .build();
+        connectionManager.setDefaultConnectionConfig(connectionConfig);
+        return connectionManager;
     }
     
     private MappingJackson2HttpMessageConverter createMappingJacksonHttpMessageConverter() {
