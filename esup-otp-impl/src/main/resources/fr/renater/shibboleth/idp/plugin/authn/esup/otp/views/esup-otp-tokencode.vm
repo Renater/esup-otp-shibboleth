@@ -36,35 +36,12 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
             <script src="$apiUrl/js/socket.io.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
             <script type="text/javascript">
-                function raw_hash(algo, data) {
-                    if (algo === 'MD5') {
-                        return CryptoJS.MD5(data).toString(CryptoJS.enc.Hex);
-                    } else if (algo === 'SHA256') {
-                        return CryptoJS.SHA256(data).toString(CryptoJS.enc.Hex);
-                    } else {
-                        throw new Error('Algorithme non supporté');
-                    }
-                }
-
-                /** @param {string} data */
-                function md5(data) {
-                    return raw_hash('MD5', data)
-                }
-
-                /** @param {String} uid */
-                function get_hash() {
-                    const d = new Date();
-                    const present_salt = d.getUTCDate()+d.getUTCHours().toString();
-                    //console.log("present-salt for ${esupOtpContext.getUsername()}:", present_salt);
-                    return raw_hash('SHA256', raw_hash('MD5', "${environment.getProperty('idp.esup.otp.usersSecret')}") + "${esupOtpContext.getUsername()}" + present_salt);
-                }
-
                 // Fonction d'initialisation du socket
                 function initializeSocket() {
                     var socket = io.connect("$apiUrl", {
                         reconnect: true,
                         path: "/sockets",
-                        query: "uid=${esupOtpContext.getUsername()}&hash=" + get_hash() + "&app=cas"
+                        query: "uid=${esupOtpContext.getUsername()}&hash=$esupOtpEncoder.getUserHash($esupOtpContext.getUsername())&app=cas"
                     });
                     socket.on('connect', function () {
                         console.log("Socket connect");
@@ -85,6 +62,7 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
             </script>
             <style>
                 .loader {
+                    margin: 8px auto;
                     border: 8px solid #f3f3f3;
                     border-top: 8px solid #0491c6;
                     border-radius: 50%;

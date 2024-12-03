@@ -44,21 +44,19 @@
           p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy"
           p:clientRegistry-ref="EsupOtpClientRegistry" />
 
-    <bean id="EsupOtpExtraction"
+    <bean id="EsupOtpExtractionAction"
           class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionAction" scope="prototype"
           p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
           p:usernameLookupStrategy-ref="DefaultUsernameLookupStrategy"
           p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy"
           p:clientRegistry-ref="EsupOtpClientRegistry" />
 
-    <bean id="EsupOtpExtractionToken"
-          class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionTokenAction" scope="prototype"
+    <bean id="EsupOtpExtractionTokenAction" class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionTokenAction" scope="prototype"
           p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
           p:usernameLookupStrategy-ref="DefaultUsernameLookupStrategy"
           p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy" />
             
-    <bean id="ValidateEsupOtpCredentials"
-        class="net.shibboleth.idp.authn.impl.ValidateCredentials" scope="prototype"
+    <bean id="ValidateEsupOtpCredentials" class="net.shibboleth.idp.authn.impl.ValidateCredentials" scope="prototype"
         p:validators-ref="EsupOtpValidator"
         p:resultCachingPredicate="#{getObject('shibboleth.authn.TOTP.resultCachingPredicate')}"
         p:addDefaultPrincipals="%{idp.authn.TOTP.addDefaultPrincipals:true}"
@@ -67,8 +65,7 @@
     
     <!-- These are singletons acting as default "back-ends". -->
 
-    <bean id="EsupOtpValidator"
-          class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpCredentialValidator" lazy-init="true"
+    <bean id="EsupOtpValidator" class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpCredentialValidator" lazy-init="true"
           p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy"
           p:clientRegistry-ref="EsupOtpClientRegistry" />
 
@@ -96,9 +93,11 @@
         </constructor-arg>
     </bean>
 
+    <bean id="EsupOTPEncoder" class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpEncoder" lazy-init="true"
+          p:usersSecret="%{idp.esup.otp.usersSecret:}" />
+
     <!-- Esup Otp Integration -->
-    <bean id="DefaultEsupOtpIntegration" lazy-init="true"
-          class="fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration"
+    <bean id="DefaultEsupOtpIntegration" class="fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration" lazy-init="true"
           p:APIHost="%{idp.esup.otp.apiHost:http://localhost}"
           p:usersSecret="%{idp.esup.otp.usersSecret:none}"
           p:apiPassword="%{idp.esup.otp.apiPassword:none}"
