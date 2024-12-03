@@ -26,6 +26,7 @@
 #set ($rpContext = $profileRequestContext.getSubcontext('net.shibboleth.profile.context.RelyingPartyContext'))
 ##
 #set ($onClick = "this.childNodes[0].nodeValue='#springMessageText('idp.login.pleasewait', 'Logging in, please wait...')'")
+#set ($onClickResend = "this.childNodes[0].nodeValue='#springMessageText('idp.esup.otp.resend.processed', 'Resend processed, please wait...')'")
 $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 'sha256-$cspDigester.apply($onClick)'")
 <!DOCTYPE html>
 <html>
@@ -300,6 +301,11 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                         </p>
                         <div class="loader"></div>
                     </article>
+                    <article class="small-10 medium-10 large-7 small-centered text-center">
+                        <p class="callout primary">
+                            #springMessageText("idp.esup.otp.push.retry", "Resend push notification.")
+                        </p>
+                    </article>
                 #elseif ("webauthn" == $esupOtpContext.getTransportChoose())
                     <form id="authenticator_assertion_form" action="$flowExecutionUrl" method="post">
                         <input type="hidden" id="publicKeyCredential" name="publicKeyCredential" />
@@ -335,7 +341,7 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 
                             <label for="tokencode"><i class="fa fa-lg fa-lock"></i> #springMessageText("idp.totp.field", "Token Code")</label>
                             <div class="input-wrap token">
-                                <input class="form-element form-field token-input input" id="tokencode" name="tokencode" type="text" inputmode="numeric" value="" minlength="6" maxlength="6" placeholder="000000" autocomplete="off" required />
+                                <input class="form-element form-field token-input input" id="tokencode" name="tokencode" type="text" inputmode="numeric" value="" placeholder="000000" autocomplete="off" />
                                 <div class="one-input token-fake"></div>
                                 <div class="one-input token-fake"></div>
                                 <div class="one-input token-fake"></div>
@@ -346,6 +352,9 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                             </div>
 
 
+                            <button class="button float-left" type="submit" name="_eventId_resend" id="retryButton"
+                                    onClick="$onClickResend"
+                                >#springMessageText("idp.esup.otp.resend", "Resend")</button>
                             <button class="button float-right" type="submit" name="_eventId_proceed" id="submitButton"
                                 disabled
                                 onClick="$onClick"
