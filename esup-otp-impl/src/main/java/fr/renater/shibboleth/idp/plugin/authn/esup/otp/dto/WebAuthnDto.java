@@ -1,9 +1,15 @@
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto;
 
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpWebauthnResponse;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
 import lombok.Data;
 
 import java.util.List;
 
+/**
+ * Webauthn Dto to transform {@link EsupOtpWebauthnResponse} from the API
+ * to store into esup otp context {@link EsupOtpContext}.
+ */
 @Data
 public class WebAuthnDto {
 

@@ -23,6 +23,9 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * Esup otp webauthn response dto retruned by the API.
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 public class EsupOtpWebauthnResponse extends EsupOtpResponse {
