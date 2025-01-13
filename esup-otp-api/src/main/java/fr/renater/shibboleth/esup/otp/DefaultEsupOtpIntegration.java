@@ -75,6 +75,9 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     /** The list of supported methods for otp.*/
     @GuardedBy("this") @Nonnull @NonnullElements private Set<String> supportedMethods;
 
+    /** The max send counter.*/
+    @GuardedBy("this") private int maxRetry;
+
     /** The supported principal subject. */
     @GuardedBy("this") @Nonnull private final Subject supportedPrincipals;
 
@@ -192,7 +195,6 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     /** {@inheritDoc} */
     @Nullable public synchronized String getHealthCheckEndpoint() {
         checkComponentActive();
-        assert healthEndpoint != null;
         return healthEndpoint;
     }
     
@@ -203,8 +205,7 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
      */
     public synchronized void setHealthCheckEndpoint(@Nullable final String endpoint) {
         checkSetterPreconditions();        
-        healthEndpoint = Constraint.isNotNull(StringSupport.trimOrNull(endpoint), 
-                "Health check endpoint cannot be null or empty");
+        healthEndpoint = StringSupport.trimOrNull(endpoint);
     }
     
     /** {@inheritDoc} */
@@ -237,6 +238,22 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     @Nonnull public synchronized Set<String> getSupportedMethods() {
         return supportedMethods;
     }
+
+    /**
+     * Set the max retry to use.
+     *
+     * @param maxCounter
+     */
+    public synchronized void setMaxRetry(final int maxCounter) {
+        checkSetterPreconditions();
+        maxRetry = maxCounter;
+    }
+
+    /** {@inheritDoc} */
+    public synchronized int getMaxRetry() {
+        return maxRetry;
+    }
+
 
     @Nonnull
     @Override

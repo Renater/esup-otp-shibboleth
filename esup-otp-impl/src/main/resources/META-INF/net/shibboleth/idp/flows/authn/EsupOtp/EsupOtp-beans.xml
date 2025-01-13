@@ -99,12 +99,13 @@
 
     <!-- Esup Otp Integration -->
     <bean id="DefaultEsupOtpIntegration" class="fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration" lazy-init="true"
-          p:APIHost="%{idp.esup.otp.apiHost:http://localhost}"
-          p:usersSecret="%{idp.esup.otp.usersSecret:none}"
-          p:apiPassword="%{idp.esup.otp.apiPassword:none}"
+          p:APIHost="%{idp.esup.otp.apiHost:}"
+          p:usersSecret="%{idp.esup.otp.usersSecret:}"
+          p:apiPassword="%{idp.esup.otp.apiPassword:}"
           p:registeredRedirectURI="%{idp.esup.otp.redirectURL:}"
-          p:healthCheckEndpoint="%{idp.esup.otp.endpoint.health:/v1/health_check}"
-          p:supportedMethods="%{idp.esup.otp.supportedMethods:totp,webauthn,push,bypass,random_code,random_code_mail}"/>
+          p:healthCheckEndpoint="%{idp.esup.otp.endpoint.health:}"
+          p:supportedMethods="%{idp.esup.otp.supportedMethods:totp,webauthn,push,bypass,random_code,random_code_mail}"
+          p:maxRetry="%{idp.esup.otp.send.counter:3}" />
     <bean id="EsupOtpIntegrationStrategy" parent="shibboleth.Functions.Constant"
           c:target-ref="DefaultEsupOtpIntegration" />
 
