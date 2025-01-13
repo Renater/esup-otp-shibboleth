@@ -41,6 +41,7 @@ public interface WebauthnMapper {
     EsupOtpVerifyWebAuthnRequest toEsupOtpVerifyWebAuthnRequestDto(WebAuthnPublicKeyCredential webAuthnPublicKeyCredential);
 
     @Mapping(target = "rawId", expression = "java(bufferToBase64URLString(webAuthnPublicKeyCredential.getRawId()))")
+    @Mapping(target = "authenticatorAttachment", expression = "java(toAuthenticatorAttachment(webAuthnPublicKeyCredential.getAuthenticatorAttachment()))")
     EsupOtpVerifyWebAuthnRequest.WebAuthnResponse toWebAuthnResponseDto(WebAuthnPublicKeyCredential webAuthnPublicKeyCredential);
 
     @Mapping(target = "authenticatorData", expression = "java(bufferToBase64URLString(webAuthnAuthenticatorAssertionResponse.getAuthenticatorData()))")
@@ -89,5 +90,9 @@ public interface WebauthnMapper {
 
     default int getTimeout() {
         return 3 * 60000;
+    }
+
+    default EsupOtpVerifyWebAuthnRequest.WebAuthnResponse.AuthenticatorAttachment toAuthenticatorAttachment(String value) {
+        return EsupOtpVerifyWebAuthnRequest.WebAuthnResponse.AuthenticatorAttachment.fromString(value);
     }
 }

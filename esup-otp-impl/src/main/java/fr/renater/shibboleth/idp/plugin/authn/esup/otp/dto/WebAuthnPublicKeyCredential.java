@@ -17,6 +17,8 @@ public class WebAuthnPublicKeyCredential {
 
     private WebAuthnAuthenticatorAssertionResponse response;
 
+    private String authenticatorAttachment;
+
     @Data
     public static class WebAuthnAuthenticatorAssertionResponse {
 

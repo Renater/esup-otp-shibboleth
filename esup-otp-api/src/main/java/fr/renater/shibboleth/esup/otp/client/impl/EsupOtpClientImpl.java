@@ -162,24 +162,25 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     public boolean postVerifyWebauthn(final String uid, final EsupOtpVerifyWebAuthnRequest body) 
             throws EsupOtpClientException {
         try {
-
+            final String hash = getUserHash(uid);
             final RequestEntity<?> request = RequestEntity
-                    .post(EsupOtpUriConstants.Public.POST_VERIFY_WEBAUTHN, uid)
+                    .post(EsupOtpUriConstants.Public.POST_VERIFY_WEBAUTHN, uid, hash)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(body);
 
-            final ResponseEntity<EsupOtpVerifyWebAuthnResponse> response = 
+            final ResponseEntity<EsupOtpVerifyWebAuthnResponse> response =
                     restTemplate.exchange(request, EsupOtpVerifyWebAuthnResponse.class);
 
-            if(response.getStatusCode().is2xxSuccessful()) {
-               return true;
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return true;
             }
 
             throw new EsupOtpClientException(
                     "Exception occured on call : " + EsupOtpUriConstants.Public.POST_VERIFY_WEBAUTHN +
                             " with uri variables : " + uid);
-
-        }  catch (final RestClientException e) {
+        } catch (final NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            throw new EsupOtpClientException("Get user hash failed", e);
+        } catch (final RestClientException e) {
             throw new EsupOtpClientException("RestClientException occured on call: " + 
                     EsupOtpUriConstants.Public.POST_VERIFY_WEBAUTHN, e);
         }
