@@ -35,7 +35,6 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
         #parse("head.vm")
         #if ("push" == $esupOtpContext.getTransportChoose())
             <script src="$apiUrl/js/socket.io.js"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
             <script type="text/javascript">
                 // Fonction d'initialisation du socket
                 function initializeSocket() {
@@ -180,6 +179,13 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                             disableSubmitButton(!validCode);
                         }
                     });
+
+                    var canRetry = true;
+                    const maxRetry = $environment.getProperty('idp.esup.otp.send.counter', -1);
+                    if(maxRetry != -1) {
+                        canRetry = $esupOtpContext.getSendCounter() <= maxRetry;
+                    }
+                    document.getElementById("retryButton").disabled = canRetry;
                 });
             </script>
             <style>
@@ -351,10 +357,10 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                                 <div class="token-overflow"></div>
                             </div>
 
-
                             <button class="button float-left" type="submit" name="_eventId_resend" id="retryButton"
                                     onClick="$onClickResend"
                                 >#springMessageText("idp.esup.otp.resend", "Resend")</button>
+
                             <button class="button float-right" type="submit" name="_eventId_proceed" id="submitButton"
                                 disabled
                                 onClick="$onClick"

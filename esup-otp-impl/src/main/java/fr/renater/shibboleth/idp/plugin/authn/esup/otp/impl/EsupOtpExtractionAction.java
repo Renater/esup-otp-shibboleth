@@ -219,11 +219,16 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
                 esupOtpContext.setWebauthnCredentialRequestOptions(WebauthnMapper.INSTANCE.toWebAuthnDto(response));
                 log.debug("Set WebauthnCredentialRequestOptions : {}", esupOtpContext.getWebauthnCredentialRequestOptions());
             } else if(!BYPASS_METHOD.equals(esupOtpContext.getTransportChoose()) && !TOTP_METHOD.equals(esupOtpContext.getTransportChoose())) {
-                if(SUPPORTED_METHODS_WITHOUT_TRANSPORT.contains(esupOtpContext.getTransportChoose())) {
-                    client.postSendMessage(esupOtpContext.getUsername(), esupOtpContext.getTransportChoose(), esupOtpContext.getTransportChoose());
+                if(esupOtpContext.getSendCounter() > esupOtpIntegration.getMaxRetry()) {
+                    log.warn("{} send message already tried {}", getLogPrefix(), esupOtpContext.getSendCounter());
                 } else {
-                    String[] method_transport = esupOtpContext.getTransportChoose().split("\\.");
-                    client.postSendMessage(esupOtpContext.getUsername(), method_transport[0], method_transport[1]);
+                    if(SUPPORTED_METHODS_WITHOUT_TRANSPORT.contains(esupOtpContext.getTransportChoose())) {
+                        client.postSendMessage(esupOtpContext.getUsername(), esupOtpContext.getTransportChoose(), esupOtpContext.getTransportChoose());
+                    } else {
+                        String[] method_transport = esupOtpContext.getTransportChoose().split("\\.");
+                        client.postSendMessage(esupOtpContext.getUsername(), method_transport[0], method_transport[1]);
+                    }
+                    esupOtpContext.setSendCounter(esupOtpContext.getSendCounter() + 1);
                 }
             }
         } catch (EsupOtpClientException e) {

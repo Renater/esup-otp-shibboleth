@@ -47,6 +47,8 @@ public class EsupOtpContext extends BaseContext {
     /** The token code supplied. */
     @Nullable private String transportChoose;
 
+    private int sendCounter;
+
     /** The webauthn dto. */
     @Nullable private WebAuthnDto webauthnCredentialRequestOptions;
 
@@ -175,6 +177,28 @@ public class EsupOtpContext extends BaseContext {
      */
     @Nonnull public EsupOtpContext setTransportChoose(@Nullable final String methodAndTransport) {
         transportChoose = methodAndTransport;
+
+        return this;
+    }
+
+    /**
+     * Get counter of sent.
+     *
+     * @return the sendCounter.
+     */
+    @Nonnull public int getSendCounter() {
+        return sendCounter;
+    }
+
+    /**
+     * Set the counter of sent.
+     *
+     * @param counter the counter of send message done.
+     *
+     * @return this context
+     */
+    @Nonnull public EsupOtpContext setSendCounter(@Nonnull final int counter) {
+        sendCounter = counter;
 
         return this;
     }
