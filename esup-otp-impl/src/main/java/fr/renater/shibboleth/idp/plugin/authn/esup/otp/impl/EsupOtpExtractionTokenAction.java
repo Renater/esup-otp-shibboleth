@@ -175,6 +175,7 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
                 return;
             }
 
+            log.debug("{} Extracted publicKeyCredential : {}", getLogPrefix(), pkCredAssertionJson);
 
             try {
                 esupOtpContext.setPublicKeyCredentialAssertionResponse(parseAssertionResponseJson(pkCredAssertionJson));

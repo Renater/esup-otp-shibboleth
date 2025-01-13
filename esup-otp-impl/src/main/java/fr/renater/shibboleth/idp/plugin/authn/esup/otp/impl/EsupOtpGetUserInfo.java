@@ -189,9 +189,6 @@ public class EsupOtpGetUserInfo extends AbstractAuthenticationAction {
             }
             esupOtpContext.setUsername(username);
         }
-
-        // TODO remove
-        esupOtpContext.setUsername("afouque");
         
         try {
         	log.debug("Get Esup otp user infos for username: {}", esupOtpContext.getUsername());
