@@ -28,32 +28,33 @@
         p:basenames-ref="ExtendedMessageSourceResources"
         p:defaultEncoding="UTF-8" />
 
-    <!-- Default username comes from previous c14n or session. -->        
-    <bean id="DefaultUsernameLookupStrategy"
-        class="net.shibboleth.idp.session.context.navigate.CanonicalUsernameLookupStrategy" />
+    <!-- Default username comes from previous c14n or session. -->
+    <bean id="UsernameWithScopeLookupStrategy" scope="prototype"
+          class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.navigate.CanonicalUsernameWithScopeLookupStrategy"
+          p:scopedDelimiter="%{idp.esup.otp.username.scopedDelimiter:@}"
+          p:withScope="%{idp.esup.otp.username.withScope:true}"
+          p:scope="%{idp.scope:}" />
 
     <bean id="EsupOtpClientRegistry" scope="singleton"
           class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpClientRegistry" />
 
-
-
     <bean id="EsupOtpGetUserInfo"
           class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpGetUserInfo" scope="prototype"
           p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
-          p:usernameLookupStrategy-ref="DefaultUsernameLookupStrategy"
+          p:usernameLookupStrategy-ref="UsernameWithScopeLookupStrategy"
           p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy"
           p:clientRegistry-ref="EsupOtpClientRegistry" />
 
     <bean id="EsupOtpExtractionAction"
           class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionAction" scope="prototype"
           p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
-          p:usernameLookupStrategy-ref="DefaultUsernameLookupStrategy"
+          p:usernameLookupStrategy-ref="UsernameWithScopeLookupStrategy"
           p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy"
           p:clientRegistry-ref="EsupOtpClientRegistry" />
 
     <bean id="EsupOtpExtractionTokenAction" class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionTokenAction" scope="prototype"
           p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
-          p:usernameLookupStrategy-ref="DefaultUsernameLookupStrategy"
+          p:usernameLookupStrategy-ref="UsernameWithScopeLookupStrategy"
           p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy" />
             
     <bean id="ValidateEsupOtpCredentials" class="net.shibboleth.idp.authn.impl.ValidateCredentials" scope="prototype"
