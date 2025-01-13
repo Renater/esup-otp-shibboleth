@@ -60,7 +60,7 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     /** Users secret .*/
     @GuardedBy("this") @NonnullAfterInit @NotEmpty private String usersSecret;
     
-    /** password .*/
+    /** API password .*/
     @GuardedBy("this") @NonnullAfterInit @NotEmpty private String apiPassword;
     
     /** The used (by clients) redirect_uri to send the client after authorisation .*/
