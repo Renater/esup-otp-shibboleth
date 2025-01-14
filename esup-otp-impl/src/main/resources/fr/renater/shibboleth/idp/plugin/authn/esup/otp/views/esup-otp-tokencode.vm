@@ -158,14 +158,33 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                 // Ajoute l'écouteur d'événement une fois le contenu chargé
                 document.addEventListener("DOMContentLoaded", function() {
                     const tokenInputElement = document.getElementById("tokencode");
+                    var ctrlDown = false;
+                    const ctrlKey = 17, cmdKey = 91, vKey = 86;
                     tokenInputElement.addEventListener('keydown', (e) => {
+                        // Allow: backspace, delete, tab, escape, enter and .
+                        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+                          // Allow: Ctrl+A,Ctrl+C,Ctrl+V, Command+A
+                          ((e.keyCode == 65 || e.keyCode == 86 || e.keyCode == 67) && (e.ctrlKey === true || e.metaKey === true)) ||
+                          // Allow: home, end, left, right, down, up
+                          (e.keyCode >= 35 && e.keyCode <= 40)) {
+                          // let it happen, don't do anything
+                          return;
+                        }
                         // prevent if input is not number
-                        if (e.key.length == 1 && /[a-zA-Z]/.test(e.key)) {
+                        if (!ctrlDown && e.key.length == 1 && /[a-zA-Z]/.test(e.key)) {
                             e.preventDefault();
                         }
-                        if(e.key == "Backspace" || e.key == "Delete") {
+                        if (e.key == "Backspace" || e.key == "Delete") {
                             disableSubmitButton(true);
                         }
+                    });
+                    $('input').bind('paste',function(e){
+                        var $this = $(this);
+                        setTimeout(function(){
+                            if(/[0-9]{6}/.test($this.val())) {
+                                disableSubmitButton(false);
+                            }
+                        },0); //just break the callstack to let the event finish
                     });
                     tokenInputElement.addEventListener('keypress', (e) => {
                         if (e.key == "Enter") {
