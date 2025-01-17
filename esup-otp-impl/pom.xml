@@ -90,6 +90,11 @@
             <artifactId>shib-support</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>${shib-shared.groupId}</groupId>
+            <artifactId>shib-attribute-resolver-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>${slf4j.groupId}</groupId>
