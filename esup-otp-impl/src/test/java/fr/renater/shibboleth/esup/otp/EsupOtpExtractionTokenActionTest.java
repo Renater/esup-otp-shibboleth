@@ -17,6 +17,9 @@
 
 package fr.renater.shibboleth.esup.otp;
 
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.PUSH_METHOD;
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.WEBAUTHN_METHOD;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
@@ -32,9 +35,6 @@ import net.shibboleth.shared.component.ComponentInitializationException;
 import net.shibboleth.shared.logic.FunctionSupport;
 import net.shibboleth.shared.testing.ConstantSupplier;
 
-import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.PUSH_METHOD;
-import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.WEBAUTHN_METHOD;
-
 /**
  *
  */
@@ -42,7 +42,6 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
     
     private EsupOtpExtractionTokenAction action;
 
-    private EsupOtpContext esupOtpContext;
     
     @BeforeMethod public void setUp() throws ComponentInitializationException {
         super.setUp();

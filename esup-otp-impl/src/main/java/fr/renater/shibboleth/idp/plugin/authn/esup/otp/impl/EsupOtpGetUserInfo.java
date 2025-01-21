@@ -17,20 +17,16 @@
 
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
-import java.util.*;
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.SUPPORTED_METHODS_WITHOUT_TRANSPORT;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
-import net.shibboleth.shared.component.ComponentInitializationException;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.action.EventIds;
@@ -48,11 +44,11 @@ import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.authn.context.AuthenticationErrorContext;
 import net.shibboleth.idp.session.context.navigate.CanonicalUsernameLookupStrategy;
+import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
+import net.shibboleth.shared.component.ComponentInitializationException;
 import net.shibboleth.shared.logic.Constraint;
 import net.shibboleth.shared.logic.FunctionSupport;
 import net.shibboleth.shared.primitive.LoggerFactory;
-
-import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.SUPPORTED_METHODS_WITHOUT_TRANSPORT;
 
 /**
  * An action that get esup otp user informations from a username from a lookup strategy,
@@ -215,10 +211,10 @@ public class EsupOtpGetUserInfo extends AbstractAuthenticationAction {
     }
 
     /**
-     * Get available choices for user
+     * Get available choices for user.
      * @param supportedMethods list of methods configured in properties
      * @param userInfo receive from esup-otp-api
-     * @return
+     * @return list of active methods.
      */
     private Set<String> getChoices(Set<String> supportedMethods, EsupOtpUserInfoResponse userInfo) {
         Map<String, UserMethod> allUserMethodByType = userInfo.getUser().getMethods().getAll();

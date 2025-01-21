@@ -33,6 +33,8 @@ import org.slf4j.Logger;
 import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
 import net.shibboleth.shared.annotation.constraint.NonnullElements;
 import net.shibboleth.shared.annotation.constraint.NotEmpty;
+import net.shibboleth.shared.annotation.constraint.NotLive;
+import net.shibboleth.shared.annotation.constraint.Unmodifiable;
 import net.shibboleth.shared.collection.CollectionSupport;
 import net.shibboleth.shared.component.AbstractInitializableComponent;
 import net.shibboleth.shared.logic.Constraint;
@@ -120,7 +122,6 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     /** {@inheritDoc} */
     @Nullable public synchronized String getClientId() {
         checkComponentActive();
-        assert clientId != null;
         return clientId;
     }
     
@@ -137,7 +138,6 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     /** {@inheritDoc} */
     @Nullable public synchronized String getSecretKey() {
         checkComponentActive();
-        assert secretKey != null;
         return secretKey;
     }
 
@@ -152,7 +152,7 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     }
 
     /** {@inheritDoc} */
-    @Nonnull @NotEmpty public synchronized String getUsersSecret() {
+    @NotEmpty public synchronized String getUsersSecret() {
         return usersSecret;
     }
     
@@ -242,7 +242,7 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     /**
      * Set the max retry to use.
      *
-     * @param maxCounter
+     * @param maxCounter int to define how many retry can be done to recall esup-otp-api
      */
     public synchronized void setMaxRetry(final int maxCounter) {
         checkSetterPreconditions();
@@ -255,9 +255,10 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     }
 
 
-    @Nonnull
+    /** {@inheritDoc} */
     @Override
-    public <T extends Principal> Set<T> getSupportedPrincipals(@Nonnull Class<T> c) {
+    public @Nonnull @Unmodifiable @NotLive <T extends Principal> Set<T> getSupportedPrincipals(
+            @Nonnull final Class<T> c) {
         final Set<T> result = supportedPrincipals.getPrincipals(c);
         assert result != null;
         return result;

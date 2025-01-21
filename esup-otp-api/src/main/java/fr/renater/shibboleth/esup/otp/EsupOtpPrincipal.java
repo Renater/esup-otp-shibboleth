@@ -17,14 +17,15 @@
 
 package fr.renater.shibboleth.esup.otp;
 
+import javax.annotation.Nonnull;
+
 import com.google.common.base.MoreObjects;
+
 import net.shibboleth.idp.authn.principal.CloneablePrincipal;
 import net.shibboleth.shared.annotation.ParameterName;
 import net.shibboleth.shared.annotation.constraint.NotEmpty;
 import net.shibboleth.shared.logic.Constraint;
 import net.shibboleth.shared.primitive.StringSupport;
-
-import javax.annotation.Nonnull;
 
 /** Principal based on a EsupOtp authentication. */
 public class EsupOtpPrincipal implements CloneablePrincipal {
@@ -33,9 +34,12 @@ public class EsupOtpPrincipal implements CloneablePrincipal {
     @Nonnull @NotEmpty
     private String username;
 
-    @Nonnull @NotEmpty
-    private String transport;
-
+    /**
+     * 
+     * Constructor.
+     *
+     * @param name the username
+     */
     public EsupOtpPrincipal(@Nonnull @NotEmpty @ParameterName(name="name") final String name) {
         username = Constraint.isNotNull(StringSupport.trimOrNull(name), "Username cannot be null or empty");
     }

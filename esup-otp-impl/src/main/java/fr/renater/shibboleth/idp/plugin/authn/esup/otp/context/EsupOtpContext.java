@@ -150,13 +150,10 @@ public class EsupOtpContext extends BaseContext {
      * Set the webauthn values.
      *
      * @param webauthndto the webauthn dto.
-     *
-     * @return this context
      */
-    @Nonnull public EsupOtpContext setWebauthnCredentialRequestOptions(@Nullable final WebAuthnDto webauthndto) {
+    public void setWebauthnCredentialRequestOptions(@Nullable final WebAuthnDto webauthndto) {
         webauthnCredentialRequestOptions = webauthndto;
 
-        return this;
     }
 
     /**

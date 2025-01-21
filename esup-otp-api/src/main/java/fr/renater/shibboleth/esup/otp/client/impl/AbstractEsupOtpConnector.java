@@ -22,8 +22,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import net.shibboleth.shared.primitive.LoggerFactory;
-import org.slf4j.Logger;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
@@ -37,11 +35,8 @@ import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
  */
 public abstract class AbstractEsupOtpConnector {
 
-    /** Class logger. */
-    @Nonnull private final Logger log = LoggerFactory.getLogger(AbstractEsupOtpConnector.class);
-    
     /** Rest template. */
-    protected final EsupOtpRestTemplate restTemplate;
+    private final EsupOtpRestTemplate restTemplate;
     
     /**
      * Constructor.
@@ -50,6 +45,15 @@ public abstract class AbstractEsupOtpConnector {
      */
     public AbstractEsupOtpConnector(final EsupOtpRestTemplate esupOtpRestTemplate) {
         restTemplate = esupOtpRestTemplate;
+    }
+    
+    /**
+     * Protected method to get current restTemplate.
+     * 
+     * @return restTemplate.
+     */
+    protected EsupOtpRestTemplate getRestTemplate() {
+        return restTemplate;
     }
     
     protected <T extends EsupOtpResponse> T get(@Nonnull final String uri, 
@@ -66,8 +70,7 @@ public abstract class AbstractEsupOtpConnector {
             if(!response.getStatusCode().is2xxSuccessful()) {
                 throw new EsupOtpClientException(
                         "Exception occured on call : " + uri + 
-                        " with uri variables : " + Arrays.asList(uriVariables).stream()
-                        .collect(Collectors.mapping(Object::toString, Collectors.joining(","))));
+                        " with uri variables : " + getUriVariables(uriVariables));
             }
             
             return response.getBody();
@@ -90,8 +93,7 @@ public abstract class AbstractEsupOtpConnector {
             if(throwException && !response.getStatusCode().is2xxSuccessful()) {
                 throw new EsupOtpClientException(
                         "Exception occured on call : " + uri + 
-                        " with uri variables : " + Arrays.stream(uriVariables)
-                                .map(Object::toString).collect(Collectors.joining(",")));
+                        " with uri variables : " + getUriVariables(uriVariables));
             }
             
             return response.getBody();
@@ -112,8 +114,7 @@ public abstract class AbstractEsupOtpConnector {
             if(!response.getStatusCode().is2xxSuccessful()) {
                 throw new EsupOtpClientException(
                         "Exception occured on call : " + uri + 
-                        " with uri variables : " + Arrays.asList(uriVariables).stream()
-                        .collect(Collectors.mapping(Object::toString, Collectors.joining(","))));
+                        " with uri variables : " + getUriVariables(uriVariables));
             }
         }  catch (final RestClientException e) {
             throw new EsupOtpClientException("RestClientException occured on call: " + uri, e);
@@ -134,8 +135,7 @@ public abstract class AbstractEsupOtpConnector {
             if(!response.getStatusCode().is2xxSuccessful()) {
                 throw new EsupOtpClientException(
                         "Exception occured on call : " + uri + 
-                        " with uri variables : " + Arrays.asList(uriVariables).stream()
-                        .collect(Collectors.mapping(Object::toString, Collectors.joining(","))));
+                        " with uri variables : " + getUriVariables());
             }
             
             return response.getBody();
@@ -143,4 +143,9 @@ public abstract class AbstractEsupOtpConnector {
             throw new EsupOtpClientException("RestClientException occured on call: " + uri, e);
         }
     }
+
+    private String getUriVariables(@Nonnull final Object... uriVariables) {
+        return Arrays.stream(uriVariables).map(Object::toString).collect(Collectors.joining(","));
+    }
+    
 }

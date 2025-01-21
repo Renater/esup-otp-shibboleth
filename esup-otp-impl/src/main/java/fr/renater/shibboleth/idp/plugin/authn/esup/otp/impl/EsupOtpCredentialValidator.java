@@ -17,6 +17,8 @@
 
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.WEBAUTHN_METHOD;
+
 import java.security.Principal;
 import java.util.Set;
 import java.util.function.Function;
@@ -27,29 +29,25 @@ import javax.annotation.Nullable;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
 
-import fr.renater.shibboleth.esup.otp.EsupOtpPrincipal;
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnPublicKeyCredential;
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.mapper.WebauthnMapper;
-import org.jetbrains.annotations.NotNull;
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 
 import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
+import fr.renater.shibboleth.esup.otp.EsupOtpPrincipal;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnPublicKeyCredential;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.mapper.WebauthnMapper;
 import net.shibboleth.idp.authn.AbstractCredentialValidator;
 import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.authn.CredentialValidator;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
-import net.shibboleth.idp.authn.context.SubjectCanonicalizationContext;
 import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
 import net.shibboleth.shared.component.ComponentInitializationException;
 import net.shibboleth.shared.logic.Constraint;
 import net.shibboleth.shared.logic.FunctionSupport;
 import net.shibboleth.shared.primitive.LoggerFactory;
-
-import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.WEBAUTHN_METHOD;
 
 /**
  * A {@link CredentialValidator} that checks for a {@link EsupOtpContext}.

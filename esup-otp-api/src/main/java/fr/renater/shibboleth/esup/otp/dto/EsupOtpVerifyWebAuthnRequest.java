@@ -17,14 +17,14 @@
 
 package fr.renater.shibboleth.esup.otp.dto;
 
+import java.util.stream.Stream;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.stream.Stream;
 
 /**
  * Esup otp verify dto request for webauthn transport.
@@ -69,6 +69,10 @@ public class EsupOtpVerifyWebAuthnRequest {
          */
         private ResponseData response;
 
+        /** 
+         * The authenticator attachment requirement (cross-platform or platform). {@code null} would represent either 
+         * possibility.
+         */
         private AuthenticatorAttachment authenticatorAttachment;
 
         /**
@@ -112,6 +116,25 @@ public class EsupOtpVerifyWebAuthnRequest {
             private String userHandle;
         }
 
+        
+        /**
+         * This enumeration’s values describe authenticators' <a
+         * href="https://www.w3.org/TR/2021/REC-webauthn-2-20210408/#authenticator-attachment-modality">attachment
+         * modalities</a>. Relying Parties use this for two purposes:
+         *
+         * <ul>
+         *   <li>to express a preferred authenticator attachment modality when calling <code>
+         *       navigator.credentials.create()</code> to create a credential, and
+         *   <li>to inform the client of the Relying Party's best belief about how to locate the managing
+         *       authenticators of the credentials listed in {@link
+         *       EsupOtpWebauthnResponse#getAuths()} when calling <code>
+         *       navigator.credentials.get()</code>.
+         * </ul>
+         *
+         * @see <a
+         *     href="https://www.w3.org/TR/2021/REC-webauthn-2-20210408/#enumdef-authenticatorattachment">§5.4.5.
+         *     Authenticator Attachment Enumeration (enum AuthenticatorAttachment) </a>
+         */
         @AllArgsConstructor
         public enum AuthenticatorAttachment {
             /**
@@ -132,16 +155,25 @@ public class EsupOtpVerifyWebAuthnRequest {
              */
             PLATFORM("platform");
 
+            /**
+             * value as String.
+             */
             private final String value;
 
+            /**
+             * Get AuthenticatorAttachment enum from String value.
+             * 
+             * <p>Same function as {@link Enum#valueOf(Class, String)} but don't throw NPE.</p>
+             * 
+             * @param value cross-platform or platform
+             * @return an AuthenticatorAttachment enum
+             */
             @JsonCreator
-            public static AuthenticatorAttachment fromString(String value) {
-                return value != null ? Stream.of(values()).filter(v -> v.value.equals(value)).findAny().orElse(null) : null;
+            public static AuthenticatorAttachment fromString(final String value) {
+                return value != null 
+                        ? Stream.of(values()).filter(v -> v.value.equals(value)).findAny().orElse(null) 
+                        : null;
             }
-
-
-
         }
     }
-
 }

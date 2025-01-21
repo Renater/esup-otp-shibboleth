@@ -17,6 +17,8 @@
 
 package fr.renater.shibboleth.esup.otp.client;
 
+import javax.annotation.Nonnull;
+
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpUsersResponse;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpVerifyWebAuthnRequest;
@@ -161,10 +163,11 @@ public interface EsupOtpClient {
      * Verifies the WebAuthn authentication for the specified user.
      *
      * @param uid The unique identifier of the user.
+     * @param body The request body for post verify webauthn.
      * @return boolean Returns true if the WebAuthn verification is successful; otherwise, false.
      * @throws EsupOtpClientException If an error occurs during the WebAuthn verification process.
      */
-    boolean postVerifyWebauthn(String uid, EsupOtpVerifyWebAuthnRequest body) throws EsupOtpClientException;
+    boolean postVerifyWebauthn(String uid, @Nonnull EsupOtpVerifyWebAuthnRequest body) throws EsupOtpClientException;
 
     /**
      * Deletes a specified transport method for the given user.

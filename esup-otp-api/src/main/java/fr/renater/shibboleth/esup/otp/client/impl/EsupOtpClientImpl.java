@@ -59,7 +59,7 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     /**
      * Constructor.
      *
-     * @param integration
+     * @param integration DefaultEsupOtpIntegration.
      */
     public EsupOtpClientImpl(final DefaultEsupOtpIntegration integration) {
         super(new EsupOtpRestTemplate(integration));
@@ -159,7 +159,7 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     }
 
     /** {@inheritDoc} */
-    public boolean postVerifyWebauthn(final String uid, final EsupOtpVerifyWebAuthnRequest body) 
+    public boolean postVerifyWebauthn(final String uid, @Nonnull final EsupOtpVerifyWebAuthnRequest body) 
             throws EsupOtpClientException {
         try {
             final String hash = getUserHash(uid);
@@ -169,7 +169,7 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
                     .body(body);
 
             final ResponseEntity<EsupOtpVerifyWebAuthnResponse> response =
-                    restTemplate.exchange(request, EsupOtpVerifyWebAuthnResponse.class);
+                    getRestTemplate().exchange(request, EsupOtpVerifyWebAuthnResponse.class);
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 return true;
@@ -233,25 +233,26 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     }
 
     /**
-     * Compute user hash for request need it.
-     * @param uid
-     * @return user hash
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * Génère un hash unique pour un utilisateur donné en utilisant son identifiant (UID).
+     *
+     * @param uid l'identifiant unique de l'utilisateur pour lequel le hash doit être généré.
+     * @return une chaîne représentant le hash de l'UID.
+     * @throws NoSuchAlgorithmException si l'algorithme de hachage spécifié n'est pas pris en charge.
+     * @throws UnsupportedEncodingException si le codage utilisé pour convertir les données n'est pas pris en charge.
      */
-    public String getUserHash(final String uid) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    private String getUserHash(final String uid) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         final MessageDigest md5Md = MessageDigest.getInstance("MD5");
         final String md5 = bytesToHex(md5Md.digest(esupOtpIntegration.getUsersSecret().getBytes())).toLowerCase();
         final String salt = md5 + getSalt(uid);
         final MessageDigest sha256Md = MessageDigest.getInstance("SHA-256");
-        final String userHash = bytesToHex(sha256Md.digest(salt.getBytes())).toLowerCase();
-        return userHash;
+        return bytesToHex(sha256Md.digest(salt.getBytes())).toLowerCase();
     }
 
     /**
-     * Convert bytes array to hexadecimal string.
-     * @param bytes
-     * @return hexadecimal string.
+     * Convertit un tableau d'octets en une représentation hexadécimale sous forme de chaîne de caractères.
+     *
+     * @param bytes le tableau d'octets à convertir.
+     * @return une chaîne représentant les octets sous forme hexadécimale.
      */
     private String bytesToHex(final byte[] bytes) {
         final StringBuilder hexString = new StringBuilder();
@@ -266,16 +267,20 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     }
 
     /**
-     * Get salt for uid.
-     * @param uid
-     * @return salt.
+     * Génère ou récupère une valeur de "sel" (salt) associée à un identifiant utilisateur (UID).
+     * <p>
+     * Le "sel" est utilisé pour renforcer le hachage en ajoutant une donnée unique ou aléatoire,
+     * rendant le hachage plus résistant aux attaques par dictionnaire ou par table arc-en-ciel.
+     * </p>
+     *
+     * @param uid l'identifiant unique de l'utilisateur pour lequel le sel est requis.
+     * @return une chaîne représentant le sel associé à l'UID.
      */
-    public String getSalt(final String uid) {
+    private String getSalt(final String uid) {
         final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         final int day = calendar.get(Calendar.DAY_OF_MONTH);
         final int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        final String salt = uid + day + hour;
-        return salt;
+        return uid + day + hour;
     }
 
 }

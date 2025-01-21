@@ -1,15 +1,16 @@
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.mapper;
 
-import fr.renater.shibboleth.esup.otp.dto.EsupOtpVerifyWebAuthnRequest;
-import fr.renater.shibboleth.esup.otp.dto.EsupOtpWebauthnResponse;
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnDto;
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnPublicKeyCredential;
+import java.util.Base64;
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-import java.util.Base64;
-import java.util.List;
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpVerifyWebAuthnRequest;
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpWebauthnResponse;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnDto;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnPublicKeyCredential;
 
 @Mapper
 public interface WebauthnMapper {
@@ -93,6 +94,7 @@ public interface WebauthnMapper {
     }
 
     default EsupOtpVerifyWebAuthnRequest.WebAuthnResponse.AuthenticatorAttachment toAuthenticatorAttachment(String value) {
+        Enum.valueOf(EsupOtpVerifyWebAuthnRequest.WebAuthnResponse.AuthenticatorAttachment.class, value);
         return EsupOtpVerifyWebAuthnRequest.WebAuthnResponse.AuthenticatorAttachment.fromString(value);
     }
 }

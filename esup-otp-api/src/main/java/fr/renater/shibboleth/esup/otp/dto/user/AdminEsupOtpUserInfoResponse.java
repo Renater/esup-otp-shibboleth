@@ -17,17 +17,15 @@
 
 package fr.renater.shibboleth.esup.otp.dto.user;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * Esup otp user response.
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class AdminEsupOtpUserInfoResponse extends EsupOtpResponse {
 
     /** user description. */
