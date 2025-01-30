@@ -17,6 +17,12 @@
 
 package fr.renater.shibboleth.esup.otp.config;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import javax.annotation.Nonnull;
 
 import org.apache.hc.client5.http.config.ConnectionConfig;
@@ -25,9 +31,10 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.util.TimeValue;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.client.*;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -36,8 +43,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
-
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -54,8 +59,14 @@ public class EsupOtpRestTemplate extends RestTemplate {
     public EsupOtpRestTemplate(final DefaultEsupOtpIntegration esupOtpIntegration) {
         super();
         this.setUriTemplateHandler(new DefaultUriBuilderFactory(esupOtpIntegration.getAPIHost()));
-        this.setRequestFactory(getClientHttpRequestFactory());
-        this.getInterceptors().add(new EsupOtpHttpClientInterceptor(esupOtpIntegration.getApiPassword()));
+        this.setRequestFactory(new BufferingClientHttpRequestFactory(getClientHttpRequestFactory()));
+        List<ClientHttpRequestInterceptor> interceptors = this.getInterceptors();
+        if (CollectionUtils.isEmpty(interceptors)) {
+            interceptors = new ArrayList<>();
+        }
+        interceptors.add(new EsupOtpAuthInterceptor(esupOtpIntegration.getApiPassword()));
+        interceptors.add(new EsupOtpLoggingInterceptor());
+        this.setInterceptors(interceptors);
         this.getMessageConverters().add(0, createMappingJacksonHttpMessageConverter());
     }
     
@@ -66,14 +77,16 @@ public class EsupOtpRestTemplate extends RestTemplate {
         return clientHttpRequestFactory;
     }
 
-    private CloseableHttpClient httpClient() {
-        return HttpClientBuilder.create()
+    private @Nonnull CloseableHttpClient httpClient() {
+        final CloseableHttpClient closeableHttpClient = HttpClientBuilder.create()
                 .setDefaultRequestConfig(requestConfig())
                 .evictExpiredConnections()
                 .evictIdleConnections(TimeValue.of(5000, TimeUnit.MILLISECONDS))
                 .setRetryStrategy(new RetryOverHttpError())
                 .setConnectionManager(poolingHttpClientConnectionManager())
                 .build();
+        assert closeableHttpClient != null;
+        return closeableHttpClient;
     }
 
     private RequestConfig requestConfig() {
@@ -83,8 +96,8 @@ public class EsupOtpRestTemplate extends RestTemplate {
     }
 
     private PoolingHttpClientConnectionManager poolingHttpClientConnectionManager() {
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-        ConnectionConfig connectionConfig = ConnectionConfig.custom()
+        final PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+        final ConnectionConfig connectionConfig = ConnectionConfig.custom()
                 .setConnectTimeout(5000, TimeUnit.MILLISECONDS)
                 .build();
         connectionManager.setDefaultConnectionConfig(connectionConfig);
@@ -98,7 +111,7 @@ public class EsupOtpRestTemplate extends RestTemplate {
         return converter;
     }
     
-    private ObjectMapper createObjectMapper() {
+    private @Nonnull ObjectMapper createObjectMapper() {
 
         final ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
@@ -107,4 +120,10 @@ public class EsupOtpRestTemplate extends RestTemplate {
         return objectMapper;
    }
 
+    @Override
+    protected ClientHttpRequest createRequest(URI url, HttpMethod method) throws IOException {
+        ClientHttpRequest request = getRequestFactory().createRequest(url, method);
+        getClientHttpRequestInitializers().forEach(initializer -> initializer.initialize(request));
+        return request;
+    }
 }

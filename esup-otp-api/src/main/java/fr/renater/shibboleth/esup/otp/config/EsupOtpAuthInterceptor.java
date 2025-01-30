@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import javax.annotation.Nonnull;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -29,29 +30,33 @@ import org.springframework.http.client.ClientHttpResponse;
 /**
  * Esup otp http client interceptor for add Authorization header.
  */
-public class EsupOtpHttpClientInterceptor implements ClientHttpRequestInterceptor {
-    
+@Order(1)
+public class EsupOtpAuthInterceptor implements ClientHttpRequestInterceptor {
+
     /**
      * apiPassword to request esup-otp-api.
      */
     private final String apiPassword;
-    
+
     /**
-     * 
+     *
      * Constructor.
      *
      * @param apiPwd
      */
-    public EsupOtpHttpClientInterceptor(final String apiPwd) {
+    public EsupOtpAuthInterceptor(final String apiPwd) {
         apiPassword = apiPwd;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Intercept request and add default authorization header.
+     *  
+     * <p>{@inheritDoc}</p> 
+     */
     public @Nonnull ClientHttpResponse intercept(@Nonnull final HttpRequest request, 
-            @Nonnull final byte[] body, @Nonnull final ClientHttpRequestExecution execution)
-            throws IOException {
+            @Nonnull final byte[] body, @Nonnull final ClientHttpRequestExecution execution) throws IOException {
+        // Add default authorization header
         request.getHeaders().add("Authorization", "Bearer " + apiPassword);
         return execution.execute(request, body);
     }
-
 }
