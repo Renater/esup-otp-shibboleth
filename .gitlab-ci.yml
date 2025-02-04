@@ -55,6 +55,8 @@ publish:
         - esup-otp-dist/src/**/*
         - esup-otp-impl/pom.xml
         - esup-otp-impl/src/**/*
+    - if: $CI_COMMIT_BRANCH == 'develop'
+      when: manual
   artifacts:
     paths:
       - esup-otp-dist/target/*.tar.gz
