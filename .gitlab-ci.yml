@@ -1,0 +1,61 @@
+default:
+  image: maven:3.8.5-openjdk-17
+  cache:
+    paths:
+      - .m2/repository/
+      - target/
+
+variables:
+  # `showDateTime` will show the passed time in milliseconds. You need to specify `--batch-mode` to make this work.
+  MAVEN_OPTS: >-
+    -Dhttps.protocols=TLSv1.2
+    -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+    -Dorg.slf4j.simpleLogger.showDateTime=true
+    -Djava.awt.headless=true
+
+  # As of Maven 3.3.0 instead of this you MAY define these options in `.mvn/maven.config` so the same config is used
+  # when running from the command line.
+  # As of Maven 3.6.1, the use of `--no-tranfer-progress` (or `-ntp`) suppresses download and upload messages. The use
+  # of the `Slf4jMavenTransferListener` is no longer necessary.
+  # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
+  MAVEN_CLI_OPTS: >-
+    -s resources/.m2/settings.xml
+    --batch-mode
+    --errors
+    --fail-at-end
+    --show-version
+    --no-transfer-progress
+
+stages:
+  - build
+  - test
+  - publish
+
+build:
+  stage: build
+  script:
+    - mvn $MAVEN_CLI_OPTS compile
+
+test:
+  stage: test
+  script:
+    - mvn $MAVEN_CLI_OPTS test
+
+publish:
+  stage: publish
+  script:
+    - mvn $MAVEN_CLI_OPTS -DskipTests=true clean install -Psign -Dno-check-m2
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - pom.xml
+        - esup-otp-api/pom.xml
+        - esup-otp-api/src/**/*
+        - esup-otp-dist/pom.xml
+        - esup-otp-dist/src/**/*
+        - esup-otp-impl/pom.xml
+        - esup-otp-impl/src/**/*
+  artifacts:
+    paths:
+      - esup-otp-dist/target/*.tar.gz
+      - esup-otp-dist/target/*.tar.gz.asc
