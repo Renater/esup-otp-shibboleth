@@ -22,6 +22,7 @@
     </properties>
 
     <build>
+        <finalName>${dist.finalName}</finalName>
         <plugins>
             <!-- Copy src/main/resources to assembly directory. -->
             <plugin>
@@ -62,7 +63,6 @@
                     <descriptors>
                         <descriptor>src/main/assembly/assembly.xml</descriptor>
                     </descriptors>
-                    <finalName>${dist.finalName}</finalName>
                     <overrideUid>1000</overrideUid>
                     <overrideGid>1000</overrideGid>
                     <tarLongFileMode>gnu</tarLongFileMode>

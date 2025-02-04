@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp;
+package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
 import jakarta.servlet.http.HttpServletRequest;

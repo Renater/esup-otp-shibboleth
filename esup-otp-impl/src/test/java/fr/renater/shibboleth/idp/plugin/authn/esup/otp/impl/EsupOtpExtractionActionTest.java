@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp;
+package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
+import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpClientRegistry;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -29,7 +29,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionAction;
 import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.profile.testing.ActionTestingSupport;
 import net.shibboleth.shared.component.ComponentInitializationException;

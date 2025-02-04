@@ -132,7 +132,6 @@ public abstract class AbstractAttributeContextUserIdentityStrategy<T>
             return null;
         }
 
-
         final AttributeResolutionContext resolutionContext = buildResolutionContext(profileRequestContext, principal);
         assert attributeResolverService != null;
         resolutionContext.resolveAttributes(attributeResolverService);

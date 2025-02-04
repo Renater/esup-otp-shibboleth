@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp;
+package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
 import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.PUSH_METHOD;
 import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.WEBAUTHN_METHOD;
 
+import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.webflow.execution.Event;
 import org.testng.Assert;
@@ -27,7 +28,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionTokenAction;
 import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.profile.testing.ActionTestingSupport;
@@ -48,6 +48,7 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
         
         action = new EsupOtpExtractionTokenAction();
         addEsupOtpContext();
+        eoc.setTransportChoose(PUSH_METHOD);
         final MockHttpServletRequest request = new MockHttpServletRequest();
         action.setHttpServletRequestSupplier(new ConstantSupplier<>(request));
         action.setUsernameLookupStrategy(FunctionSupport.constant("jdoe"));
@@ -64,6 +65,7 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
     @Test public void testNoServlet() throws Exception {
         action = new EsupOtpExtractionTokenAction();
         addEsupOtpContext();
+        eoc.setTransportChoose(PUSH_METHOD);
         action.setUsernameLookupStrategy(FunctionSupport.constant("jdoe"));
 
         final DefaultEsupOtpIntegration defaultEsupOtpIntegration = new DefaultEsupOtpIntegration();

@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-package fr.renater.shibboleth.esup.otp;
+package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
 import static org.mockito.ArgumentMatchers.any;
 
 import java.util.List;
 import java.util.Map;
 
+import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.webflow.execution.Event;
@@ -34,8 +35,6 @@ import fr.renater.shibboleth.esup.otp.client.EsupOtpClientException;
 import fr.renater.shibboleth.esup.otp.dto.user.EsupOtpUserInfoResponse;
 import fr.renater.shibboleth.esup.otp.dto.user.UserMethods;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpClientRegistry;
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpGetUserInfo;
 import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.profile.testing.ActionTestingSupport;

@@ -1,7 +1,5 @@
-package fr.renater.shibboleth.esup.otp;
+package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpAuthenticatorArguments;
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpAuthenticatorCLI;
 import net.shibboleth.shared.component.ComponentInitializationException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

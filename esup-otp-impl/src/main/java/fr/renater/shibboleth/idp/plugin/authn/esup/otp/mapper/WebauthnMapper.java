@@ -51,6 +51,12 @@ public interface WebauthnMapper {
     @Mapping(target = "userHandle", expression = "java(bufferToBase64URLString(webAuthnAuthenticatorAssertionResponse.getUserHandle()))")
     EsupOtpVerifyWebAuthnRequest.WebAuthnResponse.ResponseData toWebAuthnResponseDataDto(WebAuthnPublicKeyCredential.WebAuthnAuthenticatorAssertionResponse webAuthnAuthenticatorAssertionResponse);
 
+    /**
+     * Get byte array to Base64 String.
+     * 
+     * @param buffer byte array.
+     * @return base64.
+     */
     default String bufferToBase64URLString(byte[] buffer) {
         if (buffer == null || buffer.length == 0) {
             return null; // Retourner null si le buffer est null ou vide
@@ -67,6 +73,12 @@ public interface WebauthnMapper {
 
     }
 
+    /**
+     * Convert String to byte array.
+     * 
+     * @param value
+     * @return
+     */
     default byte[] base64URLStringToBuffer(String value) {
         // Convertir Base64URL en Base64
         String base64 = value
@@ -94,7 +106,6 @@ public interface WebauthnMapper {
     }
 
     default EsupOtpVerifyWebAuthnRequest.WebAuthnResponse.AuthenticatorAttachment toAuthenticatorAttachment(String value) {
-        Enum.valueOf(EsupOtpVerifyWebAuthnRequest.WebAuthnResponse.AuthenticatorAttachment.class, value);
         return EsupOtpVerifyWebAuthnRequest.WebAuthnResponse.AuthenticatorAttachment.fromString(value);
     }
 }
