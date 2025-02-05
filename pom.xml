@@ -171,9 +171,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <keyname>Fouque</keyname>
                     <useAgent>true</useAgent>
-                    <executable>C:\Program Files (x86)\GnuPG\bin\gpg.exe</executable>
                 </configuration>
             </plugin>
         </plugins>
