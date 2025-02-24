@@ -140,7 +140,7 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                 function validInputLength(addOneChar) {
                     const tokenInputElement = document.getElementById("tokencode");
 
-                    var inputLength = tokenInputElement.textLength;
+                    var inputLength = tokenInputElement.value.length;
                     if(addOneChar) {
                         inputLength = inputLength + 1;
                     }
@@ -364,7 +364,7 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 
                         <fieldset class="small-10 medium-10 large-7 small-centered margin-top">
 
-                            <label for="tokencode"><i class="fa fa-lg fa-lock"></i> #springMessageText("idp.totp.field", "Token Code")</label>
+                            <label for="tokencode"><i class="fa fa-lg fa-lock"></i> #springMessageText("idp.esup.otp.field", "Token Code")</label>
                             <div class="input-wrap token">
                                 <input class="form-element form-field token-input input" id="tokencode" name="tokencode" type="text" inputmode="numeric" value="" placeholder="000000" autocomplete="off" />
                                 <div class="one-input token-fake"></div>
