@@ -17,6 +17,7 @@
           class="fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration"
           p:APIHost="%{idp.esup.otp.apiHost:http://localhost}"
           p:apiPassword="%{idp.esup.otp.apiPassword:none}"
+          p:issuer="%{idp.entityID}"
           p:registeredRedirectURI="%{idp.esup.otp.redirectURL:}"
           p:healthCheckEndpoint="%{idp.esup.otp.endpoint.health:/v1/health_check}" />
 

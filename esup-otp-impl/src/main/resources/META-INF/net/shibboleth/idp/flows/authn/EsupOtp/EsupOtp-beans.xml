@@ -108,6 +108,7 @@
           p:APIHost="%{idp.esup.otp.apiHost:}"
           p:usersSecret="%{idp.esup.otp.usersSecret:}"
           p:apiPassword="%{idp.esup.otp.apiPassword:}"
+          p:issuer="%{idp.esup.otp.issuer:idp.entityID}"
           p:registeredRedirectURI="%{idp.esup.otp.redirectURL:}"
           p:healthCheckEndpoint="%{idp.esup.otp.endpoint.health:}"
           p:supportedMethods="%{idp.esup.otp.supportedMethods:totp,webauthn,push,bypass,random_code,random_code_mail}"

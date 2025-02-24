@@ -222,12 +222,23 @@ public class EsupOtpContext extends BaseContext {
         return this;
     }
 
+    /**
+     * Set the webauthn pub key credential
+     *
+     * @param pkCredAssertion the webauthn pub key credential
+     * @return this context
+     */
     @Nonnull public EsupOtpContext setPublicKeyCredentialAssertionResponse(@Nullable final WebAuthnPublicKeyCredential pkCredAssertion) {
         this.publicKeyCredentialAssertionResponse = pkCredAssertion;
 
         return this;
     }
 
+    /**
+     * Get the webauthn pub key credential
+     *
+     * @return the webauthn pub key credential
+     */
     @Nullable public WebAuthnPublicKeyCredential getPublicKeyCredentialAssertionResponse() {
         return publicKeyCredentialAssertionResponse;
     }

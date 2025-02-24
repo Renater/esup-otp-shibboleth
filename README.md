@@ -23,9 +23,22 @@ Ce plugin est à utilisé au sein d'un login flow de type Multi-Factor. Il perme
 |--------------------------------|-------------------|------------------------|
 | fr.renater.shibboleth.esup.otp | idp.authn.esupotp | authn/EsupOtp          |
 
+## Build
+
+### Prérequis
+
+- OpenJDK 17
+- Maven 3
+
+```
+  mvn clean install -s resources/.m2/settings.xml -Psign -Dno-check-m2
+```
+
+Une fois la commande maven passée avec succès, le package du module se trouve dans le répertoire `esup-otp-dist/target` 
+
 ## Installation
 
-### Copy package to the server
+### Copie du package sur le serveur
 
 ```
 $ scp module.tar.gz username@server:/tmp/.
@@ -37,72 +50,52 @@ $ ssh username@server -i ~/.ssh/id_rsa
 [username@server ~]$ cp /tmp/module.tar.gz.asc $idp_install_path/plugins/.
 ```
 
-### Enable Multifactor Module
+### Activer le module multifacteur Shibboleth
 
-From shibboleth documentation [MultiFactorAuthnConfiguration](https://shibboleth.atlassian.net/wiki/spaces/IDP5/pages/3199505534/MultiFactorAuthnConfiguration)
+A partir de la documentation Shibboleth [MultiFactorAuthnConfiguration](https://shibboleth.atlassian.net/wiki/spaces/IDP5/pages/3199505534/MultiFactorAuthnConfiguration)
 
 ```
 [username@server ~]$ $idp_install_path/bin/module.sh -t idp.authn.MFA || $idp_install_path/bin/module.sh -e idp.authn.MFA
 ```
 
-Check
+Vérification
 
 ```
 [username@server ~]$ $idp_install_path/bin/module.sh -l
 ```
 
-### Install the plugin
+### Installation du plugin
 
 ```
 [username@server ~]$ $idp_install_path/bin/plugin.sh -i $idp_install_path/plugins/module.tar.gz --noCheck
 [username@server ~]$ systemctl restart tomcat10.service
 ```
 
-#### Tomcat installation not standard
-If your tomcat configuration does not point to the war regenerated after plugin installation, such as the following configuration for example:
-```
-[username@server ~]$ cat /etc/tomcat10/Catalina/localhost/idp.xml
-<Context
-    docBase="$idp_install_path/war/idp.war"
-    privileged="true"
-    swallowOutput="true">
-```
-
-You need to copy jar files into docBase directory to plugin work well:
-
-1. Copy jar into WEB-INF/lib
-2. Add permission on jar files
-3. restart service
-
-```
-[username@server ~]$ cp $idp_install_path/dist/plugin-webapp/WEB-INF/lib/esup-otp-* $idp_install_path/webapp/WEB-INF/lib/.
-[username@server ~]$ chmod o+r $idp_install_path/webapp/WEB-INF/lib/esup-otp-*
-```
-
-- Remove plugin
-```
-[username@server ~]$ $idp_install_path/bin/plugin.sh -r fr.renater.shibboleth.esup.otp
-```
-
 ## Configuration
 
-| property                     |                      required                      | Default value    | Description |
-|:-----------------------------|:--------------------------------------------------:|------------------|-------------|
-| idp.esup.otp.apiHost         |                      &check;                       |                  |             |
-| idp.duo.oidc.apiPassword     |                      &check;                       |                  |             |
-| idp.esup.oidc.redirectURL    |                                                    |                  |             |
-| idp.esup.otp.endpoint.health |                                                    | /v1/health_check |             |
-|                              |                                                    |                  |             |
+| property                        |                                       required                                       | Default value                                          | Description                                                                                                                                                                                                 |
+|:--------------------------------|:------------------------------------------------------------------------------------:|--------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| idp.esup.otp.apiHost            |                                       &check;                                        |                                                        | Url de l'api esup-otp-api.                                                                                                                                                                                  |
+| idp.esup.otp.apiPassword        |                                       &check;                                        |                                                        |                                                                                                                                                                                                             |
+| idp.esup.otp.usersSecret        |                                       &check;                                        |                                                        |                                                                                                                                                                                                             |
+| idp.esup.otp.username.strategy  |                                       &check;                                        | DefaultUsernameLookupStrategy                          | Stratégie du module pour récupérer l'identifiant pour appeler esup-otp-api (valeurs possible : DefaultUsernameLookupStrategy, SubjectContextUsernameLookupStrategy, AttributeContextUsernameLookupStrategy) |
+| idp.esup.otp.attributeId        | &check; (si idp.esup.otp.username.strategy = AttributeContextUsernameLookupStrategy) |                                                        | Attribut de l'IDP à utiliser comme identifiant de l'utilisateur courant (peut être un StringAttribute ou un ScopedStringAttribute)                                                                          |
+| idp.esup.otp.issuer             |                                       &check;                                        | %{idp.entityID}                                        | L'issuer correspond au tenant pour esup-otp-api.                                                                                                                                                            |
+| idp.esup.otp.supportedMethods   |                                                                                      | totp,webauthn,push,bypass,random_code,random_code_mail | Liste des méthodes supportées pour le second facteur (doit matcher avec les méthodes retourné par esup-otp-api).                                                                                            |
+| idp.esup.otp.send.counter       |                                                                                      | 3                                                      | Nombre maximum de renvoie possible de code.                                                                                                                                                                 |
+| idp.esup.otp.endpoint.health    |                                                                                      |                                                        |                                                                                                                                                                                                             |
+|                                 |                                                                                      |                                                        |                                                                                                                                                                                                             |
 
 
-## Log configuration
+## Configuration des logs
 
-To activate debug logs for plugin you need to edit conf/logback.xml file like this : 
+Pour activer les logs debug il est nécessaire de modifier le fichier conf/logback.xml 
+Par exemple : 
 
 ```
-<!-- To log request and response from esup-otp-api -->
-<logger name="org.apache.hc.client5.http.wire" level="DEBUG" />
-<!-- To add debug logs of plugin -->
+<!-- Pour logger les appels vers esup-otp-api -->
+<logger name="fr.renater.shibboleth.esup.otp" level="DEBUG" />
+<!-- logs debug pour le plugin -->
 <logger name="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl" level="DEBUG" />
 ```
 
@@ -113,12 +106,12 @@ To activate debug logs for plugin you need to edit conf/logback.xml file like th
 
 ## Test
 
-- Command utils
+- Aide
 ```
 [username@server ~]$ $idp_install_path/bin/esupotpauth.sh --help
 ```
 
-- List all user uids
+- Lister tous les utilisateurs
 
 ```
 [username@server ~]$ $idp_install_path/bin/esupotpauth.sh --home /usr/share/shibboleth-idp --verbose --command all
