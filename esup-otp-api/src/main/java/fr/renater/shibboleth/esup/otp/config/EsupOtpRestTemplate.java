@@ -64,7 +64,7 @@ public class EsupOtpRestTemplate extends RestTemplate {
         if (CollectionUtils.isEmpty(interceptors)) {
             interceptors = new ArrayList<>();
         }
-        interceptors.add(new EsupOtpAuthInterceptor(esupOtpIntegration.getApiPassword()));
+        interceptors.add(new EsupOtpAuthInterceptor(esupOtpIntegration.getApiPassword(), esupOtpIntegration.getIssuer()));
         interceptors.add(new EsupOtpLoggingInterceptor());
         this.setInterceptors(interceptors);
         this.getMessageConverters().add(0, createMappingJacksonHttpMessageConverter());

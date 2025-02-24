@@ -39,13 +39,20 @@ public class EsupOtpAuthInterceptor implements ClientHttpRequestInterceptor {
     private final String apiPassword;
 
     /**
+     * tenant to request esup-otp-api.
+     */
+    private final String tenant;
+
+    /**
      *
      * Constructor.
      *
-     * @param apiPwd
+     * @param apiPwd api_password to call esup-otp-api
+     * @param issuer tenant to call esup-otp-api
      */
-    public EsupOtpAuthInterceptor(final String apiPwd) {
+    public EsupOtpAuthInterceptor(final String apiPwd, final String issuer) {
         apiPassword = apiPwd;
+        tenant = issuer;
     }
 
     /**
@@ -57,6 +64,8 @@ public class EsupOtpAuthInterceptor implements ClientHttpRequestInterceptor {
             @Nonnull final byte[] body, @Nonnull final ClientHttpRequestExecution execution) throws IOException {
         // Add default authorization header
         request.getHeaders().add("Authorization", "Bearer " + apiPassword);
+        // Add custom header to identify tenant
+        request.getHeaders().add("x-tenant", tenant);
         return execution.execute(request, body);
     }
 }

@@ -64,6 +64,9 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     
     /** API password .*/
     @GuardedBy("this") @NonnullAfterInit @NotEmpty private String apiPassword;
+
+    /** Issuer .*/
+    @GuardedBy("this") @NonnullAfterInit @NotEmpty private String issuer;
     
     /** The used (by clients) redirect_uri to send the client after authorisation .*/
     @GuardedBy("this") @Nullable private String redirectURI;
@@ -169,6 +172,21 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     /** {@inheritDoc} */
     @Nullable public synchronized String getApiPassword() {
         return apiPassword;
+    }
+
+    /**
+     * Set the issuer to use.
+     *
+     * @param iss generally equal to idp.entityID
+     */
+    public synchronized void setIssuer(@Nullable final String iss) {
+        checkSetterPreconditions();
+        issuer = StringSupport.trimOrNull(iss);
+    }
+
+    /** {@inheritDoc} */
+    @Nullable public synchronized String getIssuer() {
+        return issuer;
     }
     
     
