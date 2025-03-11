@@ -120,3 +120,10 @@ Par exemple :
 ### Development
 
 Java 17, Spring framework 6, Lombok
+
+## License
+
+Ce programme est un logiciel libre ; vous pouvez le redistribuer ou le modifier
+suivant les termes de la licence publique générale GNU Affero telle que publiée
+par la Free Software Foundation ; soit la version 3 de la licence, soit (à
+votre gré) toute version ultérieure.
