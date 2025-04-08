@@ -28,13 +28,23 @@ Ce plugin est à utilisé au sein d'un login flow de type Multi-Factor. Il perme
 ### Prérequis
 
 - OpenJDK 17
-- Maven 3
+- Maven 3.8 ou supérieur
 
 ```
-  mvn clean install -s resources/.m2/settings.xml -Psign -Dno-check-m2
+  ./mvnw clean install -s resources/.m2/settings.xml -Dno-check-m2
 ```
 
 Une fois la commande maven passée avec succès, le package du module se trouve dans le répertoire `esup-otp-dist/target` 
+
+## Signature du plugin
+
+Pour signer le plugin, il est nécessaire de posséder ou générer une paire clef privée/clef publique (par exemple avec gpg)
+La clef publique devra être ajoutée au préalable du build dans le fichier `esup-otp-dist/src/main/resources/bootstrap/keys.txt`
+
+La ligne de commande pour signer l'archive est la suivante : 
+```
+  gpg -u USER_A_REMPLACER -ab esup-otp-dist/target/shibboleth-esup-otp-${version}.tar.gz
+```
 
 ## Installation
 

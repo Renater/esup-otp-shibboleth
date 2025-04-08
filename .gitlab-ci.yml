@@ -49,7 +49,7 @@ publish:
     - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash
     - export GPG_TTY=`tty`
     - gpg --batch --passphrase $MY_PGP_PASSPHRASE --import .secure_files/private.key
-    - mvn $MAVEN_CLI_OPTS -DskipTests=true clean install -Psign -Dno-check-m2
+    - mvn $MAVEN_CLI_OPTS -DskipTests=true clean install -Dno-check-m2
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
