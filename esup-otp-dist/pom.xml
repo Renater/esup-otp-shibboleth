@@ -10,19 +10,19 @@
         <version>0.0.0</version>
     </parent>
 
-    <name>Shibboleth IdP :: Plugins :: Esup otp Login Flow Distribution</name>
-    <description>Esup otp plugin packaging.</description>
+    <name>Shibboleth IdP :: Plugins :: Esup-Otp Login Flow Distribution</name>
+    <description>Esup-Otp plugin packaging.</description>
     <artifactId>esup-otp-dist</artifactId>
     <packaging>pom</packaging>
 
     <properties>
-        <dist.finalName>idp-plugin-esup-otp-${project.version}</dist.finalName>
-        <dist.assemblyDirectory>${project.build.directory}/${dist.finalName}</dist.assemblyDirectory>
+        <dist.plugin.finalName>idp-plugin-esup-otp-${project.version}</dist.plugin.finalName>
+        <dist.assemblyDirectory>${project.build.directory}/${dist.plugin.finalName}</dist.assemblyDirectory>
         <checkstyle.configLocation>${project.basedir}/../resources/checkstyle/checkstyle.xml</checkstyle.configLocation>
     </properties>
 
     <build>
-        <finalName>${dist.finalName}</finalName>
+        <finalName>${dist.plugin.finalName}</finalName>
         <plugins>
             <!-- Copy src/main/resources to assembly directory. -->
             <plugin>

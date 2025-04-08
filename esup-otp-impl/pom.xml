@@ -11,8 +11,8 @@
         <!--<relativePath>../pom.xml</relativePath>-->
     </parent>
 
-    <name>Shibboleth IdP :: Plugins :: Esup otp Login Flow Impl</name>
-    <description>Esup otp plugin implementation.</description>
+    <name>Shibboleth IdP :: Plugins :: Esup-Otp Login Flow Impl</name>
+    <description>Esup-Otp plugin implementation.</description>
     <artifactId>esup-otp-impl</artifactId>
     <packaging>jar</packaging>
     
@@ -37,61 +37,61 @@
 
         <!-- Provided dependencies -->
         <dependency>
-            <groupId>${idp.groupId}</groupId>
+            <groupId>net.shibboleth.idp</groupId>
             <artifactId>idp-admin-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <!-- Needed to allow module/plugin derivation. -->
         <dependency>
-            <groupId>${idp.groupId}</groupId>
+            <groupId>net.shibboleth.idp</groupId>
             <artifactId>idp-admin-impl</artifactId>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>${idp.groupId}</groupId>
+            <groupId>net.shibboleth.idp</groupId>
             <artifactId>idp-authn-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${idp.groupId}</groupId>
+            <groupId>net.shibboleth.idp</groupId>
             <artifactId>idp-cli</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${idp.groupId}</groupId>
+            <groupId>net.shibboleth.idp</groupId>
             <artifactId>idp-core</artifactId>
             <scope>provided</scope>
         </dependency>
         
         <dependency>
-            <groupId>${opensaml.groupId}</groupId>
+            <groupId>org.opensaml</groupId>
             <artifactId>opensaml-messaging-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${opensaml.groupId}</groupId>
+            <groupId>org.opensaml</groupId>
             <artifactId>opensaml-profile-api</artifactId>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>${shib-shared.groupId}</groupId>
+            <groupId>net.shibboleth</groupId>
             <artifactId>shib-cli</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${shib-shared.groupId}</groupId>
+            <groupId>net.shibboleth</groupId>
             <artifactId>shib-service</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${shib-shared.groupId}</groupId>
+            <groupId>net.shibboleth</groupId>
             <artifactId>shib-support</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${shib-shared.groupId}</groupId>
+            <groupId>net.shibboleth</groupId>
             <artifactId>shib-attribute-resolver-api</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -134,41 +134,41 @@
 
         <!-- Test Dependencies -->
         <dependency>
-            <groupId>${idp.groupId}</groupId>
+            <groupId>net.shibboleth.idp</groupId>
             <artifactId>idp-authn-impl</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>${idp.groupId}</groupId>
+            <groupId>net.shibboleth.idp</groupId>
             <artifactId>idp-testing</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>${shib-attribute.groupId}</groupId>
+            <groupId>net.shibboleth</groupId>
             <artifactId>shib-attribute-resolver-impl</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>${shib-attribute.groupId}</groupId>
+            <groupId>net.shibboleth</groupId>
             <artifactId>shib-attribute-testing</artifactId>
             <scope>test</scope>
         </dependency>
 
         <!-- Needed for XMLObject providers. -->
         <dependency>
-            <groupId>${opensaml.groupId}</groupId>
+            <groupId>org.opensaml</groupId>
             <artifactId>opensaml-core-impl</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>${opensaml.groupId}</groupId>
+            <groupId>org.opensaml</groupId>
             <artifactId>opensaml-testing</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>${shib-shared.groupId}</groupId>
+            <groupId>net.shibboleth</groupId>
             <artifactId>shib-testing</artifactId>
             <scope>test</scope>
         </dependency>

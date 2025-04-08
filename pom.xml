@@ -10,8 +10,8 @@
         <version>17.0.2</version>
     </parent>
 
-    <name>Shibboleth IdP :: Plugins :: Esup otp Login Flow</name>
-    <description>An IdP plugin providing Esup otp login support.</description>
+    <name>Shibboleth IdP :: Plugins :: Esup-Otp Login Flow</name>
+    <description>An IdP plugin providing Esup-Otp login support.</description>
     <groupId>fr.renater.shibboleth.esup.otp</groupId>
     <artifactId>idp-plugin-esup-otp-parent</artifactId>
     <version>0.0.0</version>
@@ -20,17 +20,11 @@
     <properties>
         <shibboleth.projectName>java-idp-plugin-esup-otp</shibboleth.projectName>
         <idp.groupId>net.shibboleth.idp</idp.groupId>
-        <idp.version>5.0.0</idp.version>
-        <opensaml.groupId>org.opensaml</opensaml.groupId>
-        <opensaml.version>5.0.0</opensaml.version>
-        <shib-profile.groupId>net.shibboleth</shib-profile.groupId>
-        <shib-profile.version>5.0.0</shib-profile.version>
-        <shib-attribute.groupId>net.shibboleth</shib-attribute.groupId>
-        <shib-attribute.version>5.0.0</shib-attribute.version>
-        <shib-shared.groupId>net.shibboleth</shib-shared.groupId>
-        <shib-shared.version>9.0.0</shib-shared.version>
+        <idp.version>5.1.0</idp.version>
+        <opensaml.version>5.1.0</opensaml.version>
+        <shib-shared.version>9.1.0</shib-shared.version>
         <checkstyle.configLocation>${project.basedir}/resources/checkstyle/checkstyle.xml</checkstyle.configLocation>
-        <lombok.version>1.18.30</lombok.version>
+        <lombok.version>1.18.36</lombok.version>
     </properties>
 
     <dependencies>
@@ -90,28 +84,28 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>${shib-profile.groupId}</groupId>
+                <groupId>net.shibboleth</groupId>
                 <artifactId>shib-profile-bom</artifactId>
-                <version>${shib-profile.version}</version>
+                <version>${idp.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>${shib-attribute.groupId}</groupId>
+                <groupId>net.shibboleth</groupId>
                 <artifactId>shib-attribute-bom</artifactId>
-                <version>${shib-attribute.version}</version>
+                <version>${idp.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>${opensaml.groupId}</groupId>
+                <groupId>org.opensaml</groupId>
                 <artifactId>opensaml-bom</artifactId>
                 <version>${opensaml.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>${shib-shared.groupId}</groupId>
+                <groupId>net.shibboleth</groupId>
                 <artifactId>shib-shared-bom</artifactId>
                 <version>${shib-shared.version}</version>
                 <type>pom</type>
@@ -129,19 +123,6 @@
 
     <build>
         <plugins>
-            <!--<plugin>
-                <groupId>net.shibboleth.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <links combine.children="append">
-                        <link>${javadoc.url}/java-shib-shared/${shib-shared.version}</link>
-                        <link>${javadoc.url}/java-opensaml/${opensaml.version}</link>
-                        <link>${javadoc.url}/java-shib-attribute/${shib-attribute.version}</link>
-                        <link>${javadoc.url}/java-shib-profile/${shib-profile.version}</link>
-                        <link>${javadoc.url}/java-identity-provider/${idp.version}</link>
-                    </links>
-                </configuration>
-            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>

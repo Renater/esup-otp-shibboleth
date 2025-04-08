@@ -10,8 +10,8 @@
         <version>0.0.0</version>
     </parent>
 
-    <name>Shibboleth IdP :: Plugins :: Esup otp Login Flow API</name>
-    <description>Esup otp plugin api.</description>
+    <name>Shibboleth IdP :: Plugins :: Esup-Otp Login Flow API</name>
+    <description>Esup-Otp plugin api.</description>
     <artifactId>esup-otp-api</artifactId>
     <packaging>jar</packaging>
     
@@ -25,12 +25,12 @@
 
         <!-- Provided Dependencies -->
         <dependency>
-            <groupId>${idp.groupId}</groupId>
+            <groupId>net.shibboleth.idp</groupId>
             <artifactId>idp-authn-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${shib-shared.groupId}</groupId>
+            <groupId>net.shibboleth</groupId>
             <artifactId>shib-support</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -79,7 +79,7 @@
         <!-- Test Dependencies -->
         <!-- Test dependencies -->
         <dependency>
-            <groupId>${shib-shared.groupId}</groupId>
+            <groupId>net.shibboleth</groupId>
             <artifactId>shib-testing</artifactId>
             <scope>test</scope>
         </dependency>

@@ -55,5 +55,12 @@
                 <include>keys.txt</include>
             </includes>
         </fileSet>
+        <fileSet>
+            <directory>src/main/resources/bootstrap</directory>
+            <outputDirectory>bootstrap</outputDirectory>
+            <includes>
+                <include>id.properties</include>
+            </includes>
+        </fileSet>
     </fileSets>
 </assembly>
