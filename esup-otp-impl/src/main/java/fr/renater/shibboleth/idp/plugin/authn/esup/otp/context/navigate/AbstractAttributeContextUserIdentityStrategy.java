@@ -169,7 +169,6 @@ public abstract class AbstractAttributeContextUserIdentityStrategy<T>
 
         resolutionContext.setPrincipal(principal);
         assert attributeId != null;
-        resolutionContext.setRequestedIdPAttributeNames(CollectionSupport.singletonList(attributeId));
 
         profileRequestContext.addSubcontext(resolutionContext, true);
         return resolutionContext;
