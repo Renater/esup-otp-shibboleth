@@ -1,4 +1,4 @@
-package fr.renater.shibboleth.esup.otp.client.impl;
+package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;

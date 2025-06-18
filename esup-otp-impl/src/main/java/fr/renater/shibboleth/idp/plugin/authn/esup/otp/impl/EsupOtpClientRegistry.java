@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClientInitializationException;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
-import fr.renater.shibboleth.esup.otp.client.impl.EsupOtpClientImpl;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpClientImpl;
 import net.shibboleth.shared.annotation.constraint.NonnullElements;
 import net.shibboleth.shared.component.AbstractIdentifiableInitializableComponent;
 import net.shibboleth.shared.logic.Constraint;
