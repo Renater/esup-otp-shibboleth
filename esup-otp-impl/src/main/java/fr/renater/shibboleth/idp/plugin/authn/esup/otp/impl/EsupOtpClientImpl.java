@@ -26,6 +26,7 @@ import fr.renater.shibboleth.esup.otp.dto.EsupOtpVerifyWebAuthnRequest;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpVerifyWebAuthnResponse;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpWebauthnResponse;
 import fr.renater.shibboleth.esup.otp.dto.user.EsupOtpUserInfoResponse;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpEncoder;
 import net.shibboleth.shared.primitive.LoggerFactory;
 
 /**
@@ -38,6 +39,8 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
 
     /** Esup otp integration configuration. */
     private final DefaultEsupOtpIntegration esupOtpIntegration;
+
+    private final EsupOtpEncoder encoder;
     
     /**
      * Constructor.
@@ -48,13 +51,14 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
         super(new EsupOtpRestTemplate(integration));
 
         this.esupOtpIntegration = integration;
+        this.encoder = new EsupOtpEncoder(integration.getUsersSecret());
     }
    
     
     /** {@inheritDoc} */
     public EsupOtpUserInfoResponse getOtpUserInfos(final String uid) throws EsupOtpClientException {
         try {
-            final String hash = getUserHash(uid);
+            final String hash = encoder.getUserHash(uid);
             return get(EsupOtpUriConstants.Public.GET_USER_INFOS, EsupOtpUserInfoResponse.class, uid, hash);
         } catch (final NoSuchAlgorithmException | UnsupportedEncodingException e) {
             throw new EsupOtpClientException("Get user hash failed", e);
@@ -66,7 +70,7 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     public EsupOtpResponse postSendMessage(final String uid, final String method,
                                                   final String transport) throws EsupOtpClientException {
         try {
-            final String hash = getUserHash(uid);
+            final String hash = encoder.getUserHash(uid);
             return post(EsupOtpUriConstants.Public.POST_MESSAGE, EsupOtpResponse.class,
                     true, uid, method, transport, hash);
         } catch (final NoSuchAlgorithmException | UnsupportedEncodingException e) {
@@ -77,7 +81,7 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     @Override
     public EsupOtpWebauthnResponse postGenerateWebauthnSecret(final String uid) throws EsupOtpClientException {
         try {
-            final String hash = getUserHash(uid);
+            final String hash = encoder.getUserHash(uid);
             return post(EsupOtpUriConstants.Public.POST_GENERATE_WEBAUTHN, EsupOtpWebauthnResponse.class,
                     true, uid, hash);
         } catch (final NoSuchAlgorithmException | UnsupportedEncodingException e) {
@@ -145,7 +149,7 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     public boolean postVerifyWebauthn(final String uid, @Nonnull final EsupOtpVerifyWebAuthnRequest body) 
             throws EsupOtpClientException {
         try {
-            final String hash = getUserHash(uid);
+            final String hash = encoder.getUserHash(uid);
             final RequestEntity<?> request = RequestEntity
                     .post(EsupOtpUriConstants.Public.POST_VERIFY_WEBAUTHN, uid, hash)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -213,57 +217,6 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     /** {@inheritDoc} */
     public EsupOtpResponse deleteMethodSecret(final String uid, final String method) throws EsupOtpClientException {
         return delete(EsupOtpUriConstants.Admin.DELETE_SECRET, EsupOtpResponse.class, uid, method);
-    }
-
-    /**
-     * Génère un hash unique pour un utilisateur donné en utilisant son identifiant (UID).
-     *
-     * @param uid l'identifiant unique de l'utilisateur pour lequel le hash doit être généré.
-     * @return une chaîne représentant le hash de l'UID.
-     * @throws NoSuchAlgorithmException si l'algorithme de hachage spécifié n'est pas pris en charge.
-     * @throws UnsupportedEncodingException si le codage utilisé pour convertir les données n'est pas pris en charge.
-     */
-    private String getUserHash(final String uid) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        final MessageDigest md5Md = MessageDigest.getInstance("MD5");
-        final String md5 = bytesToHex(md5Md.digest(esupOtpIntegration.getUsersSecret().getBytes())).toLowerCase();
-        final String salt = md5 + getSalt(uid);
-        final MessageDigest sha256Md = MessageDigest.getInstance("SHA-256");
-        return bytesToHex(sha256Md.digest(salt.getBytes())).toLowerCase();
-    }
-
-    /**
-     * Convertit un tableau d'octets en une représentation hexadécimale sous forme de chaîne de caractères.
-     *
-     * @param bytes le tableau d'octets à convertir.
-     * @return une chaîne représentant les octets sous forme hexadécimale.
-     */
-    private String bytesToHex(final byte[] bytes) {
-        final StringBuilder hexString = new StringBuilder();
-        for (final byte b : bytes) {
-            final String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) {
-                hexString.append('0');
-            }
-            hexString.append(hex);
-        }
-        return hexString.toString();
-    }
-
-    /**
-     * Génère ou récupère une valeur de "sel" (salt) associée à un identifiant utilisateur (UID).
-     * <p>
-     * Le "sel" est utilisé pour renforcer le hachage en ajoutant une donnée unique ou aléatoire,
-     * rendant le hachage plus résistant aux attaques par dictionnaire ou par table arc-en-ciel.
-     * </p>
-     *
-     * @param uid l'identifiant unique de l'utilisateur pour lequel le sel est requis.
-     * @return une chaîne représentant le sel associé à l'UID.
-     */
-    private String getSalt(final String uid) {
-        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        final int day = calendar.get(Calendar.DAY_OF_MONTH);
-        final int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        return uid + day + hour;
     }
 
 }
