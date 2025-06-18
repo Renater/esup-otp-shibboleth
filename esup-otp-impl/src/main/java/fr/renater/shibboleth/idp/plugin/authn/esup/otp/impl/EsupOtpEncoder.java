@@ -10,6 +10,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnDto;
 import net.shibboleth.shared.annotation.ParameterName;
 import net.shibboleth.shared.annotation.constraint.NotEmpty;
+import net.shibboleth.shared.primitive.StringSupport;
 import net.shibboleth.shared.primitive.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -35,16 +36,15 @@ public final class EsupOtpEncoder {
     @NotEmpty private String usersSecret;
 
     public EsupOtpEncoder() {
-
     }
 
     /** Constructor */
-    public EsupOtpEncoder(@Nonnull @NotEmpty @ParameterName(name="usersSecret") String usrSecret) {
-        this.usersSecret = usrSecret;
+    public EsupOtpEncoder(@Nonnull @NotEmpty @ParameterName(name="usersSecret") String secret) {
+        this.usersSecret = StringSupport.trimOrNull(secret);
     }
 
-    public void setUsersSecret(@Nonnull @NotEmpty final String usrSecret) {
-        usersSecret = usrSecret;
+    public void setUsersSecret(@Nonnull @NotEmpty final String secret) {
+        usersSecret = StringSupport.trimOrNull(secret);
     }
 
     public static ObjectMapper getWebAuthnObjectMapper() {
