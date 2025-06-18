@@ -132,9 +132,9 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
      *
      * @param usrSecret secret key
      */
-    public synchronized void setUsersSecret(@Nonnull @NotEmpty final String usrSecret) {
+    public synchronized void setUsersSecret(@Nonnull @NotEmpty final String secret) {
         checkSetterPreconditions();
-        usersSecret = StringSupport.trimOrNull(usrSecret);
+        usersSecret = StringSupport.trimOrNull(secret);
     }
 
     /** {@inheritDoc} */
@@ -147,9 +147,9 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
      * 
      * @param apiPwd secret key
      */
-    public synchronized void setApiPassword(@Nullable final String apiPwd) {
+    public synchronized void setApiPassword(@Nullable final String password) {
         checkSetterPreconditions();        
-        apiPassword = StringSupport.trimOrNull(apiPwd);
+        apiPassword = StringSupport.trimOrNull(password);
     }
     
     /** {@inheritDoc} */
