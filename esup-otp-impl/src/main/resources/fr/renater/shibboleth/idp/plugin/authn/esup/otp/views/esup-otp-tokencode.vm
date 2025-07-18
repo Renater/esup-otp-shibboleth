@@ -339,7 +339,7 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                             authentication")</button>
                     </form>
                     <div class="center">
-                        <button id="authenticate">#springMessageText("idp.esup.otp.webauthn.authenticate",
+                        <button class="button" id="authenticate">#springMessageText("idp.esup.otp.webauthn.authenticate",
                             "Login with passkey or security key")</button>
                     </div>
 
