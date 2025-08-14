@@ -101,14 +101,14 @@
     </bean>
 
     <bean id="EsupOTPEncoder" class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpEncoder" lazy-init="true"
-          p:usersSecret="%{idp.esup.otp.usersSecret:}" />
+          p:usersSecret="%{idp.esup.otp.usersSecret}" />
 
     <!-- Esup Otp Integration -->
     <bean id="DefaultEsupOtpIntegration" class="fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration" lazy-init="true"
-          p:APIHost="%{idp.esup.otp.apiHost:}"
-          p:usersSecret="%{idp.esup.otp.usersSecret:}"
-          p:apiPassword="%{idp.esup.otp.apiPassword:}"
-          p:issuer="%{idp.esup.otp.issuer:idp.entityID}"
+          p:APIHost="%{idp.esup.otp.apiHost}"
+          p:usersSecret="%{idp.esup.otp.usersSecret}"
+          p:apiPassword="%{idp.esup.otp.apiPassword}"
+          p:issuer="%{idp.esup.otp.issuer}"
           p:registeredRedirectURI="%{idp.esup.otp.redirectURL:}"
           p:healthCheckEndpoint="%{idp.esup.otp.endpoint.health:}"
           p:supportedMethods="%{idp.esup.otp.supportedMethods:totp,webauthn,push,bypass,random_code,random_code_mail}"
