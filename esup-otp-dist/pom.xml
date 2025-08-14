@@ -7,7 +7,7 @@
     <parent>
         <groupId>fr.renater.shibboleth.esup.otp</groupId>
         <artifactId>idp-plugin-esup-otp-parent</artifactId>
-        <version>1.0.2</version>
+        <version>1.0.3-SNAPSHOT</version>
     </parent>
 
     <name>Shibboleth IdP :: Plugins :: Esup-Otp Login Flow Distribution</name>
