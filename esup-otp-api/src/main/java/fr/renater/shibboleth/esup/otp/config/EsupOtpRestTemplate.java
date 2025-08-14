@@ -34,10 +34,10 @@ import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 public class EsupOtpRestTemplate extends RestTemplate {
 
     /**
-     * 
+     *
      * Constructor.
      *
-     * @param esupOtpIntegration 
+     * @param esupOtpIntegration
      */
     public EsupOtpRestTemplate(final DefaultEsupOtpIntegration esupOtpIntegration) {
         super();
@@ -52,9 +52,9 @@ public class EsupOtpRestTemplate extends RestTemplate {
         this.setInterceptors(interceptors);
         this.getMessageConverters().add(0, createMappingJacksonHttpMessageConverter());
     }
-    
+
     private @Nonnull ClientHttpRequestFactory getClientHttpRequestFactory() {
-        final HttpComponentsClientHttpRequestFactory clientHttpRequestFactory 
+        final HttpComponentsClientHttpRequestFactory clientHttpRequestFactory
             = new HttpComponentsClientHttpRequestFactory();
         clientHttpRequestFactory.setHttpClient(httpClient());
         return clientHttpRequestFactory;
@@ -86,14 +86,14 @@ public class EsupOtpRestTemplate extends RestTemplate {
         connectionManager.setDefaultConnectionConfig(connectionConfig);
         return connectionManager;
     }
-    
+
     private MappingJackson2HttpMessageConverter createMappingJacksonHttpMessageConverter() {
 
         final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setObjectMapper(createObjectMapper());
         return converter;
     }
-    
+
     private @Nonnull ObjectMapper createObjectMapper() {
 
         final ObjectMapper objectMapper = new ObjectMapper();

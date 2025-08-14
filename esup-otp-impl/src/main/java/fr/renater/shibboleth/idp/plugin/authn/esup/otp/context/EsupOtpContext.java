@@ -17,19 +17,20 @@ import java.util.*;
  * Context class for state of a Esup otp validation.
  */
 public class EsupOtpContext extends BaseContext {
-    
+
     /** The subject identifier with respect to the token "back-end". */
     @Nullable @NotEmpty private String username;
 
-    /** The choices configured by user". */
+    /** The choices configured by the user. */
     @Nullable private Set<String> enabledChoices;
 
-    /** The transports configured by user". */
+    /** The possible transports configured by the user. */
     @Nullable private Map<String, String> configuredTransports;
 
-    /** The token code supplied. */
+    /** The transport chosen. */
     @Nullable private String transportChoose;
 
+    /** The counter of send message done. */
     private int sendCounter;
 
     /** The webauthn dto. */
@@ -64,7 +65,7 @@ public class EsupOtpContext extends BaseContext {
         } else {
             username = name;
         }
-        
+
         return this;
     }
 
@@ -201,7 +202,7 @@ public class EsupOtpContext extends BaseContext {
      */
     @Nonnull public EsupOtpContext setTokenCode(@Nullable final Integer code) {
         tokenCode = code;
-        
+
         return this;
     }
 

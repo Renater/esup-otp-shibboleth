@@ -16,31 +16,31 @@ import java.io.PrintStream;
  * Arguments for {@link EsupOtpAuthenticatorCLI}.
  */
 public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLineArguments {
-    
+
     /** Credential issuer. */
     @Parameter(names = {"-c", "--command"})
     @Nullable private String command;
-    
+
     /** Credential account name. */
     @Parameter(names = "--uid")
     @Nullable private String uid;
-    
+
     /** method (bypass, esupnfc, push, random_code_mail, random_code, totp, webauthn). */
     @Parameter(names = "--method")
     @Nullable private String method;
-    
+
     /** Chosen transport. */
     @Parameter(names = "--transport")
     @Nullable private String transport;
-    
+
     /** Credential account name. */
     @Parameter(names = "--userHash")
     @Nullable private String userHash;
-        
+
     /** Token code to verify. */
     @Parameter(names = "--tokencode")
     @Nullable private Integer tokenCode;
-    
+
     /** The Log. */
     @Nullable private Logger log;
 
@@ -52,12 +52,12 @@ public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLi
         assert log != null;
         return log;
     }
-    
+
     /** {@inheritDoc} */
     public String getCommand() {
         return command;
     }
-    
+
     /** {@inheritDoc} */
     public String getMethod() {
         return method;
@@ -75,7 +75,7 @@ public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLi
 
     /**
      * Get the token account name.
-     * 
+     *
      * @return token account name
      */
     @Nullable @NotEmpty public String getUid() {
@@ -84,7 +84,7 @@ public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLi
 
     /**
      * Get token code to verify.
-     * 
+     *
      * @return token code
      */
     @Nullable public Integer getTokenCode() {
@@ -94,7 +94,7 @@ public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLi
     /** {@inheritDoc} */
     public void validate() throws IllegalArgumentException {
         super.validate();
-        
+
         if (getOtherArgs().size() == 0) {
             throw new IllegalArgumentException("Invalid operation requested, must have one additional arguments");
         } else if (getOtherArgs().size() == 3) {

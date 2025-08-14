@@ -29,16 +29,16 @@ import net.shibboleth.shared.testing.ConstantSupplier;
  *
  */
 public class EsupOtpGetUserInfoTest extends BaseAuthenticationContextTest {
-    
+
     private EsupOtpGetUserInfo action;
 
     private EsupOtpContext esupOtpContext;
 
     private EsupOtpClient mockClient;
-    
+
     @BeforeMethod public void setUp() throws ComponentInitializationException {
         super.setUp();
-        
+
         action = new EsupOtpGetUserInfo();
         final MockHttpServletRequest request = new MockHttpServletRequest();
         action.setHttpServletRequestSupplier(new ConstantSupplier<>(request));
@@ -62,7 +62,7 @@ public class EsupOtpGetUserInfoTest extends BaseAuthenticationContextTest {
 
         esupOtpContext = prc.ensureSubcontext(AuthenticationContext.class).ensureSubcontext(EsupOtpContext.class);
     }
-    
+
     @Test public void testNoUsername() throws Exception {
         action = new EsupOtpGetUserInfo();
         action.setUsernameLookupStrategy(FunctionSupport.constant(null));
@@ -79,7 +79,7 @@ public class EsupOtpGetUserInfoTest extends BaseAuthenticationContextTest {
         action.initialize();
 
         final Event event = action.execute(src);
-        
+
         ActionTestingSupport.assertEvent(event, AuthnEventIds.UNKNOWN_USERNAME);
     }
 

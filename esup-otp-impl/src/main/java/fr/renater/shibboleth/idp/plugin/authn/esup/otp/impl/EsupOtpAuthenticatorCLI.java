@@ -27,19 +27,19 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
 
     /** Class logger. */
     @Nullable private Logger log;
-    
+
     private final ObjectMapper objectMapper;
 
     public EsupOtpAuthenticatorCLI() {
         ObjectMapper objMapper = new ObjectMapper();
         objMapper.registerModule(new JavaTimeModule());
         objMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        
+
         objMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objMapper.enable(SerializationFeature.INDENT_OUTPUT);
         this.objectMapper = objMapper;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     @Nonnull protected Logger getLogger() {
@@ -49,13 +49,13 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
         assert log != null;
         return log;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     @Nonnull protected Class<EsupOtpAuthenticatorArguments> getArgumentClass() {
         return EsupOtpAuthenticatorArguments.class;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     @Nonnull @NotEmpty protected String getVersion() {
@@ -63,7 +63,7 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
         assert result != null;
         return result;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     protected int doRun(@Nonnull final EsupOtpAuthenticatorArguments args) {
@@ -71,12 +71,12 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
         if (ret != RC_OK) {
             return ret;
         }
-        
+
         try {
             DefaultEsupOtpIntegration integration = getApplicationContext().getBean(DefaultEsupOtpIntegration.class);
 
             final EsupOtpClient client = new EsupOtpClientRegistry().getClientOrCreate(integration);
-            
+
             if("all".equals(args.getCommand())) {
                 final EsupOtpUsersResponse userUids = client.getUsers();
                 final String response = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(userUids);
@@ -102,20 +102,20 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
                         System.out.println("OK");
                         return RC_OK;
                     }
-                    
+
                     System.out.println("INVALID");
                     return RC_UNKNOWN;
                 }
-                
+
                 final String method = args.getMethod() != null ? args.getMethod() : "totp";
                 final String transport = args.getTransport() != null ? args.getTransport() : "sms";
-                
+
                 // Create a new token.
                 final EsupOtpResponse tc = client.postSendMessage(username, method, transport);
                 System.out.println("Send message code: " + tc.getCode());
                 System.out.println("Send message message: " + tc.getMessage());
             }
-            
+
         } catch (final Exception e) {
             if (args.isVerboseOutput()) {
                 getLogger().error("Unable to access EsupOtpAuthenticator from Spring context", e);
@@ -124,7 +124,7 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
             }
             return RC_UNKNOWN;
         }
-        
+
         return RC_OK;
     }
 
@@ -136,5 +136,5 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
     public static void main(@Nonnull final String[] args) {
         System.exit(new EsupOtpAuthenticatorCLI().run(args));
     }
-    
+
 }

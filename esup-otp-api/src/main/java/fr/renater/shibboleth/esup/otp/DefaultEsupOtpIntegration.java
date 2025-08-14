@@ -28,42 +28,42 @@ import net.shibboleth.shared.primitive.StringSupport;
  * Wrapper for use of esup otp api.
  */
 @ThreadSafe
-public final class DefaultEsupOtpIntegration extends AbstractInitializableComponent implements IEsupOtpIntegration { 
-    
+public final class DefaultEsupOtpIntegration extends AbstractInitializableComponent implements IEsupOtpIntegration {
+
     /** Class logger. */
     @Nonnull private final Logger log = LoggerFactory.getLogger(DefaultEsupOtpIntegration.class);
-    
+
     /** API host. */
-    @GuardedBy("this") @NonnullAfterInit @NotEmpty private String apiHost; 
+    @GuardedBy("this") @NonnullAfterInit @NotEmpty private String apiHost;
 
     /** Integration key. */
     @GuardedBy("this") @Nullable private String clientId;
-    
-    /** Secret key. */ 
+
+    /** Secret key. */
     @GuardedBy("this") @Nullable private String secretKey;
 
-    /** Users secret .*/
+    /** Users secret. */
     @GuardedBy("this") @NonnullAfterInit @NotEmpty private String usersSecret;
-    
-    /** API password .*/
+
+    /** API password. */
     @GuardedBy("this") @NonnullAfterInit @NotEmpty private String apiPassword;
 
-    /** Issuer .*/
+    /** Issuer. */
     @GuardedBy("this") @NonnullAfterInit @NotEmpty private String issuer;
-    
-    /** The used (by clients) redirect_uri to send the client after authorisation .*/
+
+    /** The used (by clients) redirect_uri to send the client after authorisation. */
     @GuardedBy("this") @Nullable private String redirectURI;
-    
-    /** A statically set (pre-registered) redirectURI to send the client to after authorisation.*/
+
+    /** A statically set (pre-registered) redirectURI to send the client to after authorisation. */
     @GuardedBy("this") @Nullable private String registeredRedirectURI;
-    
-    /** The URL path to the health endpoint.*/
+
+    /** The URL path to the health endpoint. */
     @GuardedBy("this") @Nullable private String healthEndpoint;
 
-    /** The list of supported methods for otp.*/
+    /** The list of supported methods for otp. */
     @GuardedBy("this") @Nonnull @NonnullElements private Set<String> supportedMethods;
 
-    /** The max send counter.*/
+    /** The max send counter. */
     @GuardedBy("this") private int maxRetry;
 
     /** The supported principal subject. */
@@ -77,7 +77,7 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
         supportedMethods = new HashSet<String>();
         supportedPrincipals = new Subject();
     }
-    
+
     /** {@inheritDoc} */
     @Nonnull @NotEmpty public synchronized String getAPIHost() {
         checkComponentActive();
@@ -87,40 +87,40 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
 
     /**
      * Set the API host to use.
-     * 
+     *
      * @param host API host
      */
     public synchronized void setAPIHost(@Nonnull @NotEmpty final String host) {
-        checkSetterPreconditions();        
+        checkSetterPreconditions();
         apiHost = Constraint.isNotNull(StringSupport.trimOrNull(host), "API host cannot be null or empty");
     }
-    
+
     /**
      * Set the client ID to use.
-     * 
+     *
      * @param id the client identifier.
      */
     public synchronized void setClientId(@Nullable final String id) {
-        checkSetterPreconditions();        
+        checkSetterPreconditions();
         clientId = Constraint.isNotNull(StringSupport.trimOrNull(id), "ClientID cannot be null or empty");
     }
-    
+
     /** {@inheritDoc} */
     @Nullable public synchronized String getClientId() {
         checkComponentActive();
         return clientId;
     }
-    
+
     /**
      * Set the secret key to use.
-     * 
+     *
      * @param key secret key
      */
     public synchronized void setSecretKey(@Nullable final String key) {
-        checkSetterPreconditions();        
+        checkSetterPreconditions();
         secretKey = Constraint.isNotNull(StringSupport.trimOrNull(key), "Secret key cannot be null or empty");
     }
-    
+
     /** {@inheritDoc} */
     @Nullable public synchronized String getSecretKey() {
         checkComponentActive();
@@ -141,17 +141,17 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     @NotEmpty public synchronized String getUsersSecret() {
         return usersSecret;
     }
-    
+
     /**
      * Set the api password to use.
-     * 
+     *
      * @param apiPwd secret key
      */
     public synchronized void setApiPassword(@Nullable final String password) {
-        checkSetterPreconditions();        
+        checkSetterPreconditions();
         apiPassword = StringSupport.trimOrNull(password);
     }
-    
+
     /** {@inheritDoc} */
     @Nullable public synchronized String getApiPassword() {
         return apiPassword;
@@ -160,7 +160,7 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     /**
      * Set the issuer to use.
      *
-     * @param iss generally equal to idp.entityID
+     * @param iss generally equal to ${idp.entityID}
      */
     public synchronized void setIssuer(@Nullable final String iss) {
         checkSetterPreconditions();
@@ -171,50 +171,49 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     @Nullable public synchronized String getIssuer() {
         return issuer;
     }
-    
-    
+
     /** {@inheritDoc} */
     @Nullable public synchronized String getRedirectURI() {
         return redirectURI;
     }
-    
+
     /**
      * Set the redirect_uri to use.
-     * 
+     *
      * @param uri the redirect_uri
      */
     public synchronized void setRegisteredRedirectURI(@Nullable final String uri) {
-        checkSetterPreconditions();       
+        checkSetterPreconditions();
         registeredRedirectURI = StringSupport.trimOrNull(uri);
     }
-    
+
     /** {@inheritDoc} */
     @Nullable public synchronized String getRegisteredRedirectURI() {
         return registeredRedirectURI;
     }
-    
+
     /** {@inheritDoc} */
     @Nullable public synchronized String getHealthCheckEndpoint() {
         checkComponentActive();
         return healthEndpoint;
     }
-    
+
     /**
      * Set the health check endpoint URL path.
-     * 
+     *
      * @param endpoint the endpoint.
      */
     public synchronized void setHealthCheckEndpoint(@Nullable final String endpoint) {
-        checkSetterPreconditions();        
+        checkSetterPreconditions();
         healthEndpoint = StringSupport.trimOrNull(endpoint);
     }
-    
+
     /** {@inheritDoc} */
     public synchronized void setRedirectURIIfAbsent(
-            @Nonnull @NotEmpty final String computedRedirectURI){   
+            @Nonnull @NotEmpty final String computedRedirectURI){
         // Specifically do not check if component has been initialized. This can change during use.
         Constraint.isNotEmpty(computedRedirectURI, "Computed redirect URI can not be null or empty");
-        
+
         if (redirectURI == null) {
             log.debug("Integration redirect_uri is being pinned to '{}'",computedRedirectURI);
             redirectURI = computedRedirectURI;
@@ -229,7 +228,7 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     public synchronized void setSupportedMethods(@Nullable @NonnullElements final Collection<String> methods) {
         checkSetterPreconditions();
         supportedMethods.clear();
-        
+
         if(methods != null && !methods.isEmpty()) {
             supportedMethods = CollectionSupport.copyToSet(StringSupport.normalizeStringCollection(methods));
         }
