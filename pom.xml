@@ -7,7 +7,7 @@
     <parent>
         <groupId>net.shibboleth</groupId>
         <artifactId>parent</artifactId>
-        <version>17.0.2</version>
+        <version>17.1.5</version>
     </parent>
 
     <name>Shibboleth IdP :: Plugins :: Esup-Otp Login Flow</name>
@@ -20,11 +20,11 @@
     <properties>
         <shibboleth.projectName>java-idp-plugin-esup-otp</shibboleth.projectName>
         <idp.groupId>net.shibboleth.idp</idp.groupId>
-        <idp.version>5.1.0</idp.version>
-        <opensaml.version>5.1.0</opensaml.version>
-        <shib-shared.version>9.1.0</shib-shared.version>
+        <idp.version>5.1.5</idp.version>
+        <opensaml.version>5.1.5</opensaml.version>
+        <shib-shared.version>9.1.5</shib-shared.version>
         <checkstyle.configLocation>${project.basedir}/resources/checkstyle/checkstyle.xml</checkstyle.configLocation>
-        <lombok.version>1.18.36</lombok.version>
+        <lombok.version>1.18.38</lombok.version>
     </properties>
 
     <dependencies>
