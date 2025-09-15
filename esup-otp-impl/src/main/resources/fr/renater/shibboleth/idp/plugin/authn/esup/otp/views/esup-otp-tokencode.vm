@@ -2,32 +2,50 @@
 ## Velocity Template for DisplayTOTPView view-state
 ##
 #set ($esupOtpContext = $authenticationContext.getSubcontext('fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext'))
+#set ($uid = $esupOtpContext.getUsername())
 #set ($apiUrl = $environment.getProperty("idp.esup.otp.apiHost"))
-##
-$response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes'")
 <!DOCTYPE html>
 <html>
     <head>
         <title>#springMessageText("idp.title", "Web Login Service")</title>
         #parse("head.vm")
+        <link href="${apiUrl}/public/login.css" rel="stylesheet" />
+        <script src="$request.getContextPath()/js/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="></script>
+        <script src="${apiUrl}/js/socket.io.js"></script>
+        <script src="${apiUrl}/public/login.js"></script>
+        <style>
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            font-family: Arial,"Helvetica Neue", Helvetica,verdana, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        #errors {
+            color: #CF4A02;
+        }
+        </style>
     </head>
     <body>
         <main class="main">
             <section class="small-12 small-centered medium-8 large-7">
                 #parse("header.vm")
+                <h1>#springMessageText("idp.esup.otp.title", "Multi-Factor Authentication")</h1>
                 #parse("esup-otp-error.vm")
-
-                    <form action="$flowExecutionUrl" method="post">
+                    <form id="fm1" action="$flowExecutionUrl" method="post">
                         #parse("csrf/csrf.vm")
-
-                            <div class="input-wrap token">
-                                <input class="form-element form-field token-input input" id="tokencode" name="tokencode" type="text" inputmode="numeric" value="" placeholder="000000" autocomplete="off" />
-                            </div>
-
-                            <button class="button float-right" type="submit" name="_eventId_proceed" id="submitButton"
-                                disabled
-                                >#springMessageText("idp.login.login", "Login")</button>
+                        <input type="hidden" name="_eventId_proceed">
                     </form>
+
+                <script>
+                    var uid = "${uid}"
+                    var userHash = "${esupOtpEncoder.getUserHash($uid)}"
+                    var apiUrl = "${apiUrl}"
+                    var otpManagerUrl = "${environment.getProperty("idp.esup.otp.manager.link")}"
+
+                    getUserOtpMethods_and_displayChoices({ uid, userHash, apiUrl, otpManagerUrl });
+                </script>
 
                 #parse("help.vm")
 
