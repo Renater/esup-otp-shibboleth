@@ -82,8 +82,6 @@ public class EsupOtpGetUserInfo extends AbstractAuthenticationAction {
 
         esupOtpContext.setTokenCode(null);
         
-        // Fill in username if not set.
-        if (esupOtpContext.getUsername() == null) {
             final String username = usernameLookupStrategy.apply(profileRequestContext);
             if (username == null) {
                 log.warn("{} No principal name available", getLogPrefix());
@@ -91,7 +89,6 @@ public class EsupOtpGetUserInfo extends AbstractAuthenticationAction {
                 return;
             }
             esupOtpContext.setUsername(username);
-        }
     }
 
 }
