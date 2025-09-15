@@ -47,7 +47,7 @@ import net.shibboleth.shared.primitive.LoggerFactory;
 public class EsupOtpGetUserInfo extends AbstractAuthenticationAction {
 
 	/** Class logger. */
-    @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpExtractionAction.class);
+    @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpGetUserInfo.class);
     
     private static final String CLIENT_EXCEPTION = "ClientException";
 
