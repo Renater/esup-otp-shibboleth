@@ -59,7 +59,7 @@ public class EsupOtpClientRegistry extends AbstractIdentifiableInitializableComp
     }
     
     /**
-     * A function for creating a new Esup otp client from the configured client factory for the given Duo integration.
+     * A function for creating a new Esup otp client from the configured client factory for the given EsupOtp integration.
      * throws a {@link EsupOtpClientInitializationException} if the factory can not create the client.
      */
     @ThreadSafe

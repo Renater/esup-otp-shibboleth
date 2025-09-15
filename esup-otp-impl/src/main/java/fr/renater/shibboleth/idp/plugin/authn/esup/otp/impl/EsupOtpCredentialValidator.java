@@ -33,7 +33,7 @@ import net.shibboleth.shared.logic.FunctionSupport;
 import net.shibboleth.shared.primitive.LoggerFactory;
 
 /**
- * A {@link CredentialValidator} that checks for a {@link EsupOtpContext}.
+ * A {@link CredentialValidator} that checks {@link EsupOtpContext}.
  */
 public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
 
