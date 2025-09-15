@@ -36,11 +36,11 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
     @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpExtractionTokenAction.class);
     
     /** esup otp context getter */
-    @Nonnull private Function<AuthenticationContext, EsupOtpContext> esupOtpContextCreationStrategy;
+    @Nonnull private Function<AuthenticationContext, EsupOtpContext> esupOtpContextLookup;
 
     /** Constructor. */
     public EsupOtpExtractionTokenAction() {
-        esupOtpContextCreationStrategy = new ChildContextLookup<>(EsupOtpContext.class);
+        esupOtpContextLookup = new ChildContextLookup<>(EsupOtpContext.class);
     }
 
     /** {@inheritDoc} */
@@ -51,7 +51,7 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
         // Clear error state.
         authenticationContext.removeSubcontext(AuthenticationErrorContext.class);
         
-        final EsupOtpContext esupOtpContext = esupOtpContextCreationStrategy.apply(authenticationContext);
+        final EsupOtpContext esupOtpContext = esupOtpContextLookup.apply(authenticationContext);
         if (esupOtpContext == null) {
             log.warn("{} Unable to get esup otp context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);

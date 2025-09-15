@@ -32,7 +32,7 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
     @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpCredentialValidator.class);
 
     /** Lookup strategy for EsupOtp context. */
-    @Nonnull private Function<AuthenticationContext, EsupOtpContext> esupOtpContextLookupStrategy;
+    @Nonnull private Function<AuthenticationContext, EsupOtpContext> esupOtpContextLookup;
 
     /** The registry for locating EsupOtpClient */
     @NonnullAfterInit
@@ -40,7 +40,7 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
     
     /** Constructor. */
     public EsupOtpCredentialValidator() {
-        esupOtpContextLookupStrategy = new ChildContextLookup<>(EsupOtpContext.class);
+        esupOtpContextLookup = new ChildContextLookup<>(EsupOtpContext.class);
     }
 
     /**
@@ -72,7 +72,7 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
             @Nullable final WarningHandler warningHandler,
             @Nullable final ErrorHandler errorHandler) throws Exception {
         
-        final EsupOtpContext esupOtpContext = esupOtpContextLookupStrategy.apply(authenticationContext);
+        final EsupOtpContext esupOtpContext = esupOtpContextLookup.apply(authenticationContext);
         if (esupOtpContext == null) {
             log.info("{} No EsupOtpContext available", getLogPrefix());
             if (errorHandler != null) {
