@@ -34,18 +34,13 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
     /** Lookup strategy for EsupOtp context. */
     @Nonnull private Function<AuthenticationContext, EsupOtpContext> esupOtpContextLookupStrategy;
 
-    /** Lookup strategy for esup otp integration. */
-    @Nonnull private Function<ProfileRequestContext, DefaultEsupOtpIntegration> esupOtpIntegrationLookupStrategy;
-            
-    /** The registry for locating the EsupOtpClient for the established integration.*/
+    /** The registry for locating EsupOtpClient */
     @NonnullAfterInit
     private EsupOtpClientRegistry clientRegistry;
     
     /** Constructor. */
     public EsupOtpCredentialValidator() {
         esupOtpContextLookupStrategy = new ChildContextLookup<>(EsupOtpContext.class);
-
-        esupOtpIntegrationLookupStrategy = FunctionSupport.constant(null);
     }
 
     /**
@@ -87,18 +82,6 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
             throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
         }
 
-        final DefaultEsupOtpIntegration esupOtpIntegration = esupOtpIntegrationLookupStrategy.apply(profileRequestContext);
-        if (esupOtpIntegration == null) {
-            log.warn("{} No EsupOtpIntegration returned by lookup strategy", getLogPrefix());
-            if (errorHandler != null) {
-                errorHandler.handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS,
-                        AuthnEventIds.NO_CREDENTIALS);
-            }
-            throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
-        }
-        
-        final EsupOtpClient client = clientRegistry.getClientOrCreate(esupOtpIntegration);
-        
         final String username = esupOtpContext.getUsername();
         if(username == null) {
             log.info("{} No username available within EsupOtpContext", getLogPrefix());
@@ -121,6 +104,7 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
 
         log.debug("{} Attempting to authenticate token code for '{}' ", getLogPrefix(), esupOtpContext.getUsername());
         
+        final EsupOtpClient client = clientRegistry.getClient();       
         try {
                 if(client.postVerify(username, tokenCode.toString())) {
                     log.info("{} Login by '{}' succeeded", getLogPrefix(), esupOtpContext.getUsername());

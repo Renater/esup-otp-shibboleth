@@ -1,7 +1,5 @@
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
@@ -13,10 +11,8 @@ import org.slf4j.Logger;
 import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClientInitializationException;
 import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpClientImpl;
-import net.shibboleth.shared.annotation.constraint.NonnullElements;
+import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
 import net.shibboleth.shared.component.AbstractIdentifiableInitializableComponent;
-import net.shibboleth.shared.logic.Constraint;
 import net.shibboleth.shared.primitive.LoggerFactory;
 
 /**
@@ -28,34 +24,26 @@ public class EsupOtpClientRegistry extends AbstractIdentifiableInitializableComp
     /** Class logger. */
     @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpClientRegistry.class);
     
-    /** Registry of Duo client to Duo integration.*/
-    @Nonnull @NonnullElements private final ConcurrentMap<DefaultEsupOtpIntegration, EsupOtpClient> clientRegistry;
-    
-    /** Function for creating a DuoClient from a DuoIntegration. */
-    @Nonnull private final Function<DefaultEsupOtpIntegration, EsupOtpClient> clientRegistryMappingFunction;
+    @NonnullAfterInit private EsupOtpClient client;
 
     /**
      * Constructor.
      *
      */
     public EsupOtpClientRegistry() {
-        clientRegistry = new ConcurrentHashMap<>(1);
-        clientRegistryMappingFunction = new CreateNewClientMappingFunction();
     }
     
     /**
-     * Get or create esup otp connector.
+     * Get esup otp client
      * 
-     * @param integration
-     * @return esup otp connector
+     * @return esup otp client
      */
-    @Nonnull public EsupOtpClient getClientOrCreate(@Nonnull final DefaultEsupOtpIntegration integration) {
-        Constraint.isNotNull(integration, "Duo integration can not be null");
-        
-        final EsupOtpClient client = clientRegistry.computeIfAbsent(integration, clientRegistryMappingFunction);
-        log.trace("Client registry returning the EsupOtpConnector instance of type '{}'", 
-                client.getClass().getCanonicalName());
+    @Nonnull public EsupOtpClient getClient() {
         return client;
+    }
+
+    public synchronized void setIntegration(@Nonnull final DefaultEsupOtpIntegration integration) {
+        client = new EsupOtpClientImpl(integration);
     }
     
     /**

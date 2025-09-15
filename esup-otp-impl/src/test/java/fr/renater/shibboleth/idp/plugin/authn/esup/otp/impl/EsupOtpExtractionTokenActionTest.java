@@ -13,7 +13,6 @@ import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.profile.testing.ActionTestingSupport;
 import net.shibboleth.shared.component.ComponentInitializationException;
-import net.shibboleth.shared.logic.FunctionSupport;
 import net.shibboleth.shared.testing.ConstantSupplier;
 
 /**
@@ -31,27 +30,22 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
         addEsupOtpContext();
         final MockHttpServletRequest request = new MockHttpServletRequest();
         action.setHttpServletRequestSupplier(new ConstantSupplier<>(request));
-        action.setUsernameLookupStrategy(FunctionSupport.constant("jdoe"));
 
         final DefaultEsupOtpIntegration defaultEsupOtpIntegration = new DefaultEsupOtpIntegration();
         defaultEsupOtpIntegration.setAPIHost("https://tobedefine.fr");
         defaultEsupOtpIntegration.setUsersSecret("anUsersSecret");
         defaultEsupOtpIntegration.initialize();
 
-        action.setEsupOtpIntegrationLookupStrategy(prc -> defaultEsupOtpIntegration);
         action.initialize();
     }
 
     @Test public void testNoServlet() throws Exception {
         action = new EsupOtpExtractionTokenAction();
         addEsupOtpContext();
-        action.setUsernameLookupStrategy(FunctionSupport.constant("jdoe"));
 
         final DefaultEsupOtpIntegration defaultEsupOtpIntegration = new DefaultEsupOtpIntegration();
         defaultEsupOtpIntegration.setAPIHost("https://tobedefine.fr");
         defaultEsupOtpIntegration.initialize();
-
-        action.setEsupOtpIntegrationLookupStrategy(prc -> defaultEsupOtpIntegration);
 
         action.initialize();
         final Event event = action.execute(src);
@@ -63,13 +57,10 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
         action = new EsupOtpExtractionTokenAction();
         addEsupOtpContext();
         eoc.setUsername(null);
-        action.setUsernameLookupStrategy(FunctionSupport.constant(null));
 
         final DefaultEsupOtpIntegration defaultEsupOtpIntegration = new DefaultEsupOtpIntegration();
         defaultEsupOtpIntegration.setAPIHost("https://tobedefine.fr");
         defaultEsupOtpIntegration.initialize();
-
-        action.setEsupOtpIntegrationLookupStrategy(prc -> defaultEsupOtpIntegration);
 
         action.initialize();
         final Event event = action.execute(src);
