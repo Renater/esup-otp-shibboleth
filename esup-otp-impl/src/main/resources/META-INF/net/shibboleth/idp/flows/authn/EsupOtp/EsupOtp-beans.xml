@@ -12,8 +12,6 @@
        default-init-method="initialize"
        default-destroy-method="destroy">
 
-    <!--<import resource="EsupOtp-authenticator.xml" />-->
-
     <bean id ="ExtendedMessageSourceResources" parent="shibboleth.ListCombiner"
           p:firstList-ref="#{'%{idp.message.resources:shibboleth.MessageSourceResources}'.trim()}" >
         <property name="secondList">
