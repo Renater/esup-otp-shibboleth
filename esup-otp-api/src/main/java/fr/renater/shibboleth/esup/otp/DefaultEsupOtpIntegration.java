@@ -13,6 +13,7 @@ import javax.security.auth.Subject;
 
 import org.slf4j.Logger;
 
+import net.shibboleth.idp.authn.principal.PrincipalSupportingComponent;
 import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
 import net.shibboleth.shared.annotation.constraint.NonnullElements;
 import net.shibboleth.shared.annotation.constraint.NotEmpty;
@@ -28,7 +29,7 @@ import net.shibboleth.shared.primitive.StringSupport;
  * Wrapper for use of esup otp api.
  */
 @ThreadSafe
-public final class DefaultEsupOtpIntegration extends AbstractInitializableComponent implements IEsupOtpIntegration {
+public final class DefaultEsupOtpIntegration extends AbstractInitializableComponent implements PrincipalSupportingComponent {
 
     /** Class logger. */
     @Nonnull private final Logger log = LoggerFactory.getLogger(DefaultEsupOtpIntegration.class);
