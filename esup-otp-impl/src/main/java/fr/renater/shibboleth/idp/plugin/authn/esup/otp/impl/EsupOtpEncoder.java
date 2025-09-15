@@ -1,13 +1,5 @@
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.Base64Variants;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnDto;
 import net.shibboleth.shared.annotation.ParameterName;
 import net.shibboleth.shared.annotation.constraint.NotEmpty;
 import net.shibboleth.shared.primitive.StringSupport;
@@ -15,7 +7,6 @@ import net.shibboleth.shared.primitive.LoggerFactory;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -45,40 +36,6 @@ public final class EsupOtpEncoder {
 
     public void setUsersSecret(@Nonnull @NotEmpty final String secret) {
         usersSecret = StringSupport.trimOrNull(secret);
-    }
-
-    public static ObjectMapper getWebAuthnObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
-        objectMapper.setBase64Variant(Base64Variants.MODIFIED_FOR_URL);
-        objectMapper.registerModule(new JavaTimeModule());
-
-        return objectMapper;
-    }
-
-    /**
-     * Serialize the PublicKeyCredentialRequestOptions request into a JSON string.
-     *
-     * @param options the options to serialize
-     *
-     * @return the JSON serialized PublicKeyCredentialRequestOptions, or an empty string if there is an error
-     *          converting the string.
-     */
-    public static String serializePublicKeyCredentialRequestOptionsAsJSON(
-            @Nullable final WebAuthnDto options) {
-        log.debug("Get options : {}", options);
-        if (options != null) {
-            try {
-                ObjectMapper objectMapper = getWebAuthnObjectMapper();
-                ObjectNode result = objectMapper.createObjectNode();
-                result.set("publicKey", objectMapper.valueToTree(options));
-                return objectMapper.writeValueAsString(result);
-            } catch (final JsonProcessingException e) {
-                log.debug("Unable to serialize PublicKeyCredentialOptions", e);
-            }
-        }
-        return "";
     }
 
     /**
