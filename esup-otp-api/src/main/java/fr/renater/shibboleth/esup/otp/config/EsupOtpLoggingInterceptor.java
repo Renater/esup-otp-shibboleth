@@ -9,7 +9,6 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -18,7 +17,6 @@ import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -26,7 +24,6 @@ import org.springframework.http.client.ClientHttpResponse;
 
 import net.shibboleth.shared.primitive.LoggerFactory;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StreamUtils;
 
 /**
