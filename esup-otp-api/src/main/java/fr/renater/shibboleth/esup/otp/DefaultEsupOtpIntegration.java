@@ -1,7 +1,6 @@
 package fr.renater.shibboleth.esup.otp;
 
 import java.security.Principal;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,16 +8,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
-import javax.security.auth.Subject;
-
 import org.slf4j.Logger;
 
+import net.shibboleth.idp.authn.principal.PrincipalSupportingComponent;
 import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
-import net.shibboleth.shared.annotation.constraint.NonnullElements;
 import net.shibboleth.shared.annotation.constraint.NotEmpty;
 import net.shibboleth.shared.annotation.constraint.NotLive;
 import net.shibboleth.shared.annotation.constraint.Unmodifiable;
-import net.shibboleth.shared.collection.CollectionSupport;
 import net.shibboleth.shared.component.AbstractInitializableComponent;
 import net.shibboleth.shared.logic.Constraint;
 import net.shibboleth.shared.primitive.LoggerFactory;
@@ -28,19 +24,13 @@ import net.shibboleth.shared.primitive.StringSupport;
  * Wrapper for use of esup otp api.
  */
 @ThreadSafe
-public final class DefaultEsupOtpIntegration extends AbstractInitializableComponent implements IEsupOtpIntegration {
+public final class DefaultEsupOtpIntegration extends AbstractInitializableComponent implements PrincipalSupportingComponent {
 
     /** Class logger. */
     @Nonnull private final Logger log = LoggerFactory.getLogger(DefaultEsupOtpIntegration.class);
 
     /** API host. */
     @GuardedBy("this") @NonnullAfterInit @NotEmpty private String apiHost;
-
-    /** Integration key. */
-    @GuardedBy("this") @Nullable private String clientId;
-
-    /** Secret key. */
-    @GuardedBy("this") @Nullable private String secretKey;
 
     /** Users secret. */
     @GuardedBy("this") @NonnullAfterInit @NotEmpty private String usersSecret;
@@ -51,31 +41,14 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     /** Issuer. */
     @GuardedBy("this") @NonnullAfterInit @NotEmpty private String issuer;
 
-    /** The used (by clients) redirect_uri to send the client after authorisation. */
-    @GuardedBy("this") @Nullable private String redirectURI;
-
-    /** A statically set (pre-registered) redirectURI to send the client to after authorisation. */
-    @GuardedBy("this") @Nullable private String registeredRedirectURI;
-
     /** The URL path to the health endpoint. */
     @GuardedBy("this") @Nullable private String healthEndpoint;
-
-    /** The list of supported methods for otp. */
-    @GuardedBy("this") @Nonnull @NonnullElements private Set<String> supportedMethods;
-
-    /** The max send counter. */
-    @GuardedBy("this") private int maxRetry;
-
-    /** The supported principal subject. */
-    @GuardedBy("this") @Nonnull private final Subject supportedPrincipals;
 
     /**
      * Constructor.
      *
      */
     public DefaultEsupOtpIntegration() {
-        supportedMethods = new HashSet<String>();
-        supportedPrincipals = new Subject();
     }
 
     /** {@inheritDoc} */
@@ -93,38 +66,6 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     public synchronized void setAPIHost(@Nonnull @NotEmpty final String host) {
         checkSetterPreconditions();
         apiHost = Constraint.isNotNull(StringSupport.trimOrNull(host), "API host cannot be null or empty");
-    }
-
-    /**
-     * Set the client ID to use.
-     *
-     * @param id the client identifier.
-     */
-    public synchronized void setClientId(@Nullable final String id) {
-        checkSetterPreconditions();
-        clientId = Constraint.isNotNull(StringSupport.trimOrNull(id), "ClientID cannot be null or empty");
-    }
-
-    /** {@inheritDoc} */
-    @Nullable public synchronized String getClientId() {
-        checkComponentActive();
-        return clientId;
-    }
-
-    /**
-     * Set the secret key to use.
-     *
-     * @param key secret key
-     */
-    public synchronized void setSecretKey(@Nullable final String key) {
-        checkSetterPreconditions();
-        secretKey = Constraint.isNotNull(StringSupport.trimOrNull(key), "Secret key cannot be null or empty");
-    }
-
-    /** {@inheritDoc} */
-    @Nullable public synchronized String getSecretKey() {
-        checkComponentActive();
-        return secretKey;
     }
 
     /**
@@ -173,26 +114,6 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     }
 
     /** {@inheritDoc} */
-    @Nullable public synchronized String getRedirectURI() {
-        return redirectURI;
-    }
-
-    /**
-     * Set the redirect_uri to use.
-     *
-     * @param uri the redirect_uri
-     */
-    public synchronized void setRegisteredRedirectURI(@Nullable final String uri) {
-        checkSetterPreconditions();
-        registeredRedirectURI = StringSupport.trimOrNull(uri);
-    }
-
-    /** {@inheritDoc} */
-    @Nullable public synchronized String getRegisteredRedirectURI() {
-        return registeredRedirectURI;
-    }
-
-    /** {@inheritDoc} */
     @Nullable public synchronized String getHealthCheckEndpoint() {
         checkComponentActive();
         return healthEndpoint;
@@ -209,77 +130,10 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     }
 
     /** {@inheritDoc} */
-    public synchronized void setRedirectURIIfAbsent(
-            @Nonnull @NotEmpty final String computedRedirectURI){
-        // Specifically do not check if component has been initialized. This can change during use.
-        Constraint.isNotEmpty(computedRedirectURI, "Computed redirect URI can not be null or empty");
-
-        if (redirectURI == null) {
-            log.debug("Integration redirect_uri is being pinned to '{}'",computedRedirectURI);
-            redirectURI = computedRedirectURI;
-        }
-    }
-
-    /**
-     * Set the redirect_uri to use.
-     *
-     * @param methods the methods allowed
-     */
-    public synchronized void setSupportedMethods(@Nullable @NonnullElements final Collection<String> methods) {
-        checkSetterPreconditions();
-        supportedMethods.clear();
-
-        if(methods != null && !methods.isEmpty()) {
-            supportedMethods = CollectionSupport.copyToSet(StringSupport.normalizeStringCollection(methods));
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Nonnull public synchronized Set<String> getSupportedMethods() {
-        return supportedMethods;
-    }
-
-    /**
-     * Set the max retry to use.
-     *
-     * @param maxCounter int to define how many retry can be done to recall esup-otp-api
-     */
-    public synchronized void setMaxRetry(final int maxCounter) {
-        checkSetterPreconditions();
-        maxRetry = maxCounter;
-    }
-
-    /** {@inheritDoc} */
-    public synchronized int getMaxRetry() {
-        return maxRetry;
-    }
-
-
-    /** {@inheritDoc} */
     @Override
     public @Nonnull @Unmodifiable @NotLive <T extends Principal> Set<T> getSupportedPrincipals(
             @Nonnull final Class<T> c) {
-        final Set<T> result = supportedPrincipals.getPrincipals(c);
-        assert result != null;
-        return result;
+        return new HashSet<T>();
     }
 
-    /**
-     * Set supported non-user-specific principals that the action will include in the subjects
-     * it generates, in place of any default principals from the flow.
-     *
-     * <p>Setting to a null or empty collection will maintain the default behavior of relying on the flow.</p>
-     *
-     * @param <T> a type of principal to add, if not generic
-     * @param principals supported principals to include
-     */
-    public synchronized <T extends Principal> void setSupportedPrincipals(
-            @Nullable @NonnullElements final Collection<T> principals) {
-        checkSetterPreconditions();
-        supportedPrincipals.getPrincipals().clear();
-
-        if (principals != null && !principals.isEmpty()) {
-            supportedPrincipals.getPrincipals().addAll(Set.copyOf(principals));
-        }
-    }
 }
