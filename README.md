@@ -29,6 +29,7 @@ Ce plugin est à utilisé au sein d'un login flow de type Multi-Factor. Il perme
 
 - OpenJDK 17
 - Maven 3.8 ou supérieur
+- Esup-Otp-Api 2.1.0 ou supérieur
 
 ```
   ./mvnw clean install -s resources/.m2/settings.xml -Dno-check-m2
