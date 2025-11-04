@@ -33,8 +33,6 @@
         <link rel="stylesheet" type="text/css" href="$request.getContextPath()#springMessageText("idp.css", "/css/placeholder.css")">
         <link rel="stylesheet" type="text/css" href="${apiUrl}/public/login.css" />
         <script src="$request.getContextPath()/js/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="></script>
-        <script src="${apiUrl}/js/socket.io.js"></script>
-        <script src="${apiUrl}/public/login.js"></script>
         <style>
         body {
             max-width: 800px;
@@ -89,13 +87,22 @@
                     <input type="hidden" name="_eventId_proceed">
                 </form>
 
-                <script>
+                <script type="module">
                     var uid = "${uid}"
                     var userHash = "${esupOtpEncoder.getUserHash($uid)}"
                     var apiUrl = "${apiUrl}"
                     var otpManagerUrl = "${environment.getProperty("idp.esup.otp.manager.link")}"
 
-                    getUserOtpMethods_and_displayChoices({ uid, userHash, apiUrl, otpManagerUrl });
+
+                    import * as login_js from "${apiUrl}/public/login.js?v=1";
+
+                    if (!login_js.getUserOtpMethods_and_displayChoices) {
+                        // the login.js has no export (ie prior to migration to module). It is a fatal error:
+                        alert('FATAL ERROR: you must upgrade esup-otp-api (or downgrade esup-otp-cas / esup-otp-cas-server / esup-otp-shibboleth)')
+                    }
+
+                    login_js.getUserOtpMethods_and_displayChoices({ uid, userHash, apiUrl, otpManagerUrl });
+
                 </script>
 
                 <ul>
