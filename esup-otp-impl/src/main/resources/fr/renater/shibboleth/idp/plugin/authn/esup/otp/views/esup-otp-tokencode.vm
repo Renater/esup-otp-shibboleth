@@ -486,18 +486,22 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                         <input type="hidden" id="token" name="token" type="text" value="" />
                         <button class="hidden" id="submitPush" type="submit" name="_eventId_proceed"
                                 onClick="$onClick">#springMessageText("idp.esup.otp.send", "Send")</button>
+                        <button class="button float-left" type="submit" name="_eventId_back" id="backButton"
+                                onClick="$onClickBack">#springMessageText("idp.esup.otp.back", "Back to the methods choice")</button>
+                        <button class="button float-right" type="submit" name="_eventId_resend" id="retryButton"
+                                onClick="$onClickResend">#springMessageText("idp.esup.otp.push.resend", "Request a new push notification")</button>
                     </form>
-                    <button class="button float-right" type="submit" name="_eventId_resend" id="retryButton"
-                        onClick="$onClickResend">#springMessageText("idp.esup.otp.push.resend", "Request a new push notification")
-                    </button>
                     #elseif ("webauthn" == $method)
                     <form id="authenticator_assertion_form" action="$flowExecutionUrl" method="post">
                         #parse("csrf/csrf.vm")
                         <input type="hidden" id="publicKeyCredential" name="publicKeyCredential" />
                         <button class="hidden" id="authenticationSubmit" type="submit"
                                 name="_eventId_proceed">#springMessageText("idp.esup.otp.webauthn.submit", "Submit authentication")</button>
+                        <button class="button float-left" type="submit" name="_eventId_back" id="backButton"
+                                onClick="$onClickBack">#springMessageText("idp.esup.otp.back", "Back to the methods choice")</button>
+                        <button class="button float-right" type="button" id="authenticate">#springMessageText("idp.esup.otp.webauthn.authenticate", "Login with a passkey or a security key (WebAuthn)")</button>
+
                     </form>
-                    <button class="button float-right" id="authenticate">#springMessageText("idp.esup.otp.webauthn.authenticate", "Login with a passkey or a security key (WebAuthn)")</button>
                     #end
                 </div>
                 #elseif ("totp" == $method || "passcode_grid" == $method || "bypass" == $method || "random_code.sms" == $method || "random_code_mail.mail" == $method)
